@@ -21,7 +21,7 @@ public class ArgsParser {
     private final Map<String, String> shortFlagMap = new HashMap<>();
     private final Set<String> allFlags = new HashSet<>();
     private final Set<String> mandatoryFlags = new HashSet<>();
-    private boolean argsWereParsed = false;
+    private boolean parsedSuccessfully = false;
 
     public ArgsParser(String[] args) {
         this.args = args;
@@ -65,7 +65,7 @@ public class ArgsParser {
             }
         }
 
-        argsWereParsed = true;
+        parsedSuccessfully = true;
     }
 
     /**
@@ -100,7 +100,7 @@ public class ArgsParser {
      * @throws IllegalStateException if parseArgs() was not called before
      */
     public String getArgument(String flagName) {
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgument()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgument()!");
         return argumentsMap.get(flagName);
     }
 
@@ -111,7 +111,7 @@ public class ArgsParser {
      * @throws IllegalStateException if parseArgs() was not called before
      */
     public String getArgumentAsString(String flagName) {
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsString()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsString()!");
         return argumentsMap.get(flagName);
     }
 
@@ -122,7 +122,7 @@ public class ArgsParser {
      * @throws IllegalStateException if parseArgs() was not called before
      */
 public int getArgumentAsInteger(String flagName) throws IllegalStateException {
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsInteger()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsInteger()!");
         return Integer.parseInt(argumentsMap.get(flagName));
     }
 
@@ -133,7 +133,7 @@ public int getArgumentAsInteger(String flagName) throws IllegalStateException {
      * @throws IllegalStateException if parseArgs() was not called before
      */
     public double getArgumentAsDouble(String flagName) throws IllegalStateException {
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsDouble()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsDouble()!");
         return Double.parseDouble(argumentsMap.get(flagName));
     }
 
@@ -144,7 +144,7 @@ public int getArgumentAsInteger(String flagName) throws IllegalStateException {
      * @throws IllegalStateException if parseArgs() was not called before
      */
     public boolean getArgumentAsBoolean(String flagName) throws IllegalStateException{
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsBoolean()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsBoolean()!");
         return Boolean.parseBoolean(argumentsMap.get(flagName));
     }
 
@@ -155,7 +155,7 @@ public int getArgumentAsInteger(String flagName) throws IllegalStateException {
      * @throws IllegalStateException if parseArgs() was not called before
      */
     public char getArgumentAsChar(String flagName) throws IllegalStateException{
-        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsChar()!");
+        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsChar()!");
         return argumentsMap.get(flagName).charAt(0);
     }
 }
