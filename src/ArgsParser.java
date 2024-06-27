@@ -1,16 +1,17 @@
 import java.util.*;
 
 /**
- * Class to parse arguments given in the command line
- * Arguments are given in the form of flagName argument
- * Flags can be mandatory or optional
- * Flags can have a short version
- * Arguments can be of type String, Integer, Double, Boolean or char
- *
- * The argsParser is called and the args array has to be passed to the constructor
- * * then the parameters have to be added with the addParameter method
- * * after all parameters are added, the parseArgs method has to be called! (this is mandatory!)
- * * then the arguments can be accessed with the getArgument methods
+ * Class to parse arguments given in the command line,
+ * Arguments are given in the form of flagName argument,
+ * Flags can be mandatory or optional,
+ * Flags can have a short version,
+ * Arguments returned by the getter methods can be of type String, Integer, Double, Boolean or char
+ * <ol>
+ * <li>The argsParser is called and the args array has to be passed to the constructor</li>
+ * <li>then the parameters have to be added with the addParameter method</li>
+ * <li>after all parameters are added, the parseArgs method has to be called! (this is mandatory!)</li>
+ * <li>then the arguments can be accessed with the getArgument methods</li>
+ * </ol>
  */
 public class ArgsParser {
 
