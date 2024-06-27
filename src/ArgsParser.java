@@ -20,6 +20,7 @@ public class ArgsParser {
     private final Map<String, String> shortFlagMap = new HashMap<>();
     private final Set<String> allFlags = new HashSet<>();
     private final Set<String> mandatoryFlags = new HashSet<>();
+    private boolean argsWereParsed = false;
 
     public ArgsParser(String[] args) {
         this.args = args;
@@ -39,7 +40,7 @@ public class ArgsParser {
     }
 
     /**
-     * adds a new parameter with a short version of the flaf that will be checked in args
+     * adds a new parameter with a short version of the flag that will be checked in args
      * @param flagName name of the parameter
      * @param shortName short version of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
@@ -62,11 +63,13 @@ public class ArgsParser {
                 }
             }
         }
+
+        argsWereParsed = true;
     }
 
     /**
      * checks if all mandatory parameters are set with an argument
-     * exits program if not all mandatory parameters are set
+     * reports missing flags and exits program if not all mandatory parameters are set
      */
     private void checkMandatoryParameters() {
         //find all fullName parameters in the given args:
@@ -93,8 +96,10 @@ public class ArgsParser {
      * returns the argument of the given flag
      * @param flagName name of the flag
      * @return argument of the flag
+     * @throws IllegalStateException if parseArgs() was not called before
      */
     public String getArgument(String flagName) {
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgument()!");
         return argumentsMap.get(flagName);
     }
 
@@ -102,8 +107,10 @@ public class ArgsParser {
      * returns the argument of the given flag as a String
      * @param flagName name of the flag
      * @return argument of the flag as a String
+     * @throws IllegalStateException if parseArgs() was not called before
      */
     public String getArgumentAsString(String flagName) {
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsString()!");
         return argumentsMap.get(flagName);
     }
 
@@ -111,8 +118,10 @@ public class ArgsParser {
      * returns the argument of the given flag as an Integer
      * @param flagName name of the flag
      * @return argument of the flag as an Integer
+     * @throws IllegalStateException if parseArgs() was not called before
      */
-    public int getArgumentAsInteger(String flagName) {
+public int getArgumentAsInteger(String flagName) throws IllegalStateException {
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsInteger()!");
         return Integer.parseInt(argumentsMap.get(flagName));
     }
 
@@ -120,8 +129,10 @@ public class ArgsParser {
      * returns the argument of the given flag as a Double
      * @param flagName name of the flag
      * @return argument of the flag as a Double
+     * @throws IllegalStateException if parseArgs() was not called before
      */
-    public double getArgumentAsDouble(String flagName) {
+    public double getArgumentAsDouble(String flagName) throws IllegalStateException {
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsDouble()!");
         return Double.parseDouble(argumentsMap.get(flagName));
     }
 
@@ -129,8 +140,10 @@ public class ArgsParser {
      * returns the argument of the given flag as a Boolean
      * @param flagName name of the flag
      * @return argument of the flag as a Boolean
+     * @throws IllegalStateException if parseArgs() was not called before
      */
-    public boolean getArgumentAsBoolean(String flagName) {
+    public boolean getArgumentAsBoolean(String flagName) throws IllegalStateException{
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsBoolean()!");
         return Boolean.parseBoolean(argumentsMap.get(flagName));
     }
 
@@ -138,8 +151,10 @@ public class ArgsParser {
      * returns the argument of the given flag as a char
      * @param flagName name of the flag
      * @return argument of the flag as a char - if input is longer than 1 character, only the first character is returned
+     * @throws IllegalStateException if parseArgs() was not called before
      */
-    public char getArgumentAsChar(String flagName) {
+    public char getArgumentAsChar(String flagName) throws IllegalStateException{
+        if (!argsWereParsed) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsChar()!");
         return argumentsMap.get(flagName).charAt(0);
     }
 }
