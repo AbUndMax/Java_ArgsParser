@@ -1,3 +1,5 @@
+import org.junit.jupiter.params.aggregator.ArgumentAccessException;
+
 import java.util.*;
 
 /**
@@ -32,7 +34,7 @@ public class ArgsParser {
      */
     public void addParameter(String flagName, boolean isMandatory) {
         Parameter parameter = new Parameter(flagName);
-        argumentsList.addParameterToList(parameter);
+        argumentsList.add(parameter);
         if (isMandatory) mandatoryParameters.add(parameter);
     }
 
@@ -44,7 +46,7 @@ public class ArgsParser {
      */
     public void addParameter(String flagName, String shortName, boolean isMandatory) {
         Parameter parameter = new Parameter(flagName, shortName);
-        argumentsList.addParameterToList(parameter);
+        argumentsList.add(parameter);
         if (isMandatory) mandatoryParameters.add(parameter);
     }
 
@@ -57,7 +59,7 @@ public class ArgsParser {
      */
     public void addParameter(String flagName, String shortName, String description, boolean isMandatory) {
         Parameter parameter = new Parameter(flagName, shortName, description);
-        argumentsList.addParameterToList(parameter);
+        argumentsList.add(parameter);
         if (isMandatory) mandatoryParameters.add(parameter);
     }
 
@@ -93,7 +95,7 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public String getArgument(String flagName) throws IllegalStateException, IllegalArgumentException {
-        return getArgumentAsString(flagName);
+        return getArgumentFromParameter(flagName);
     }
 
     /**
@@ -104,10 +106,7 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public String getArgumentAsString(String flagName) throws IllegalStateException, IllegalArgumentException{
-        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgument()!");
-        Parameter param;
-        if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return param.argument;
+        return getArgumentFromParameter(flagName);
     }
 
     /**
@@ -118,10 +117,7 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public int getArgumentAsInteger(String flagName) throws IllegalStateException, IllegalArgumentException {
-        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsInteger()!");
-        Parameter param;
-        if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return Integer.parseInt(param.argument);
+        return Integer.parseInt(getArgumentFromParameter(flagName));
     }
 
     /**
@@ -132,10 +128,7 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public double getArgumentAsDouble(String flagName) throws IllegalStateException, IllegalArgumentException {
-        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsDouble()!");
-        Parameter param;
-        if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return Double.parseDouble(param.argument);
+        return Double.parseDouble(getArgumentFromParameter(flagName));
     }
 
     /**
@@ -146,10 +139,7 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public boolean getArgumentAsBoolean(String flagName) throws IllegalStateException, IllegalArgumentException {
-        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsBoolean()!");
-        Parameter param;
-        if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return Boolean.parseBoolean(param.argument);
+        return Boolean.parseBoolean(getArgumentFromParameter(flagName));
     }
 
     /**
@@ -160,10 +150,19 @@ public class ArgsParser {
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     public char getArgumentAsChar(String flagName) throws IllegalStateException{
-        if (!parsedSuccessfully) throw new IllegalStateException("parseArgs() has to be called before getArgumentAsChar()!");
+        return getArgumentFromParameter(flagName).charAt(0);
+    }
+
+    /**
+     * returns the Prameter Object of the given flagName
+     * @param flagName name of the flag
+     * @return Parameter Object of the given flagName
+     * @throws IllegalArgumentException if a wrong or not existent flagName was given
+     */
+    private String getArgumentFromParameter(String flagName) throws IllegalArgumentException {
         Parameter param;
         if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return param.argument.charAt(0);
+        return param.argument;
     }
 
 
@@ -212,10 +211,6 @@ public class ArgsParser {
      */
     private class ParameterList extends LinkedList<Parameter> {
 
-        public void addParameterToList(Parameter parameter) {
-            add(parameter);
-        }
-
         /**
          * returns the parameter with the given flagName
          * @param flag flagName (long or short version) of the parameter
@@ -230,6 +225,16 @@ public class ArgsParser {
             return null;
         }
 
+    }
+
+
+    /**
+     * Exception to be thrown if a mandatory argument is not provided
+     */
+    public class ArgumentNotProvidedException extends RuntimeException {
+        public ArgumentNotProvidedException(String message) {
+            super(message);
+        }
     }
 
 }
