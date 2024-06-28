@@ -49,6 +49,19 @@ public class ArgsParser {
     }
 
     /**
+     * adds a new parameter with a short version of the flag that will be checked in args as well as a description
+     * @param flagName name of the parameter
+     * @param shortName short version of the parameter
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     */
+    public void addParameter(String flagName, String shortName, String description, boolean isMandatory) {
+        Parameter parameter = new Parameter(flagName, shortName, description);
+        argumentsList.addParameterToList(parameter);
+        if (isMandatory) mandatoryParameters.add(parameter);
+    }
+
+    /**
      * checks the given args Array and connects the argument of the user to the correct flag
      */
     public void parseArgs() {
@@ -160,6 +173,7 @@ public class ArgsParser {
     private class Parameter {
         private String flagName;
         private String shortName;
+        private String description;
         private String argument;
 
         public Parameter(String flagName) {
@@ -169,6 +183,12 @@ public class ArgsParser {
         public Parameter(String flagName, String shortName) {
             this.flagName = flagName;
             this.shortName = shortName;
+        }
+
+        public Parameter(String flagName, String shortName, String description) {
+            this.flagName = flagName;
+            this.shortName = shortName;
+            this.description = description;
         }
 
         @Override
