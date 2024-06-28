@@ -149,7 +149,7 @@ public class ArgsParser {
      * @throws IllegalStateException if parseArgs() was not called before
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
-    public char getArgumentAsChar(String flagName) throws IllegalStateException{
+    public char getArgumentAsChar(String flagName) throws IllegalStateException, IllegalArgumentException{
         return getArgumentFromParameter(flagName).charAt(0);
     }
 
@@ -157,9 +157,11 @@ public class ArgsParser {
      * returns the Prameter Object of the given flagName
      * @param flagName name of the flag
      * @return Parameter Object of the given flagName
+     * @throws IllegalStateException if parseArgs() was not called before
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
     private String getArgumentFromParameter(String flagName) throws IllegalArgumentException {
+        if (!parsedSuccessfully) throw new IllegalStateException();
         Parameter param;
         if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
         return param.argument;
