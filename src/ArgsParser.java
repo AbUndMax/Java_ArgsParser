@@ -1,5 +1,3 @@
-import org.junit.jupiter.params.aggregator.ArgumentAccessException;
-
 import java.util.*;
 
 /**
@@ -18,7 +16,7 @@ import java.util.*;
  */
 public class ArgsParser {
 
-    private String[] args;
+    private final String[] args;
     private final ParameterList argumentsList = new ParameterList();
     private final Set<Parameter> mandatoryParameters = new HashSet<>();
     private boolean parsedSuccessfully = false;
@@ -154,17 +152,250 @@ public class ArgsParser {
     }
 
     /**
-     * returns the Prameter Object of the given flagName
+     * returns the Parameter Object of the given flagName
      * @param flagName name of the flag
      * @return Parameter Object of the given flagName
      * @throws IllegalStateException if parseArgs() was not called before
      * @throws IllegalArgumentException if a wrong or not existent flagName was given
      */
-    private String getArgumentFromParameter(String flagName) throws IllegalArgumentException {
+    private String getArgumentFromParameter(String flagName) throws IllegalArgumentException, IllegalStateException {
         if (!parsedSuccessfully) throw new IllegalStateException();
         Parameter param;
         if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
         return param.argument;
+    }
+
+    /**
+     * searches the args Array (user Input) for a specific flag and returns the argument of the flag
+     * @param flagName name of the flag
+     * @return null if no matching flag was found, argument if flag was found
+     */
+    private String findArgumentInArgs(String flagName) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(flagName)) {
+                return args[i + 1];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * searches the args Array (user Input) for a specific flag based on long version and short version of the flag
+     * and returns the argument of the flag
+     * @param flagName long version of the flag
+     * @param shortName short version of the flag
+     * @return null if no matching flag was found, argument if flag was found
+     */
+    private String findArgumentInArgs(String flagName, String shortName) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(flagName) || args[i].equals(shortName)) {
+                return args[i + 1];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * uses the flagName to parse the argument from the args array
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    private String parse(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = findArgumentInArgs(flagName);
+        if (argument == null && isMandatory) throw new MandatoryArgumentNotProvided("Mandatory argument " + flagName + " not provided");
+        return argument;
+    }
+
+    /**
+     * uses the flagName and shortName to parse the argument from the args array
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    private String parse(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = findArgumentInArgs(flagName, shortName);
+        if (argument == null && isMandatory) throw new MandatoryArgumentNotProvided("Mandatory argument " + flagName + " not provided");
+        return argument;
+    }
+
+    /**
+     * Returns the argument provided under the given flag as String.
+     * If the given flag is not found in the args array,
+     * null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public String parseParameter(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        return parse(flagName, isMandatory);
+    }
+
+    /**
+     * Returns the argument provided under the given full flag or short flag as String.
+     * If the given flag is not found in the args array, null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public String parseParameter(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        return parse(flagName, shortName, isMandatory);
+    }
+
+    /**
+     * Returns the argument provided under the given flag as Integer Object.
+     * If the given flag is not found in the args array,
+     * null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Integer parseParameterAsInt(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, isMandatory);
+        if (argument == null) return null;
+        return Integer.parseInt(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given full flag or short flag as Integer Object.
+     * If the given flag is not found in the args array, null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Integer parseParameterAsInt(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, shortName, isMandatory);
+        if (argument == null) return null;
+        return Integer.parseInt(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given flag as Double Object.
+     * If the given flag is not found in the args array,
+     * null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Double parseParameterAsDouble(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, isMandatory);
+        if (argument == null) return null;
+        return Double.parseDouble(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given full flag or short flag as Double Object.
+     * If the given flag is not found in the args array, null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Double parseParameterAsDouble(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, shortName, isMandatory);
+        if (argument == null) return null;
+        return Double.parseDouble(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given flag as Boolean Object.
+     * If the given flag is not found in the args array,
+     * null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Boolean parseParameterAsBoolean(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, isMandatory);
+        if (argument == null) return null;
+        return Boolean.parseBoolean(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given full flag or short flag as Boolean Object.
+     * If the given flag is not found in the args array, null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Boolean parseParameterAsBoolean(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, shortName, isMandatory);
+        if (argument == null) return null;
+        return Boolean.parseBoolean(argument);
+    }
+
+    /**
+     * Returns the argument provided under the given flag as Character Object.
+     * If the given flag is not found in the args array,
+     * null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Character parseParameterAsChar(String flagName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, isMandatory);
+        if (argument == null) return null;
+        return argument.charAt(0);
+    }
+
+    /**
+     * Returns the argument provided under the given full flag or short flag as Character Object.
+     * If the given flag is not found in the args array, null is returned
+     * or a MandatoryArgumentNotProvided exception is thrown if the argument was set as mandatory
+     *
+     * <p>The argument is not saved in the ArgsParser Instance thus has to be assigned to a variable for further usage!</p>
+     * @param flagName name of the flag
+     * @param shortName short version of the flag
+     * @param isMandatory true if the argument is mandatory
+     * @return argument of the flag as String or null if flag not in args
+     * @throws MandatoryArgumentNotProvided if the argument is mandatory and not provided
+     */
+    public Character parseParameterAsChar(String flagName, String shortName, boolean isMandatory) throws MandatoryArgumentNotProvided {
+        String argument = parse(flagName, shortName, isMandatory);
+        if (argument == null) return null;
+        return argument.charAt(0);
     }
 
 
@@ -172,7 +403,7 @@ public class ArgsParser {
      * class to keep the argument attributes together
      */
     private class Parameter {
-        private String flagName;
+        private final String flagName;
         private String shortName;
         private String description;
         private String argument;
@@ -233,8 +464,8 @@ public class ArgsParser {
     /**
      * Exception to be thrown if a mandatory argument is not provided
      */
-    public class ArgumentNotProvidedException extends RuntimeException {
-        public ArgumentNotProvidedException(String message) {
+    public static class MandatoryArgumentNotProvided extends RuntimeException {
+        public MandatoryArgumentNotProvided(String message) {
             super(message);
         }
     }
