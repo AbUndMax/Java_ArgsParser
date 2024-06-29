@@ -22,7 +22,13 @@ public class ArgsParser {
     private final Set<Parameter> mandatoryParameters = new HashSet<>();
     private boolean parsedSuccessfully = false;
     private int longestFlagSize = 0;
+    private int longestShortFlag = 0;
+    private final int consoleWidth = 80;
 
+    /**
+     * Constructor demands the args array of the main method to be passed
+     * @param args String array of the main method
+     */
     public ArgsParser(String[] args) {
         this.args = args;
     }
@@ -33,7 +39,12 @@ public class ArgsParser {
      */
     private void prepareParameter(Parameter parameter) {
         argumentsList.add(parameter);
-        longestFlagSize = parameter.flagName.length();
+        int nameSize = parameter.flagName.length();
+        if (parameter.shortName != null) {
+            int shortSize = parameter.shortName.length();
+            if (longestShortFlag < shortSize) longestShortFlag = shortSize;
+        }
+        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
         if (parameter.isMandatory) mandatoryParameters.add(parameter);
     }
 
@@ -71,12 +82,13 @@ public class ArgsParser {
     }
 
     /**
-     * checks the given args Array for all mandatory arguments and connects all given arguments in args to the correct flag for easy calling.
+     * <ul>checks if --help or -h was called on the program or a specific parameter, printing out teh corresponding help Strings. <strong>Exits program after printout</strong></ul>
+     * <ul>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</ul>
+     * <ul>checks if all mandatory parameters were given in the args, <strong>if not, exits the program</strong></ul>
      *
-     * <p> additionally checks if --help / -h was called! </p>
      */
     public void parseArgs() {
-        checkHelpCall();
+        checkForHelpCall();
         Set<Parameter> givenParameters = parseArguments();
         checkMandatoryArguments(givenParameters);
 
@@ -86,24 +98,21 @@ public class ArgsParser {
     /**
      * <ul>checks if --help or -h was called on the program, printing out help Strings for all parameters</ul>
      * <ul>checks if --help or -h was called for a specific parameter, printing out this parameters help string</ul>
+     * <p><strong>Exits the program after the help information were printed!</strong></p>
      */
-    private void checkHelpCall() {
-        if (args.length == 1 && (args[0].equals("--help") || args[0].equals("-h"))) {
-            printHelp();
-            System.exit(0);
-        }
+    private void checkForHelpCall() {
 
-        // check if help was called for a single parameter
-        if (args.length == 2 && (args[1].equals("--help") || args[1].equals("-h"))) {
-            Parameter param;
-            if ((param = argumentsList.getParameterFromList(args[0])) != null) {
-                printHelpForParameter(param);
-                System.exit(0);
-            }
-            else {
-                System.out.println("# Parameter flag " + args[0] + " is unknown!");
-                System.exit(1);
-            }
+        boolean firstArgIsHelp = args.length == 1 && (args[0].equals("--help") || args[0].equals("-h"));
+        boolean secondArgIsHelp = args.length == 2 && (args[1].equals("--help") || args[1].equals("-h"));
+        boolean firstArgExists = argumentsList.getParameterFromList(args[0]) != null;
+
+        if (firstArgIsHelp || (firstArgExists && secondArgIsHelp)) {
+            printHelp(firstArgIsHelp);
+            System.exit(0);
+
+        } else if (secondArgIsHelp){
+            System.out.println("# Parameter flag " + args[0] + " is unknown!");
+            System.exit(1);
         }
     }
 
@@ -139,32 +148,38 @@ public class ArgsParser {
     /**
      * prints all available Parameters found in argumentsList to the console
      */
-    private void printHelp() {
-        String hashLine = "#".repeat(80);
-        System.out.println(hashLine);
+    private void printHelp(boolean printAll) {
+        String headTitle = " HELP ";
+        int spaceForHeadTitle = headTitle.length();
+        int numberOfHashes = consoleWidth / 2 - spaceForHeadTitle / 2;
+        String header = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
+        System.out.println(header);
+
+        System.out.println(centerString("(!) = mandatory parameter | (+) = optional parameter"));
         System.out.println("#");
-        System.out.println("# Available Parameters:");
+
+        if (printAll) {
+            System.out.println(centerString("Available Parameters:"));
+        }
         System.out.println("#");
+
         for (Parameter param : argumentsList) {
             String helpString = parameterHelpString(param);
             System.out.println(helpString);
+            System.out.println("#");
         }
-        System.out.println("#");
-        System.out.println(hashLine);
+
+        System.out.println("#".repeat(consoleWidth));
     }
 
     /**
-     * prints the flags and description of the requested parameter to the console
-     * @param parameter parameter instance that should be printed out
+     * centers a given string in the help Box
+     * @param stringToCenter String to be centered
+     * @return centered String with a leading #
      */
-    private void printHelpForParameter(Parameter parameter) {
-        String hashLine = "#".repeat(80);
-        System.out.println(hashLine);
-        System.out.println("#");
-        System.out.println(parameterHelpString(parameter));
-        System.out.println("#");
-        System.out.println(hashLine);
-
+    private String centerString(String stringToCenter) {
+        int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
+        return "#" + " ".repeat(freeSpace) + stringToCenter;
     }
 
     /**
@@ -176,10 +191,57 @@ public class ArgsParser {
         String name = parameter.flagName;
         String shortName = parameter.shortName == null ? "/" : parameter.shortName;
         String description = parameter.description == null ? "No description provided!" : parameter.description;
-        String helpString = "# ";
-        helpString += String.format("%-20s %-5s %s", name, shortName, description);
+        String isMandatory = parameter.isMandatory ? "(!)" : "(+)";
+        StringBuilder helpString = new StringBuilder("###  ");
 
-        return helpString;
+        // align the parameter names nicely
+        int nameWhiteSpaceSize = longestFlagSize - name.length();
+        name = name + " ".repeat(nameWhiteSpaceSize);
+        int shortWhiteSpaceSize = longestShortFlag - shortName.length();
+        shortName = shortName + " ".repeat(shortWhiteSpaceSize);
+
+        helpString.append(name).append("  ").append(shortName).append("  ").append(isMandatory).append("  ");
+
+        // The description String gets checked if it fits inside the info box.
+        // If not, a new line will be added and the rest of the description will be aligned.
+        String[] descriptionRows = description.split(" \\n| \\n |\\n ", -1);
+        int whiteSpace = helpString.length();
+        if (descriptionRows.length == 1) {
+            return helpString.append(concatDescriptionLines(description, whiteSpace)).toString();
+
+        } else {
+            for (int i = 0; i < descriptionRows.length; i++) {
+                String row = descriptionRows[i];
+                helpString.append(concatDescriptionLines(row, whiteSpace));
+                if (i != descriptionRows.length - 1) helpString.append("\n#").append(" ".repeat(whiteSpace - 1));
+            }
+            return helpString.toString();
+        }
+    }
+
+    /**
+     * helper function to do correct new lines if the Description is too long to fit into the help box
+     * @param restDescription part of the description that doesn't fit
+     * @param whiteSpace int that specifies how many white space before the description should be placed
+     * @return the concatenated lines
+     */
+    private String concatDescriptionLines(String restDescription, int whiteSpace) {
+        int restLength = restDescription.length();
+        if (whiteSpace + restLength <= consoleWidth) {
+            return restDescription;
+
+        } else {
+            int i = consoleWidth - whiteSpace;
+            char currentChar = restDescription.charAt(i);
+            while (currentChar != ' ') {
+                currentChar = restDescription.charAt(--i);
+            }
+
+            String line = restDescription.substring(0, i) + "\n#" + " ".repeat(whiteSpace - 1) ;
+            restDescription = restDescription.substring(++i);
+
+            return line + concatDescriptionLines(restDescription, whiteSpace);
+        }
     }
 
     /**
@@ -521,7 +583,7 @@ public class ArgsParser {
             this.flagName = flagName;
             this.isMandatory = isMandatory;
             this.shortName = shortName;
-            this.description = description;
+            this.description = description.trim();
         }
 
         @Override
