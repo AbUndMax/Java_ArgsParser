@@ -21,9 +21,20 @@ public class ArgsParser {
     private final ParameterList argumentsList = new ParameterList();
     private final Set<Parameter> mandatoryParameters = new HashSet<>();
     private boolean parsedSuccessfully = false;
+    private int longestFlagSize = 0;
 
     public ArgsParser(String[] args) {
         this.args = args;
+    }
+
+    /**
+     * adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
+     * @param parameter parameter to be processed
+     */
+    private void prepareParameter(Parameter parameter) {
+        argumentsList.add(parameter);
+        longestFlagSize = parameter.flagName.length();
+        if (parameter.isMandatory) mandatoryParameters.add(parameter);
     }
 
     /**
@@ -32,9 +43,8 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public void addParameter(String flagName, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName);
-        argumentsList.add(parameter);
-        if (isMandatory) mandatoryParameters.add(parameter);
+        Parameter parameter = new Parameter(flagName, isMandatory);
+        prepareParameter(parameter);
     }
 
     /**
@@ -44,9 +54,8 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public void addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName, shortName);
-        argumentsList.add(parameter);
-        if (isMandatory) mandatoryParameters.add(parameter);
+        Parameter parameter = new Parameter(flagName, shortName, isMandatory);
+        prepareParameter(parameter);
     }
 
     /**
@@ -57,9 +66,8 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public void addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName, shortName, description);
-        argumentsList.add(parameter);
-        if (isMandatory) mandatoryParameters.add(parameter);
+        Parameter parameter = new Parameter(flagName, shortName, description, isMandatory);
+        prepareParameter(parameter);
     }
 
     /**
@@ -493,21 +501,25 @@ public class ArgsParser {
      */
     private class Parameter {
         private final String flagName;
+        private final boolean isMandatory;
         private String shortName;
         private String description;
         private String argument;
 
-        public Parameter(String flagName) {
+        public Parameter(String flagName, boolean isMandatory) {
             this.flagName = flagName;
+            this.isMandatory = isMandatory;
         }
 
-        public Parameter(String flagName, String shortName) {
+        public Parameter(String flagName, String shortName, boolean isMandatory) {
             this.flagName = flagName;
+            this.isMandatory = isMandatory;
             this.shortName = shortName;
         }
 
-        public Parameter(String flagName, String shortName, String description) {
+        public Parameter(String flagName, String shortName, String description, boolean isMandatory) {
             this.flagName = flagName;
+            this.isMandatory = isMandatory;
             this.shortName = shortName;
             this.description = description;
         }
