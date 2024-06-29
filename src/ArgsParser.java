@@ -227,21 +227,21 @@ public class ArgsParser {
      */
     private String concatDescriptionLines(String restDescription, int whiteSpace) {
         int restLength = restDescription.length();
-        if (whiteSpace + restLength <= consoleWidth) {
-            return restDescription;
+        StringBuilder lineBuilder = new StringBuilder();
 
-        } else {
+        while (whiteSpace + restLength > consoleWidth) {
             int i = consoleWidth - whiteSpace;
             char currentChar = restDescription.charAt(i);
             while (currentChar != ' ') {
                 currentChar = restDescription.charAt(--i);
             }
 
-            String line = restDescription.substring(0, i) + "\n#" + " ".repeat(whiteSpace - 1) ;
+            lineBuilder.append(restDescription, 0, i).append("\n#").append(" ".repeat(whiteSpace - 1));
             restDescription = restDescription.substring(++i);
-
-            return line + concatDescriptionLines(restDescription, whiteSpace);
+            restLength = restDescription.length();
         }
+
+        return lineBuilder.append(restDescription).toString();
     }
 
     /**
