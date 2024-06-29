@@ -13,6 +13,7 @@ import java.util.*;
  * <li>then the arguments can be accessed with the getArgument methods</li>
  * </ol>
  * <p> Made by Niklas Max G. 2024 </p>
+ * <p> available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a></p>
  */
 public class ArgsParser {
 
@@ -62,27 +63,115 @@ public class ArgsParser {
     }
 
     /**
-     * checks the given args Array and connects the argument of the user to the correct flag
+     * checks the given args Array for all mandatory arguments and connects all given arguments in args to the correct flag for easy calling.
+     *
+     * <p> additionally checks if --help / -h was called! </p>
      */
     public void parseArgs() {
+        checkHelpCall();
+        Set<Parameter> givenParameters = parseArguments();
+        checkMandatoryArguments(givenParameters);
 
+        parsedSuccessfully = true;
+    }
+
+    /**
+     * <ul>checks if --help or -h was called on the program, printing out help Strings for all parameters</ul>
+     * <ul>checks if --help or -h was called for a specific parameter, printing out this parameters help string</ul>
+     */
+    private void checkHelpCall() {
+        if (args.length == 1 && (args[0].equals("--help") || args[0].equals("-h"))) {
+            printHelp();
+            System.exit(0);
+        }
+
+        // check if help was called for a single parameter
+        if (args.length == 2 && (args[1].equals("--help") || args[1].equals("-h"))) {
+            Parameter param;
+            if ((param = argumentsList.getParameterFromList(args[0])) != null) {
+                printHelpForParameter(param);
+                System.exit(0);
+            }
+            else {
+                System.out.println("# Parameter flag " + args[0] + " is unknown!");
+                System.exit(1);
+            }
+        }
+    }
+
+    /**
+     * goes through all entries in args and creates a Parameter instance for each found flag.
+     * @return a set of all Parameter instances created based on args
+     */
+    private Set<Parameter> parseArguments() {
         Set<Parameter> givenParameters = new HashSet<>();
         Parameter currentParameter;
-
         for (int i = 0; i < args.length; i++) {
             if ((currentParameter = argumentsList.getParameterFromList(args[i])) != null) {
                 currentParameter.argument = args[i + 1];
                 givenParameters.add(currentParameter);
             }
         }
+        return givenParameters;
+    }
 
+    /**
+     * checks if all mandatory parameters were given in args!
+     * <p><strong>Exits the program if not all mandatory parameters were given!</strong></p>
+     * @param givenParameters a set of all Parameter instances created based on args
+     */
+    private void checkMandatoryArguments(Set<Parameter> givenParameters) {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
             System.out.println("Mandatory parameters are missing: " + mandatoryParameters);
             System.exit(1);
         }
+    }
 
-        parsedSuccessfully = true;
+    /**
+     * prints all available Parameters found in argumentsList to the console
+     */
+    private void printHelp() {
+        String hashLine = "#".repeat(80);
+        System.out.println(hashLine);
+        System.out.println("#");
+        System.out.println("# Available Parameters:");
+        System.out.println("#");
+        for (Parameter param : argumentsList) {
+            String helpString = parameterHelpString(param);
+            System.out.println(helpString);
+        }
+        System.out.println("#");
+        System.out.println(hashLine);
+    }
+
+    /**
+     * prints the flags and description of the requested parameter to the console
+     * @param parameter parameter instance that should be printed out
+     */
+    private void printHelpForParameter(Parameter parameter) {
+        String hashLine = "#".repeat(80);
+        System.out.println(hashLine);
+        System.out.println("#");
+        System.out.println(parameterHelpString(parameter));
+        System.out.println("#");
+        System.out.println(hashLine);
+
+    }
+
+    /**
+     * generates the help String (flagName, shortFlag, description) for a single Parameter
+     * @param parameter parameter Instance of which the help String should be generated
+     * @return String with all information for the given Parameter
+     */
+    private String parameterHelpString(Parameter parameter) {
+        String name = parameter.flagName;
+        String shortName = parameter.shortName == null ? "/" : parameter.shortName;
+        String description = parameter.description == null ? "No description provided!" : parameter.description;
+        String helpString = "# ";
+        helpString += String.format("%-20s %-5s %s", name, shortName, description);
+
+        return helpString;
     }
 
     /**
