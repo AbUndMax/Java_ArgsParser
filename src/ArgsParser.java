@@ -101,18 +101,35 @@ public class ArgsParser {
      * <p><strong>Exits the program after the help information were printed!</strong></p>
      */
     private void checkForHelpCall() {
+        boolean oneArgProvided = args.length == 1;
+        boolean twoArgsProvided = args.length == 2;
+        boolean firstArgumentIsParameter = argumentsList.getParameterFromList(args[0]) != null;
 
-        boolean firstArgIsHelp = args.length == 1 && (args[0].equals("--help") || args[0].equals("-h"));
-        boolean secondArgIsHelp = args.length == 2 && (args[1].equals("--help") || args[1].equals("-h"));
-        boolean firstArgExists = argumentsList.getParameterFromList(args[0]) != null;
+        if (oneArgProvided) {
+            if (args[0].equals("--help") || args[0].equals("-h")) { // if --help or -h was called, the help is printed
+                printHelp(true);
+                System.exit(0);
 
-        if (firstArgIsHelp || (firstArgExists && secondArgIsHelp)) {
-            printHelp(firstArgIsHelp);
-            System.exit(0);
+            } else if (firstArgumentIsParameter) { // if the first argument is a parameter but --help was not called, the program notifies the user of a missing argument
+                System.out.println("Missing argument for parameter: " + args[0]);
+                System.exit(0);
 
-        } else if (secondArgIsHelp){
-            System.out.println("# Parameter flag " + args[0] + " is unknown!");
-            System.exit(1);
+            } else { // if the first argument is not a parameter and --help was not called, the program notifies the user of an unknown parameter input
+                System.out.println("# Parameter flag " + args[0] + " is unknown!");
+                System.exit(1);
+            }
+
+        } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
+            if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
+                // help is printed for this parameter
+                printHelp(false);
+                System.exit(0);
+
+            } else { // if the first argument is not a parameter but --help was called,
+                // the program notifies the user of an unknown parameter input
+                System.out.println("# Parameter flag " + args[0] + " is unknown!");
+                System.exit(1);
+            }
         }
     }
 
@@ -123,12 +140,39 @@ public class ArgsParser {
     private Set<Parameter> parseArguments() {
         Set<Parameter> givenParameters = new HashSet<>();
         Parameter currentParameter;
-        for (int i = 0; i < args.length; i++) {
-            if ((currentParameter = argumentsList.getParameterFromList(args[i])) != null) {
-                currentParameter.argument = args[i + 1];
-                givenParameters.add(currentParameter);
+
+        // check if arg is odd and if so,
+        // check if the last arg is a parameter thus reporting missing argument for this one
+        if (args.length % 2 != 0) {
+            if (argumentsList.getParameterFromList(args[args.length - 1]) != null) {
+                System.out.println("Missing argument for parameter: " + args[args.length - 1]);
+                System.exit(1);
+            } else {
+                System.out.println("Provided two arguments to: " + args[args.length - 2]);
+                System.exit(1);
             }
         }
+
+        // goes through all args and assigns the arguments to the corresponding parameters
+        for (int i = 0; i <= args.length - 2; i += 2) {
+            currentParameter = argumentsList.getParameterFromList(args[i]);
+            boolean currentPositionIsParameter = currentParameter != null;
+            boolean nextPositionIsArgument = argumentsList.getParameterFromList(args[i + 1]) == null;
+
+            if (currentPositionIsParameter && nextPositionIsArgument) {
+                currentParameter.argument = args[i + 1];
+                givenParameters.add(currentParameter);
+
+            } else if (currentPositionIsParameter) {
+                System.out.println("Missing argument for parameter: " + argumentsList.getParameterFromList(args[i]).flagName);
+                System.exit(1);
+
+            }  else {
+                System.out.println("Provided two arguments to: " + argumentsList.getParameterFromList(args[i - 2]).flagName);
+                System.exit(1);
+            }
+        }
+
         return givenParameters;
     }
 
