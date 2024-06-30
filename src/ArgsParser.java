@@ -166,15 +166,15 @@ public class ArgsParser {
             boolean nextPositionIsArgument = argumentsList.getParameterFromList(args[i + 1]) == null;
 
             if (currentPositionIsParameter && nextPositionIsArgument) {
-                currentParameter.argument = args[i + 1];
+                currentParameter.setArgument(args[i + 1]);
                 givenParameters.add(currentParameter);
 
             } else if (currentPositionIsParameter) {
-                System.out.println("Missing argument for parameter: " + argumentsList.getParameterFromList(args[i]).flagName);
+                System.out.println("Missing argument for parameter: " + argumentsList.getParameterFromList(args[i]).getFlagName());
                 System.exit(1);
 
             }  else {
-                System.out.println("Provided two arguments to: " + argumentsList.getParameterFromList(args[i - 2]).flagName);
+                System.out.println("Provided two arguments to: " + argumentsList.getParameterFromList(args[i - 2]).getFlagName());
                 System.exit(1);
             }
         }
