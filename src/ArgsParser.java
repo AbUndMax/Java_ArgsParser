@@ -26,10 +26,16 @@ public class ArgsParser {
     private final int consoleWidth = 80;
 
     /**
-     * Constructor demands the args array of the main method to be passed
+     * Constructor demands the args array of the main method to be passed.
+     * <p><strong>If args is null or args has no elements, the program ist terminated with Code 1</strong></p>
      * @param args String array of the main method
      */
     public ArgsParser(String[] args) {
+        if (args == null || args.length == 0) {
+            System.out.println("No arguments provided!");
+            System.exit(1);
+        }
+
         this.args = args;
     }
 
@@ -39,13 +45,13 @@ public class ArgsParser {
      */
     private void prepareParameter(Parameter parameter) {
         argumentsList.add(parameter);
-        int nameSize = parameter.flagName.length();
-        if (parameter.shortName != null) {
-            int shortSize = parameter.shortName.length();
+        int nameSize = parameter.getFlagName().length();
+        if (parameter.getShortName() != null) {
+            int shortSize = parameter.getShortName().length();
             if (longestShortFlag < shortSize) longestShortFlag = shortSize;
         }
         if (longestFlagSize < nameSize) longestFlagSize = nameSize;
-        if (parameter.isMandatory) mandatoryParameters.add(parameter);
+        if (parameter.isMandatory()) mandatoryParameters.add(parameter);
     }
 
     /**
@@ -184,7 +190,10 @@ public class ArgsParser {
     private void checkMandatoryArguments(Set<Parameter> givenParameters) {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
-            System.out.println("Mandatory parameters are missing: " + mandatoryParameters);
+            System.out.println("Mandatory parameters are missing: ");
+            for (Parameter param : mandatoryParameters) {
+                System.out.println("# " + param.getFlagName());
+            }
             System.exit(1);
         }
     }
@@ -232,16 +241,16 @@ public class ArgsParser {
      * @return String with all information for the given Parameter
      */
     private String parameterHelpString(Parameter parameter) {
-        String name = parameter.flagName;
-        String shortName = parameter.shortName == null ? "/" : parameter.shortName;
-        String description = parameter.description == null ? "No description provided!" : parameter.description;
-        String isMandatory = parameter.isMandatory ? "(!)" : "(+)";
+        String name = parameter.getFlagName();
+        String shortName = parameter.getShortName() == null ? "/" : parameter.getShortName();
+        String description = parameter.getDescription() == null ? "No description provided!" : parameter.getDescription();
+        String isMandatory = parameter.isMandatory() ? "(!)" : "(+)";
         StringBuilder helpString = new StringBuilder("###  ");
 
         // align the parameter names nicely
         int nameWhiteSpaceSize = longestFlagSize - name.length();
         name = name + " ".repeat(nameWhiteSpaceSize);
-        int shortWhiteSpaceSize = longestShortFlag - shortName.length();
+        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortName.length();
         shortName = shortName + " ".repeat(shortWhiteSpaceSize);
 
         helpString.append(name).append("  ").append(shortName).append("  ").append(isMandatory).append("  ");
@@ -365,7 +374,7 @@ public class ArgsParser {
         if (!parsedSuccessfully) throw new IllegalStateException();
         Parameter param;
         if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
-        return param.argument;
+        return param.getArgument();
     }
 
     /**
@@ -600,81 +609,4 @@ public class ArgsParser {
         if (argument == null) return null;
         return argument.charAt(0);
     }
-
-
-    /**
-     * class to keep the argument attributes together
-     */
-    private class Parameter {
-        private final String flagName;
-        private final boolean isMandatory;
-        private String shortName;
-        private String description;
-        private String argument;
-
-        public Parameter(String flagName, boolean isMandatory) {
-            this.flagName = flagName;
-            this.isMandatory = isMandatory;
-        }
-
-        public Parameter(String flagName, String shortName, boolean isMandatory) {
-            this.flagName = flagName;
-            this.isMandatory = isMandatory;
-            this.shortName = shortName;
-        }
-
-        public Parameter(String flagName, String shortName, String description, boolean isMandatory) {
-            this.flagName = flagName;
-            this.isMandatory = isMandatory;
-            this.shortName = shortName;
-            this.description = description.trim();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Parameter parameter = (Parameter) o;
-            return Objects.equals(flagName, parameter.flagName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(flagName);
-        }
-
-    }
-
-
-    /**
-     * List to store the Parameters and a method to retrieve them
-     */
-    private class ParameterList extends LinkedList<Parameter> {
-
-        /**
-         * returns the parameter with the given flagName
-         * @param flag flagName (long or short version) of the parameter
-         * @return parameter with the given flagName
-         */
-        public Parameter getParameterFromList(String flag) {
-            for (Parameter p : this) {
-                if (p.flagName.equals(flag) || (p.shortName != null && p.shortName.equals(flag))) {
-                    return p;
-                }
-            }
-            return null;
-        }
-
-    }
-
-
-    /**
-     * Exception to be thrown if a mandatory argument is not provided
-     */
-    public static class MandatoryArgumentNotProvided extends RuntimeException {
-        public MandatoryArgumentNotProvided(String message) {
-            super(message);
-        }
-    }
-
 }
