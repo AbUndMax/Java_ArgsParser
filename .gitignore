@@ -4,7 +4,6 @@ out/
 !**/src/test/**/out/
 *.iml
 /.idea/
-/src/test/
 
 ### Eclipse ###
 .apt_generated
@@ -30,3 +29,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/src/test/TestPrintout.java
