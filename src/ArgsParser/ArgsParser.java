@@ -1,5 +1,10 @@
 package ArgsParser;
 
+import ArgsParser.Argserror.MandatoryArgNotProvidedArgserror;
+import ArgsParser.Argserror.MissingArgArgserror;
+import ArgsParser.Argserror.TooManyArgumentsArgserror;
+import ArgsParser.Argserror.UnkownFlagArgserror;
+
 import java.util.*;
 
 /**
@@ -120,7 +125,7 @@ public class ArgsParser {
      * <ul>checks if all mandatory parameters were given in the args, <strong>if not, exits the program</strong></ul>
      *
      */
-    public void parseArgs() {
+    public void parseArgs() throws MandatoryArgNotProvidedArgserror, UnkownFlagArgserror, TooManyArgumentsArgserror, MissingArgArgserror {
         checkForHelpCall();
         Set<Parameter> givenParameters = parseArguments();
         checkMandatoryArguments(givenParameters);
@@ -133,7 +138,7 @@ public class ArgsParser {
      * <ul>checks if --help or -h was called for a specific parameter, printing out this parameters help string</ul>
      * <p><strong>Exits the program after the help information were printed!</strong></p>
      */
-    private void checkForHelpCall() {
+    private void checkForHelpCall() throws UnkownFlagArgserror, MissingArgArgserror{
         boolean oneArgProvided = args.length == 1;
         boolean twoArgsProvided = args.length == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
@@ -144,12 +149,10 @@ public class ArgsParser {
                 System.exit(0);
 
             } else if (firstArgumentIsParameter) { // if the first argument is a parameter but --help was not called, the program notifies the user of a missing argument
-                System.out.println("Missing argument for parameter: " + args[0]);
-                System.exit(0);
+                throw new MissingArgArgserror(args[0]);
 
             } else { // if the first argument is not a parameter and --help was not called, the program notifies the user of an unknown parameter input
-                System.out.println("# Parameter flag " + args[0] + " is unknown!");
-                System.exit(1);
+                throw new UnkownFlagArgserror(args[0]);
             }
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
@@ -160,8 +163,7 @@ public class ArgsParser {
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
-                System.out.println("# Parameter flag " + args[0] + " is unknown!");
-                System.exit(1);
+                throw new UnkownFlagArgserror(args[0]);
             }
         }
     }
@@ -170,39 +172,35 @@ public class ArgsParser {
      * goes through all entries in args and creates a Parameter instance for each found flag.
      * @return a set of all Parameter instances created based on args
      */
-    private Set<Parameter> parseArguments() {
+    private Set<Parameter> parseArguments() throws UnkownFlagArgserror, TooManyArgumentsArgserror, MissingArgArgserror {
         Set<Parameter> givenParameters = new HashSet<>();
-        Parameter currentParameter;
 
-        // check if arg is odd and if so,
-        // check if the last arg is a parameter thus reporting missing argument for this one
-        if (args.length % 2 != 0) {
-            if (parameterMap.get(args[args.length - 1]) != null) {
-                System.out.println("Missing argument for parameter: " + args[args.length - 1]);
-                System.exit(1);
-            } else {
-                System.out.println("Provided two arguments to: " + args[args.length - 2]);
-                System.exit(1);
-            }
-        }
+        Parameter currentParameter = null;
+        for (int i = 0; i < args.length; i++) {
 
-        // goes through all args and assigns the arguments to the corresponding parameters
-        for (int i = 0; i <= args.length - 2; i += 2) {
-            currentParameter = parameterMap.get(args[i]);
-            boolean currentPositionIsParameter = currentParameter != null;
-            boolean nextPositionIsArgument = parameterMap.get(args[i + 1]) == null;
+            boolean currentPositionIsFlag = args[i].startsWith("-");
+            if (currentPositionIsFlag) currentParameter = parameterMap.get(args[i]);
+            boolean flagExists = currentParameter != null;
+            boolean isLastEntry = i == args.length - 1;
+            boolean argumentNotSet = currentParameter != null && currentParameter.getArgument() == null;
+            boolean lastPositionWasFlag = i > 1 && args[i - 1].startsWith("-");
 
-            if (currentPositionIsParameter && nextPositionIsArgument) {
-                currentParameter.setArgument(args[i + 1]);
+            if (currentPositionIsFlag && !flagExists) { // if flag is unknown
+                throw new UnkownFlagArgserror(args[i]);
+
+            } else if (!argumentNotSet && !currentPositionIsFlag){ // if two arguments are provided to a single flag
+                throw new TooManyArgumentsArgserror(args[i]);
+
+            } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
+                throw new MissingArgArgserror(args[i - 1]);
+
+            }  else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
+                throw new MissingArgArgserror(args[i]);
+
+            } else if (!currentPositionIsFlag && argumentNotSet) { // if the current position is an argument
+                currentParameter.setArgument(args[i]);
                 givenParameters.add(currentParameter);
 
-            } else if (currentPositionIsParameter) {
-                System.out.println("Missing argument for parameter: " + parameterMap.get(args[i]).getFlagName());
-                System.exit(1);
-
-            }  else {
-                System.out.println("Provided two arguments to: " + parameterMap.get(args[i - 2]).getFlagName());
-                System.exit(1);
             }
         }
 
@@ -214,14 +212,15 @@ public class ArgsParser {
      * <p><strong>Exits the program if not all mandatory parameters were given!</strong></p>
      * @param givenParameters a set of all Parameter instances created based on args
      */
-    private void checkMandatoryArguments(Set<Parameter> givenParameters) {
+    private void checkMandatoryArguments(Set<Parameter> givenParameters) throws MandatoryArgNotProvidedArgserror{
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
-            System.out.println("Mandatory parameters are missing: ");
+            StringBuilder errorMessage = new StringBuilder();
+            errorMessage.append("Mandatory parameters are missing: ");
             for (Parameter param : mandatoryParameters) {
-                System.out.println("# " + param.getFlagName());
+                errorMessage.append(param.getFlagName()).append(" ");
             }
-            System.exit(1);
+            throw new MandatoryArgNotProvidedArgserror(errorMessage.toString());
         }
     }
 
