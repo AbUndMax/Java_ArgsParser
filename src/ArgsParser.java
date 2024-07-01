@@ -18,7 +18,7 @@ import java.util.*;
 public class ArgsParser {
 
     private final String[] args;
-    private final ParameterList argumentsList = new ParameterList();
+    private final Map<String, Parameter> parameterMap = new HashMap<>();
     private final Set<Parameter> mandatoryParameters = new HashSet<>();
     private boolean parsedSuccessfully = false;
     private int longestFlagSize = 0;
@@ -44,7 +44,8 @@ public class ArgsParser {
      * @param parameter parameter to be processed
      */
     private void prepareParameter(Parameter parameter) {
-        argumentsList.add(parameter);
+        parameterMap.put(parameter.getFlagName(), parameter);
+        if (parameter.getShortName() != null) parameterMap.put(parameter.getShortName(), parameter);
         int nameSize = parameter.getFlagName().length();
         if (parameter.getShortName() != null) {
             int shortSize = parameter.getShortName().length();
@@ -130,7 +131,7 @@ public class ArgsParser {
     private void checkForHelpCall() {
         boolean oneArgProvided = args.length == 1;
         boolean twoArgsProvided = args.length == 2;
-        boolean firstArgumentIsParameter = argumentsList.getParameterFromList(args[0]) != null;
+        boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
 
         if (oneArgProvided) {
             if (args[0].equals("--help") || args[0].equals("-h")) { // if --help or -h was called, the help is printed
@@ -171,7 +172,7 @@ public class ArgsParser {
         // check if arg is odd and if so,
         // check if the last arg is a parameter thus reporting missing argument for this one
         if (args.length % 2 != 0) {
-            if (argumentsList.getParameterFromList(args[args.length - 1]) != null) {
+            if (parameterMap.get(args[args.length - 1]) != null) {
                 System.out.println("Missing argument for parameter: " + args[args.length - 1]);
                 System.exit(1);
             } else {
@@ -182,20 +183,20 @@ public class ArgsParser {
 
         // goes through all args and assigns the arguments to the corresponding parameters
         for (int i = 0; i <= args.length - 2; i += 2) {
-            currentParameter = argumentsList.getParameterFromList(args[i]);
+            currentParameter = parameterMap.get(args[i]);
             boolean currentPositionIsParameter = currentParameter != null;
-            boolean nextPositionIsArgument = argumentsList.getParameterFromList(args[i + 1]) == null;
+            boolean nextPositionIsArgument = parameterMap.get(args[i + 1]) == null;
 
             if (currentPositionIsParameter && nextPositionIsArgument) {
                 currentParameter.setArgument(args[i + 1]);
                 givenParameters.add(currentParameter);
 
             } else if (currentPositionIsParameter) {
-                System.out.println("Missing argument for parameter: " + argumentsList.getParameterFromList(args[i]).getFlagName());
+                System.out.println("Missing argument for parameter: " + parameterMap.get(args[i]).getFlagName());
                 System.exit(1);
 
             }  else {
-                System.out.println("Provided two arguments to: " + argumentsList.getParameterFromList(args[i - 2]).getFlagName());
+                System.out.println("Provided two arguments to: " + parameterMap.get(args[i - 2]).getFlagName());
                 System.exit(1);
             }
         }
@@ -237,7 +238,8 @@ public class ArgsParser {
         }
         System.out.println("#");
 
-        for (Parameter param : argumentsList) {
+        Set<Parameter> parameters = new HashSet<>(parameterMap.values());
+        for (Parameter param : parameters) {
             String helpString = parameterHelpString(param);
             System.out.println(helpString);
             System.out.println("#");
@@ -394,7 +396,7 @@ public class ArgsParser {
     private String getArgumentFromParameter(String flagName) throws IllegalArgumentException, IllegalStateException {
         if (!parsedSuccessfully) throw new IllegalStateException();
         Parameter param;
-        if ((param = argumentsList.getParameterFromList(flagName)) == null) throw new IllegalArgumentException();
+        if ((param = parameterMap.get(flagName)) == null) throw new IllegalArgumentException();
         return param.getArgument();
     }
 
