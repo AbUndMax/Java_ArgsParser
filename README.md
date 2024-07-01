@@ -4,7 +4,10 @@ the programmer to access the given arguments.
 
 ## How to use
 1. Import the ArgsParser class
+
 ```Java
+import ArgsParser.ArgsParser;
+
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
 ```

@@ -1,3 +1,5 @@
+package ArgsParser;
+
 /**
  * Exception to be thrown if a mandatory argument is not provided
  */
