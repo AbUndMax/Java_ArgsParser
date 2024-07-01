@@ -216,9 +216,9 @@ public class ArgsParser {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
             StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Mandatory parameters are missing: ");
+            errorMessage.append("Mandatory parameters are missing:\n");
             for (Parameter param : mandatoryParameters) {
-                errorMessage.append(param.getFlagName()).append(" ");
+                errorMessage.append(param.getFlagName()).append("\n");
             }
             throw new MandatoryArgNotProvidedArgserror(errorMessage.toString());
         }
