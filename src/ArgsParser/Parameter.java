@@ -76,6 +76,7 @@ public class Parameter {
      */
     @SuppressWarnings("unchecked")
     public <T> T getArgument() {
+        if (!isParsed) throw new IllegaleStateException();
         List<Supplier<Object>> conversionFunctions = Arrays.asList(
                 () -> argument,
                 this::getArgumentAsInteger,
