@@ -6,9 +6,9 @@ import java.util.Objects;
 class Parameter {
     private final String flagName;
     private final boolean isMandatory;
-    private String shortName;
-    private String description;
-    private String argument;
+    private String shortName = null;
+    private String description = null;
+    private String argument = null;
 
     public Parameter(String flagName, boolean isMandatory) {
         this.flagName = flagName;

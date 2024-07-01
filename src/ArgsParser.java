@@ -55,12 +55,33 @@ public class ArgsParser {
     }
 
     /**
+     * Creates a flag from the given flagName, if the flagName is already in the correct format, it will be returned as is.
+     * If not, it will add a leading or -- to the flagName
+     * @param flagName name of the flag
+     * @param isShortName true if the flag is a short flag
+     * @return flag in the correct format (e.g. --flagName or -f)
+     */
+    private String makeFlag(String flagName, boolean isShortName) {
+        int i = 0;
+        while (flagName.charAt(i) == '-') {
+            i++;
+        }
+
+        if (i == 2 && !isShortName) return flagName;
+        else if (i == 1 && isShortName) return flagName;
+        else {
+            String newFlag = isShortName ? "-" : "--";
+            return newFlag + flagName.substring(i);
+        }
+    }
+
+    /**
      * adds a new parameter that will be checked in args
      * @param flagName name of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public void addParameter(String flagName, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName, isMandatory);
+    public void addFlag(String flagName, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), isMandatory);
         prepareParameter(parameter);
     }
 
@@ -70,8 +91,8 @@ public class ArgsParser {
      * @param shortName short version of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public void addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName, shortName, isMandatory);
+    public void addFlag(String flagName, String shortName, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), isMandatory);
         prepareParameter(parameter);
     }
 
@@ -82,8 +103,8 @@ public class ArgsParser {
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public void addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(flagName, shortName, description, isMandatory);
+    public void addFlag(String flagName, String shortName, String description, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory);
         prepareParameter(parameter);
     }
 
