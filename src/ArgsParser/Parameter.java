@@ -140,6 +140,30 @@ public class Parameter {
         isParsed = true;
     }
 
+    /**
+     * Sets the default value for the argument and assigns it to the corresponding type-specific field.
+     * The value is also converted to a string and stored in the 'argument' field.
+     *
+     * @param <T> the type of the default value
+     * @param defaultValue the default value to be set, which can be of type Integer, Double, Character, or Boolean
+     * @throws IllegalArgumentException if the type of defaultValue is unsupported
+     */
+    protected <T> void setDefault(T defaultValue) {
+        this.argument = defaultValue.toString();
+    
+        if (defaultValue instanceof Integer) {
+            argumentAsInteger = (Integer) defaultValue;
+        } else if (defaultValue instanceof Double) {
+            argumentAsDouble = (Double) defaultValue;
+        } else if (defaultValue instanceof Character) {
+            argumentAsChar = (Character) defaultValue;
+        } else if (defaultValue instanceof Boolean) {
+            argumentAsBoolean = (Boolean) defaultValue;
+        } else {
+            throw new IllegalArgumentException("Unsupported type: " + defaultValue.getClass().getName());
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
