@@ -1,9 +1,9 @@
 import ArgsParser.*;
 import ArgsParser.Argserror.*;
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 
 public class TestArgsParser {
@@ -125,5 +125,110 @@ public class TestArgsParser {
         } catch (ArgsException e) {
             assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetArgumentAsString() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "-int", "5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter integer = parser.addParameter("integer", "int", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String result = file.getArgument();
+
+        assertEquals("file.txt", result);
+    }
+
+    @Test
+    public void testGetArgumentWithGenericType() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--integer", "5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter integer = parser.addParameter("integer", Integer.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = integer.getCastedArgument();
+        Integer expected = 5;
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testBooleanGetArgument() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--boolean", "true"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter bool = parser.addParameter("boolean", Boolean.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        assertTrue(bool.getCastedArgument());
+    }
+
+    @Test
+    public void testGetArgumentAsDouble() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", Double.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = doub.getCastedArgument();
+        Double expected = 5.5;
+        String StringResult = doub.getArgument();
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetArgumentAsDoubleWithWrongInput() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5.5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", Double.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            assertEquals(new InvalidArgTypeArgsException("--double").getMessage(), e.getMessage());
+        }
+    }
+
+    @Test
+    public void useDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", 12.3 , false);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+        }
+
+        String result = doub.getArgument();
+
+        Assert.assertEquals("12.3", result);
+    }
+
+    @Test
+    public void useDefaultValueCast() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", 12.3 , false);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+        }
+
+        Double result = doub.getCastedArgument();
+        Double expected = 12.3;
+
+        Assert.assertEquals(expected, result);
     }
 }

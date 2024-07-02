@@ -24,10 +24,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
+import ArgsParser.Argserror.InvalidArgTypeArgsException;
+import ArgsParser.RuntimeExeptions.ParameterTypeNotDefined;
+
+import java.util.*;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
@@ -36,6 +36,8 @@ public class Parameter {
     private final String flagName;
     private final boolean isMandatory;
     private final ArgsParser parser;
+    private Class<?> type;
+    private boolean typeWasSet = false;
     private boolean hasArgument = false;
     private String shortName = null;
     private String description = null;
@@ -45,25 +47,133 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
+    // Simple Constructors
+
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
-        this.isMandatory = isMandatory;
+        this.isMandatory = false;
         this.parser = parserInstance;
+        this.type = String.class;
     }
 
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.isMandatory = isMandatory;
+        this(flagName, isMandatory, parserInstance);
         this.shortName = shortName;
-        this.parser = parserInstance;
     }
 
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.isMandatory = isMandatory;
+        this(flagName, shortName, isMandatory, parserInstance);
+        this.description = description;
+    }
+
+    // Constructors with type definition
+
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, isMandatory, parserInstance);
+        this.type = type;
+        this.typeWasSet = true;
+    }
+
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, type, isMandatory, parserInstance);
         this.shortName = shortName;
-        this.description = description.trim();
-        this.parser = parserInstance;
+    }
+
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, shortName, type, isMandatory, parserInstance);
+        this.description = description;
+    }
+
+    // Constructors with default value
+    // (they automatically set the type of the parameter based on the type of the provided default value)
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, isMandatory, parserInstance);
+        setDefault(defaultValue);
+        type = defaultValue.getClass();
+        typeWasSet = true;
+    }
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, defaultValue, isMandatory, parserInstance);
+        this.shortName = shortName;
+    }
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, String description, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, shortName, defaultValue, isMandatory, parserInstance);
+        this.description = description;
     }
 
     /**
@@ -98,74 +208,65 @@ public class Parameter {
         return description;
     }
 
+    protected String getType() {
+        return type.getSimpleName();
+    }
+
+    /**
+     * getter method for the argument attribute
+     * @return argument as String
+     * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
+     */
+    public String getArgument() throws IllegalStateException {
+        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
+        if (!hasArgument) return null;
+        return argument;
+    }
+
     /**
      * getter method for the argument attribute
      * @return argument
-     * @throws IllegalStateException if parseArgs() was not called before trying to access this argument
+     * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
+     * @throws IllegalArgumentException if the argument is not of the expected type
+     * @throws ParameterTypeNotDefined if the type of the parameter was not defined when using {@link ArgsParser#addParameter(String, boolean)} without a specified type
      */
     @SuppressWarnings("unchecked")
-    public <T> T getArgument() throws IllegalStateException{
-        if (!parser.parseArgsWasCalled) throw new IllegalStateException();
+    public <T> T getCastedArgument() throws IllegalStateException, IllegalArgumentException, ParameterTypeNotDefined{
+        if (!typeWasSet) throw new ParameterTypeNotDefined(this.flagName);
+        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
         if (!hasArgument) return null;
-        List<Supplier<Object>> conversionFunctions = Arrays.asList(
-                () -> argument,
-                this::getArgumentAsInteger,
-                this::getArgumentAsDouble,
-                this::getArgumentAsBoolean,
-                this::getArgumentAsChar
-        );
 
-        for (Supplier<Object> function : conversionFunctions) {
-            try {
-                return (T) function.get();
-            } catch (Exception e) {
-                // Ignorieren und zum nächsten Versuch übergehen
-            }
+        switch (type.getSimpleName()) {
+            case "Integer" -> { return (T) argumentAsInteger; }
+            case "Double" -> { return (T) argumentAsDouble; }
+            case "Boolean" -> { return (T) argumentAsBoolean; }
+            case "Character" -> { return (T) argumentAsChar; }
+            default -> throw new IllegalArgumentException("Unsupported type: " + type.getName());
         }
-        return null;
+
     }
 
     /**
-     * getter method for the argument attribute as an integer
-     * @return argument as an integer
-     */
-    private Integer getArgumentAsInteger() {
-        if (this.argumentAsInteger == null) this.argumentAsInteger = Integer.parseInt(argument);
-        return this.argumentAsInteger;
-    }
-
-    /**
-     * getter method for the argument attribute as a double
-     * @return argument as a double
-     */
-    private Double getArgumentAsDouble() {
-        if (this.argumentAsDouble == null) this.argumentAsDouble = Double.parseDouble(argument);
-        return this.argumentAsDouble;
-    }
-
-    /**
-     * getter method for the argument attribute as a boolean
-     * @return argument as a boolean
-     */
-    private Boolean getArgumentAsBoolean() {
-        if (this.argumentAsBoolean == null) this.argumentAsBoolean = Boolean.parseBoolean(argument);
-        return this.argumentAsBoolean;
-    }
-    /**
-     * getter method for the argument attribute as a char
-     * @return argument as a char
-     */
-    private Character getArgumentAsChar() {
-        if (this.argumentAsChar == null) this.argumentAsChar = argument.charAt(0);
-        return this.argumentAsChar;
-    }
-
-    /**
-     * setter method for the argument attribute, sets parsed status of this parameter to true
+     * setter method for the argument attribute, sets parsed status of this parameter instance to true
      * @param argument argument
      */
-    protected void setArgument(String argument) {
+    protected void setArgument(String argument) throws InvalidArgTypeArgsException {
         this.argument = argument;
+
+        if (type != String.class) {
+            try {
+                switch (type.getSimpleName()) {
+                    case "Integer" -> this.argumentAsInteger = Integer.parseInt(argument);
+                    case "Double" -> this.argumentAsDouble = Double.parseDouble(argument);
+                    case "Boolean" -> this.argumentAsBoolean = Boolean.parseBoolean(argument);
+                    case "Character" -> this.argumentAsChar = argument.charAt(0);
+                }
+
+            } catch (Exception e) {
+                throw new InvalidArgTypeArgsException(this.flagName);
+            }
+        }
+
         this.hasArgument = true;
     }
 

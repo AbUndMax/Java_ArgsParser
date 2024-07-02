@@ -16,10 +16,13 @@ public static void main(String[] args) {
    - A short flag for the parameter
    - If the parameter is mandatory or not
    - A description of the parameter
+   - An optional default value (which assigns the type of the parameter automatically based on the default value type)
+   - An optional type definition for the parameter (default is String)
 ```Java
     Parameter example = parser.addParameter("parameterFlag", true);
-    Parameter example2 = parser.addParameter("parameterFlag2", "pf2", false);
+    Parameter example2 = parser.addParameter("parameterFlag2", "pf2", Integer.class, false);
     Parameter example3 = parser.addParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
+    Parameter argWithDefault = parser.addParameter("parameterFlag4", "pf4", "description", 5, false);
 ```
 3. After all parameters are added, call the parse method and catch possible ArgsExceptions like No Arguemnts provided, 
 Missing argument for a specific flag, mandatory Arguments not provided, unknown Flag or too many arguments provided.
@@ -35,5 +38,6 @@ Missing argument for a specific flag, mandatory Arguments not provided, unknown 
 It is also possible to directly get the argument as a specific type.
 ```Java
     String providedArgument = example.getArgument();
+    Integer integerArgument = example2.getArgument();
 }
 ```
