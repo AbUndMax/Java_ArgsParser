@@ -3,8 +3,6 @@
 This tool makes it easier to define what arguments a user should input while at the same time it makes it easer for 
 the programmer to access the given arguments.
 
-Current Release: [v1.0.0](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v1.0.0)
-
 ## How to use
 1. Import the ArgsParser class
 
