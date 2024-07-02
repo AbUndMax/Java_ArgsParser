@@ -1,5 +1,6 @@
 import ArgsParser.*;
 import ArgsParser.Argserror.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -198,5 +199,36 @@ public class TestArgsParser {
         } catch (Exception e) {
             assertEquals(new InvalidArgTypeArgsException("--double").getMessage(), e.getMessage());
         }
+    }
+
+    @Test
+    public void useDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", 12.3 , false);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+        }
+
+        String result = doub.getArgument();
+
+        Assert.assertEquals("12.3", result);
+    }
+
+    @Test
+    public void useDefaultValueCast() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", 12.3 , false);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+        }
+
+        Double result = doub.getCastedArgument();
+        Double expected = 12.3;
+
+        Assert.assertEquals(expected, result);
     }
 }

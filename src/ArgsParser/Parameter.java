@@ -47,6 +47,14 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
+    // Simple Constructors
+
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.isMandatory = false;
@@ -54,29 +62,117 @@ public class Parameter {
         this.type = String.class;
     }
 
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, boolean isMandatory, ArgsParser parserInstance) {
         this(flagName, isMandatory, parserInstance);
         this.shortName = shortName;
     }
 
+    /**
+     * Constructor for the Parameter class
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
         this(flagName, shortName, isMandatory, parserInstance);
         this.description = description;
     }
 
+    // Constructors with type definition
+
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
         this(flagName, isMandatory, parserInstance);
         this.type = type;
         this.typeWasSet = true;
     }
 
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
         this(flagName, type, isMandatory, parserInstance);
         this.shortName = shortName;
     }
 
+    /**
+     * Constructor for the Parameter class with type definition
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
     protected Parameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
         this(flagName, shortName, type, isMandatory, parserInstance);
+        this.description = description;
+    }
+
+    // Constructors with default value
+    // (they automatically set the type of the parameter based on the type of the provided default value)
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, isMandatory, parserInstance);
+        setDefault(defaultValue);
+        type = defaultValue.getClass();
+        typeWasSet = true;
+    }
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, defaultValue, isMandatory, parserInstance);
+        this.shortName = shortName;
+    }
+
+    /**
+     * Constructor for the Parameter class with default value
+     * (sets type of Parameter based on the type of the default value)
+     * @param flagName name of the parameter
+     * @param shortName short name of the parameter
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param parserInstance instance of the ArgsParser class
+     */
+    protected Parameter(String flagName, String shortName, String description, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, shortName, defaultValue, isMandatory, parserInstance);
         this.description = description;
     }
 
