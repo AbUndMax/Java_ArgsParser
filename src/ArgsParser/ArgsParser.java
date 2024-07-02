@@ -27,7 +27,7 @@ public class ArgsParser {
     private final String[] args;
     private final Map<String, Parameter> parameterMap = new HashMap<>();
     private final Set<Parameter> mandatoryParameters = new HashSet<>();
-    private boolean parsedSuccessfully = false;
+    private boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
     private final int consoleWidth = 80;
@@ -89,7 +89,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public Parameter addParameter(String flagName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), isMandatory);
+        Parameter parameter = new Parameter(makeFlag(flagName, false), isMandatory, this.parseArgsWasCalled);
         prepareParameter(parameter);
         return parameter;
     }
@@ -101,7 +101,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), isMandatory);
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), isMandatory, this.parseArgsWasCalled);
         prepareParameter(parameter);
         return parameter;
     }
@@ -114,7 +114,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory);
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory, this.parseArgsWasCalled);
         prepareParameter(parameter);
         return parameter;
     }
@@ -130,7 +130,7 @@ public class ArgsParser {
         Set<Parameter> givenParameters = parseArguments();
         checkMandatoryArguments(givenParameters);
 
-        parsedSuccessfully = true;
+        parseArgsWasCalled = true;
     }
 
     /**
