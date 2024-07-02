@@ -1,3 +1,4 @@
+[![Badge](https://img.shields.io/badge/release-v1.0.0-brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v1.0.0)
 # ArgsParser Tool
 This tool makes it easier to define what arguments a user should input while at the same time it makes it easer for 
 the programmer to access the given arguments.
