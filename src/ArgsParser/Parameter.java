@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * class to keep the argument attributes together
+ * Parameter class with fields for each attribute of the Parameter including the argument.
  */
 public class Parameter {
     private final String flagName;

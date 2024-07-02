@@ -1,7 +1,6 @@
 package ArgsParser;
 
 import ArgsParser.Argserror.*;
-
 import java.util.*;
 
 /**
@@ -22,8 +21,8 @@ import java.util.*;
  *  <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
  *  <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable</li>
  * </ol>
- * <p> Made by Niklas Max G. 2024 </p>
- * <p> available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a></p>
+ * available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a>
+ * @author Niklas Max G. 2024
  */
 public class ArgsParser {
 
@@ -37,26 +36,28 @@ public class ArgsParser {
 
     /**
      * Constructor demands the args array of the main method to be passed.
-     * <p><strong>If args is null or args has no elements, the program ist terminated with Code 1</strong></p>
-     * @param args String array of the main method
+     * @param args args array of type String[] from the main method
      */
     public ArgsParser(String[] args) {
         this.args = args;
     }
 
     /**
-     * adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
+     * Adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
      * @param parameter parameter to be processed
      */
     private void prepareParameter(Parameter parameter) {
         parameterMap.put(parameter.getFlagName(), parameter);
         if (parameter.getShortName() != null) parameterMap.put(parameter.getShortName(), parameter);
+
         int nameSize = parameter.getFlagName().length();
+        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
+
         if (parameter.getShortName() != null) {
             int shortSize = parameter.getShortName().length();
             if (longestShortFlag < shortSize) longestShortFlag = shortSize;
         }
-        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
+
         if (parameter.isMandatory()) mandatoryParameters.add(parameter);
     }
 
@@ -82,8 +83,8 @@ public class ArgsParser {
     }
 
     /**
-     * adds a new parameter that will be checked in args
-     * @param flagName name of the parameter
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public Parameter addParameter(String flagName, boolean isMandatory) {
@@ -93,9 +94,9 @@ public class ArgsParser {
     }
 
     /**
-     * adds a new parameter with a short version of the flag that will be checked in args
-     * @param flagName name of the parameter
-     * @param shortName short version of the parameter
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
+     * @param shortName short version of the parameter (- will automatically be added)
      * @param isMandatory true if parameter is mandatory, false if optional
      */
     public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
@@ -105,9 +106,9 @@ public class ArgsParser {
     }
 
     /**
-     * adds a new parameter with a short version of the flag that will be checked in args as well as a description
-     * @param flagName name of the parameter
-     * @param shortName short version of the parameter
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
+     * @param shortName short version of the parameter (- will automatically be added)
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
      */
@@ -162,7 +163,7 @@ public class ArgsParser {
 
         if (oneArgProvided) {
             if (args[0].equals("--help") || args[0].equals("-h")) { // if --help or -h was called, the help is printed
-                throw new CalledForHelpArgsException(helpMessageForAll(new HashSet<>(parameterMap.values())));
+                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<>(parameterMap.values())));
 
             } else if (firstArgumentIsParameter) { // if the first argument is a parameter but --help was not called, the program notifies the user of a missing argument
                 throw new MissingArgArgsException(args[0]);
@@ -173,7 +174,7 @@ public class ArgsParser {
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
-                throw new CalledForHelpArgsException(helpMessageForAll(new HashSet<Parameter>(Collections.singletonList(parameterMap.get(args[0])))));
+                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<Parameter>(Collections.singletonList(parameterMap.get(args[0])))));
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
@@ -194,16 +195,17 @@ public class ArgsParser {
 
             boolean currentPositionIsFlag = args[i].startsWith("-");
             if (currentPositionIsFlag) currentParameter = parameterMap.get(args[i]);
-            boolean flagExists = currentParameter != null;
+            boolean flagExists = parameterMap.get(args[i]) != null;
             boolean isLastEntry = i == args.length - 1;
-            boolean argumentNotSet = currentParameter != null && currentParameter.getArgument() == null;
-            boolean lastPositionWasFlag = i > 1 && args[i - 1].startsWith("-");
+            boolean currentParameterNotNull = currentParameter != null;
+            boolean argumentSet = currentParameterNotNull && currentParameter.getArgument() != null;
+            boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
 
             if (currentPositionIsFlag && !flagExists) { // if flag is unknown
                 throw new UnknownFlagArgsException(args[i]);
 
-            } else if (!argumentNotSet && !currentPositionIsFlag){ // if two arguments are provided to a single flag
-                throw new TooManyArgumentsArgsException(args[i]);
+            } else if (argumentSet && !currentPositionIsFlag){ // if two arguments are provided to a single flag
+                throw new TooManyArgumentsArgsException(currentParameter.getFlagName());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
                 throw new MissingArgArgsException(args[i - 1]);
@@ -211,7 +213,7 @@ public class ArgsParser {
             } else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
                 throw new MissingArgArgsException(args[i]);
 
-            } else if (lastPositionWasFlag) { // if the current position is an argument
+            } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
                 currentParameter.setArgument(args[i]);
                 givenParameters.add(currentParameter);
 
@@ -241,7 +243,7 @@ public class ArgsParser {
     /**
      * prints all available Parameters found in argumentsList to the console
      */
-    private String helpMessageForAll(Set<Parameter> parameters) {
+    private String generateHelpMessage(Set<Parameter> parameters) {
         StringBuilder helpMessage = new StringBuilder();
 
         String headTitle = " HELP ";
