@@ -2,8 +2,7 @@ import ArgsParser.*;
 import ArgsParser.Argserror.*;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 
 public class TestArgsParser {
@@ -124,6 +123,79 @@ public class TestArgsParser {
             parser.parseArgs();
         } catch (ArgsException e) {
             assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetArgumentAsString() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "-int", "5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter integer = parser.addParameter("integer", "int", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String result = file.getArgument();
+
+        assertEquals("file.txt", result);
+    }
+
+    @Test
+    public void testGetArgumentWithGenericType() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--integer", "5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter integer = parser.addParameter("integer", Integer.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = integer.getArgument();
+        Integer expected = 5;
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testBooleanGetArgument() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--boolean", "true"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter bool = parser.addParameter("boolean", Boolean.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        assertTrue(bool.getArgument());
+    }
+
+    @Test
+    public void testGetArgumentAsDouble() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", Double.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = doub.getArgument();
+        Double expected = 5.5;
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetArgumentAsDoubleWithWrongInput() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5.5"});
+        Parameter file = parser.addParameter("file", true);
+        Parameter doub = parser.addParameter("double", Double.class , true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            assertEquals(new InvalidArgTypeArgsException("--double").getMessage(), e.getMessage());
         }
     }
 }

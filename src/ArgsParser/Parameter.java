@@ -24,9 +24,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import ArgsParser.Argserror.InvalidArgTypeArgsException;
+
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -36,6 +36,7 @@ public class Parameter {
     private final String flagName;
     private final boolean isMandatory;
     private final ArgsParser parser;
+    private final Class<?> type;
     private boolean hasArgument = false;
     private String shortName = null;
     private String description = null;
@@ -45,25 +46,21 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
-    protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
+    protected Parameter(String flagName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
         this.parser = parserInstance;
+        this.type = type;
     }
 
-    protected Parameter(String flagName, String shortName, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.isMandatory = isMandatory;
+    protected Parameter(String flagName, String shortName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, type, isMandatory, parserInstance);
         this.shortName = shortName;
-        this.parser = parserInstance;
     }
 
-    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.isMandatory = isMandatory;
-        this.shortName = shortName;
-        this.description = description.trim();
-        this.parser = parserInstance;
+    protected Parameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, shortName, type, isMandatory, parserInstance);
+        this.description = description;
     }
 
     /**
@@ -102,71 +99,60 @@ public class Parameter {
      * getter method for the argument attribute
      * @return argument
      * @throws IllegalStateException if parseArgs() was not called before trying to access this argument
+     * @throws IllegalArgumentException if the argument is not of the expected type
      */
     @SuppressWarnings("unchecked")
     public <T> T getArgument() throws IllegalStateException{
         if (!parser.parseArgsWasCalled) throw new IllegalStateException();
         if (!hasArgument) return null;
-        List<Supplier<Object>> conversionFunctions = Arrays.asList(
-                () -> argument,
-                this::getArgumentAsInteger,
-                this::getArgumentAsDouble,
-                this::getArgumentAsBoolean,
-                this::getArgumentAsChar
-        );
 
-        for (Supplier<Object> function : conversionFunctions) {
-            try {
-                return (T) function.get();
-            } catch (Exception e) {
-                // Ignorieren und zum nächsten Versuch übergehen
-            }
+        if (type == Integer.class) {
+            return (T) argumentAsInteger;
+
+        } else if (type == Double.class) {
+            return (T) argumentAsDouble;
+
+        } else if (type == Boolean.class) {
+            return (T) argumentAsBoolean;
+
+        } else if (type == Character.class) {
+            return (T) argumentAsChar;
+
+        } else if (type == String.class) {
+            return (T) argument;
+
+        } else {
+            throw new IllegalArgumentException("couldn't cast argument");
         }
-        return null;
-    }
 
-    /**
-     * getter method for the argument attribute as an integer
-     * @return argument as an integer
-     */
-    private Integer getArgumentAsInteger() {
-        if (this.argumentAsInteger == null) this.argumentAsInteger = Integer.parseInt(argument);
-        return this.argumentAsInteger;
-    }
-
-    /**
-     * getter method for the argument attribute as a double
-     * @return argument as a double
-     */
-    private Double getArgumentAsDouble() {
-        if (this.argumentAsDouble == null) this.argumentAsDouble = Double.parseDouble(argument);
-        return this.argumentAsDouble;
-    }
-
-    /**
-     * getter method for the argument attribute as a boolean
-     * @return argument as a boolean
-     */
-    private Boolean getArgumentAsBoolean() {
-        if (this.argumentAsBoolean == null) this.argumentAsBoolean = Boolean.parseBoolean(argument);
-        return this.argumentAsBoolean;
-    }
-    /**
-     * getter method for the argument attribute as a char
-     * @return argument as a char
-     */
-    private Character getArgumentAsChar() {
-        if (this.argumentAsChar == null) this.argumentAsChar = argument.charAt(0);
-        return this.argumentAsChar;
     }
 
     /**
      * setter method for the argument attribute, sets parsed status of this parameter to true
      * @param argument argument
      */
-    protected void setArgument(String argument) {
-        this.argument = argument;
-        this.hasArgument = true;
+    protected void setArgument(String argument) throws InvalidArgTypeArgsException {
+        try {
+            switch (type.getSimpleName()) {
+                case "Integer" -> {
+                    this.argumentAsInteger = Integer.parseInt(argument);
+                }
+                case "Double" -> {
+                    this.argumentAsDouble = Double.parseDouble(argument);
+                }
+                case "Boolean" -> {
+                    this.argumentAsBoolean = Boolean.parseBoolean(argument);
+                }
+                case "Character" -> {
+                    this.argumentAsChar = argument.charAt(0);
+                }
+                case "String" -> this.argument = argument;
+            }
+
+            this.hasArgument = true;
+        } catch (Exception e) {
+            throw new InvalidArgTypeArgsException(this.flagName);
+        }
     }
 
     /**

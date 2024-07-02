@@ -106,13 +106,25 @@ public class ArgsParser {
         }
     }
 
+    public Parameter addParameter(String flagName, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), String.class, isMandatory, this);
+        prepareParameter(parameter);
+        return parameter;
+    }
+
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public Parameter addParameter(String flagName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), isMandatory, this);
+    public Parameter addParameter(String flagName, Class<?> type, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), type, isMandatory, this);
+        prepareParameter(parameter);
+        return parameter;
+    }
+
+    public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), String.class, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -123,8 +135,14 @@ public class ArgsParser {
      * @param shortName short version of the parameter (- will automatically be added)
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), isMandatory, this);
+    public Parameter addParameter(String flagName, String shortName, Class<?> type, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), type, isMandatory, this);
+        prepareParameter(parameter);
+        return parameter;
+    }
+
+    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, String.class, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -136,8 +154,8 @@ public class ArgsParser {
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
      */
-    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory, this);
+    public Parameter addParameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, type, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -155,8 +173,9 @@ public class ArgsParser {
      * @throws MissingArgArgsException if a flag was provided without an argument
      * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
      * @throws CalledForHelpArgsException if --help or -h was called
+     * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException, CalledForHelpArgsException{
+    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException, CalledForHelpArgsException, InvalidArgTypeArgsException {
         parseArgsWasCalled = true;
 
         checkIfAnyArgumentsProvided();
@@ -211,7 +230,7 @@ public class ArgsParser {
      * goes through all entries in args and creates a Parameter instance for each found flag.
      * @return a set of all Parameter instances created based on args
      */
-    private Set<Parameter> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException {
+    private Set<Parameter> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, InvalidArgTypeArgsException {
         Set<Parameter> givenParameters = new HashSet<>();
 
         Parameter currentParameter = null;
@@ -228,7 +247,7 @@ public class ArgsParser {
             if (currentPositionIsFlag && !flagExists) { // if flag is unknown
                 throw new UnknownFlagArgsException(args[i]);
 
-            } else if (argumentSet && !currentPositionIsFlag){ // if two arguments are provided to a single flag
+            } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
                 throw new TooManyArgumentsArgsException(currentParameter.getFlagName());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
@@ -237,7 +256,7 @@ public class ArgsParser {
             } else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
                 throw new MissingArgArgsException(args[i]);
 
-            } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
+            }  else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
                 currentParameter.setArgument(args[i]);
                 givenParameters.add(currentParameter);
 
