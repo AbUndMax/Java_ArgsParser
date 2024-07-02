@@ -282,6 +282,7 @@ public class Parameter {
         this.argument = defaultValue.toString();
 
         switch (defaultValue) {
+            case String s -> argument = s;
             case Integer i -> argumentAsInteger = i;
             case Double v -> argumentAsDouble = v;
             case Character c -> argumentAsChar = c;

@@ -203,11 +203,11 @@ public class ArgsParser {
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
-     * @param defaultValue default value of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @param defaultValue default value of the parameter
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, Object defaultValue, boolean isMandatory) {
+    public Parameter addParameter(String flagName, boolean isMandatory, Object defaultValue) {
         Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
@@ -217,11 +217,11 @@ public class ArgsParser {
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
      * @param shortName short version of the parameter (- will automatically be added)
-     * @param defaultValue default value of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @param defaultValue default value of the parameter
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, String shortName, Object defaultValue, boolean isMandatory) {
+    public Parameter addParameter(String flagName, String shortName, boolean isMandatory, Object defaultValue) {
         Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), defaultValue, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
@@ -232,11 +232,11 @@ public class ArgsParser {
      * @param flagName name of the parameter (-- will automatically be added)
      * @param shortName short version of the parameter (- will automatically be added)
      * @param description description of the parameter
-     * @param defaultValue default value of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @param defaultValue default value of the parameter
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, String shortName, String description, Object defaultValue, boolean isMandatory) {
+    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory, Object defaultValue) {
         Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, defaultValue, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
