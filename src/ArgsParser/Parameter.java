@@ -137,11 +137,12 @@ public class Parameter {
      * (sets type of Parameter based on the type of the default value)
      * @param flagName name of the parameter
      * @param defaultValue default value of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
      * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String flagName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
-        this(flagName, isMandatory, parserInstance);
+    protected Parameter(String flagName, Object defaultValue, ArgsParser parserInstance) {
+        this.flagName = flagName;
+        this.isMandatory = false;
+        this.parser = parserInstance;
         setDefault(defaultValue);
         type = defaultValue.getClass();
         typeWasSet = true;
@@ -153,11 +154,10 @@ public class Parameter {
      * @param flagName name of the parameter
      * @param shortName short name of the parameter
      * @param defaultValue default value of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
      * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String flagName, String shortName, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
-        this(flagName, defaultValue, isMandatory, parserInstance);
+    protected Parameter(String flagName, Object defaultValue, String shortName, ArgsParser parserInstance) {
+        this(flagName, defaultValue, parserInstance);
         this.shortName = shortName;
     }
 
@@ -168,11 +168,10 @@ public class Parameter {
      * @param shortName short name of the parameter
      * @param description description of the parameter
      * @param defaultValue default value of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
      * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String flagName, String shortName, String description, Object defaultValue, boolean isMandatory, ArgsParser parserInstance) {
-        this(flagName, shortName, defaultValue, isMandatory, parserInstance);
+    protected Parameter(String flagName, Object defaultValue, String shortName, String description, ArgsParser parserInstance) {
+        this(flagName, defaultValue, shortName, parserInstance);
         this.description = description;
     }
 

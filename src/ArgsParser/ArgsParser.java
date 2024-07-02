@@ -203,12 +203,11 @@ public class ArgsParser {
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
-     * @param isMandatory true if parameter is mandatory, false if optional
-     * @param defaultValue default value of the parameter
+     * @param defaultValue default value of the parameter - by usage sets the parameter to optional
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, boolean isMandatory, Object defaultValue) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, isMandatory, this);
+    public Parameter addParameter(String flagName, Object defaultValue) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -216,13 +215,12 @@ public class ArgsParser {
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
+     * @param defaultValue default value of the parameter - by usage sets the parameter to optional
      * @param shortName short version of the parameter (- will automatically be added)
-     * @param isMandatory true if parameter is mandatory, false if optional
-     * @param defaultValue default value of the parameter
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, String shortName, boolean isMandatory, Object defaultValue) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), defaultValue, isMandatory, this);
+    public Parameter addParameter(String flagName, Object defaultValue, String shortName) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, makeFlag(shortName, true), this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -230,14 +228,13 @@ public class ArgsParser {
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
+     * @param defaultValue default value of the parameter - by usage sets the parameter to optional
      * @param shortName short version of the parameter (- will automatically be added)
      * @param description description of the parameter
-     * @param isMandatory true if parameter is mandatory, false if optional
-     * @param defaultValue default value of the parameter
      * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory, Object defaultValue) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, defaultValue, isMandatory, this);
+    public Parameter addParameter(String flagName, Object defaultValue, String shortName, String description) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, makeFlag(shortName, true), description, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -247,7 +244,7 @@ public class ArgsParser {
      *     <li>checks if args is Empty</li>
      *     <li>checks if --help or -h was called on the program</li>
      *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
-     *     <li>checks if all mandatory parameters were given in the args, <strong>if not, exits the program</strong></li>
+     *     <li>checks if all mandatory parameters were given in the args
      * </ul>
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      * @throws UnknownFlagArgsException if an unknown flag was provided in args

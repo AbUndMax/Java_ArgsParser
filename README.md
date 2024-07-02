@@ -16,7 +16,8 @@ public static void main(String[] args) {
    - A short flag for the parameter
    - If the parameter is mandatory or not
    - A description of the parameter
-   - An optional default value (which assigns the type of the parameter automatically based on the default value type)
+   - An optional default value (which assigns the type of the parameter automatically based on the default value type
+   and sets the parameter to optional)
    - An optional type definition for the parameter (default is String)
 ```Java
     Parameter example = parser.addParameter("parameterFlag", true);

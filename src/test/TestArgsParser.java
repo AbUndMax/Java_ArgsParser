@@ -205,7 +205,7 @@ public class TestArgsParser {
     public void useDefaultValue() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", false, 12.3);
+        Parameter doub = parser.addParameter("double", 12.3);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -220,7 +220,7 @@ public class TestArgsParser {
     public void useDefaultValueCast() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", false, 12.3);
+        Parameter doub = parser.addParameter("double", 12.3);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -235,8 +235,8 @@ public class TestArgsParser {
     @Test
     public void testStringDefault() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter file = parser.addParameter("file", true, "default");
-        Parameter doub = parser.addParameter("double", false, 12.3);
+        Parameter file = parser.addParameter("file", "default");
+        Parameter doub = parser.addParameter("double", 12.3);
         try {
             parser.parseArgs();
         } catch (Exception e) {
