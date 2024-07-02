@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public class Parameter {
     private final String flagName;
     private final boolean isMandatory;
-    private final boolean parseArgsWasCalled;
+    private final ArgsParser parser;
     private boolean hasArgument = false;
     private String shortName = null;
     private String description = null;
@@ -21,25 +21,25 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
-    protected Parameter(String flagName, boolean isMandatory, boolean parseArgsWasCalled) {
+    protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
-        this.parseArgsWasCalled = parseArgsWasCalled;
+        this.parser = parserInstance;
     }
 
-    protected Parameter(String flagName, String shortName, boolean isMandatory, boolean parseArgsWasCalled) {
+    protected Parameter(String flagName, String shortName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
         this.shortName = shortName;
-        this.parseArgsWasCalled = parseArgsWasCalled;
+        this.parser = parserInstance;
     }
 
-    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, boolean parseArgsWasCalled) {
+    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
         this.shortName = shortName;
         this.description = description.trim();
-        this.parseArgsWasCalled = parseArgsWasCalled;
+        this.parser = parserInstance;
     }
 
     /**
@@ -80,8 +80,8 @@ public class Parameter {
      * @throws IllegalStateException if parseArgs() was not called before trying to access this argument
      */
     @SuppressWarnings("unchecked")
-    public <T> T getArgument() throws IllegalStateExeption{
-        if (!parseArgsWasCalled) throw new IllegaleStateException();
+    public <T> T getArgument() throws IllegalStateException{
+        if (!parser.parseArgsWasCalled) throw new IllegalStateException();
         if (!hasArgument) return null;
         List<Supplier<Object>> conversionFunctions = Arrays.asList(
                 () -> argument,
@@ -124,7 +124,6 @@ public class Parameter {
      * @return argument as a boolean
      */
     private Boolean getArgumentAsBoolean() {
-        if (!isParsed) throw new IllegalStateException("Arguments not parsed yet. Call parseArgs() first.");
         if (this.argumentAsBoolean == null) this.argumentAsBoolean = Boolean.parseBoolean(argument);
         return this.argumentAsBoolean;
     }
