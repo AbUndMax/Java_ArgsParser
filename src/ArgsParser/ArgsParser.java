@@ -383,7 +383,8 @@ public class ArgsParser {
         int numberOfHashes = consoleWidth / 2 - spaceForHeadTitle / 2;
         String header = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
         helpMessage.append(header).append("\n");
-        helpMessage.append(centerString("(!) = mandatory parameter | (+) = optional parameter")).append("\n");
+        helpMessage.append(centerString("[s]=String | [i]=Integer | [d]=Double | [b]=Boolean | [c]=Character")).append("\n");
+        helpMessage.append(centerString("(!)=mandatory parameter | (+)=optional parameter")).append("\n");
         helpMessage.append("#").append("\n");
 
         if (parameters.size() > 1) {
@@ -416,6 +417,14 @@ public class ArgsParser {
      * @return String with all information for the given Parameter
      */
     private String parameterHelpString(Parameter parameter) {
+        Map<String, String> shortNameTypes = new HashMap<>(){{
+            put("String", "s");
+            put("Integer", "i");
+            put("Double", "d");
+            put("Boolean", "b");
+            put("Character", "c");
+        }};
+
         String name = parameter.getFlagName();
         String shortName = parameter.getShortName() == null ? "/" : parameter.getShortName();
         String description = parameter.getDescription() == null ? "No description provided!" : parameter.getDescription();
@@ -428,7 +437,10 @@ public class ArgsParser {
         int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortName.length();
         shortName = shortName + " ".repeat(shortWhiteSpaceSize);
 
-        helpString.append(name).append("  ").append(shortName).append("  ").append(isMandatory).append("  ");
+        // get type
+        String type = shortNameTypes.get(parameter.getType());
+
+        helpString.append(name).append("  ").append(shortName).append("  [").append(type).append("] ").append(isMandatory).append("  ");
 
         // The description String gets checked if it fits inside the info box.
         // If not, a new line will be added and the rest of the description will be aligned.
@@ -446,6 +458,7 @@ public class ArgsParser {
             return helpString.toString();
         }
     }
+    // String integer boolean double character
 
     /**
      * helper function to do correct new lines if the Description is too long to fit into the help box

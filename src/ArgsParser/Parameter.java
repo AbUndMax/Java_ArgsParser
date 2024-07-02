@@ -208,6 +208,10 @@ public class Parameter {
         return description;
     }
 
+    protected String getType() {
+        return type.getSimpleName();
+    }
+
     /**
      * getter method for the argument attribute
      * @return argument as String
