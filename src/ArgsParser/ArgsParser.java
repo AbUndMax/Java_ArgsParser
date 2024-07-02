@@ -28,22 +28,29 @@ import ArgsParser.Argserror.*;
 import java.util.*;
 
 /**
- * Class to parse arguments given in the command line,
- * Arguments are given in the form of flagName argument,
- * Flags can be mandatory or optional,
- * Flags can have a short version,
- * Arguments returned by the getter methods can be of type String, Integer, Double, Boolean or char
+ * Class to parse arguments given in the command line, the tool checks for several conditions:
+ * <ul>
+ *     <li>if no arguments were provided</li>
+ *     <li>if an unknown flag was provided</li>
+ *     <li>if a flag was provided without an argument</li>
+ *     <li>if more than one argument was provided to a single flag</li>
+ *     <li>if not all mandatory parameters were given</li>
+ * </ul>
+ *
+ * <p>The Parser functions as follows:</p>
+ *
  * <ol>
- *  <li>The ArgsParser constructor {@link #ArgsParser(String[])} is called and the args array of the main method provided.</li>
- *  <li>Now we can specify the parameters we want to have for the program</li>
- *      <ul>
- *          <li>Parameters can be mandatory or optional</li>
- *          <li>Parameters can have a short version flags</li>
- *          <li>Parameters can have a description</li>
- *          <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
- *      </ul>
- *  <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
- *  <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable</li>
+ *     <li>The ArgsParser constructor {@link #ArgsParser(String[])} is called and the args array of the main method provided.</li>
+ *     <li>Now we can specify the parameters we want to have for the program by using {@link #addParameter(String, String, String, boolean)}</li>
+       <ul>
+ *         <li>Parameters can be mandatory or optional</li>
+ *         <li>Parameters can have a short version flags</li>
+ *         <li>Parameters can have a description</li>
+ *         <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
+ *     </ul>
+ *     <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
+ *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
+ *          and type specific arguments can be accessed if a type i.e. Integer.Class was provided in {@link #addParameter(String, Class, boolean)} </li>
  * </ol>
  * available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a>
  * @author Niklas Max G. 2024
@@ -106,8 +113,14 @@ public class ArgsParser {
         }
     }
 
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
+     */
     public Parameter addParameter(String flagName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), String.class, isMandatory, this);
+        Parameter parameter = new Parameter(makeFlag(flagName, false), isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -115,16 +128,12 @@ public class ArgsParser {
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param flagName name of the parameter (-- will automatically be added)
+     * @param type type of the parameter (Class.Integer, Class.Double, Class.Boolean, Class.Character)
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
      */
     public Parameter addParameter(String flagName, Class<?> type, boolean isMandatory) {
         Parameter parameter = new Parameter(makeFlag(flagName, false), type, isMandatory, this);
-        prepareParameter(parameter);
-        return parameter;
-    }
-
-    public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), String.class, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -134,15 +143,24 @@ public class ArgsParser {
      * @param flagName name of the parameter (-- will automatically be added)
      * @param shortName short version of the parameter (- will automatically be added)
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
      */
-    public Parameter addParameter(String flagName, String shortName, Class<?> type, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), type, isMandatory, this);
+    public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
 
-    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, String.class, isMandatory, this);
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
+     * @param shortName short version of the parameter (- will automatically be added)
+     * @param type type of the parameter (Class.Integer, Class.Double, Class.Boolean, Class.Character)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
+     */
+    public Parameter addParameter(String flagName, String shortName, Class<?> type, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), type, isMandatory, this);
         prepareParameter(parameter);
         return parameter;
     }
@@ -153,6 +171,22 @@ public class ArgsParser {
      * @param shortName short version of the parameter (- will automatically be added)
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
+     */
+    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
+        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory, this);
+        prepareParameter(parameter);
+        return parameter;
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param flagName name of the parameter (-- will automatically be added)
+     * @param shortName short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param type type of the parameter (Class.Integer, Class.Double, Class.Boolean, Class.Character)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance
      */
     public Parameter addParameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory) {
         Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, type, isMandatory, this);
@@ -162,8 +196,8 @@ public class ArgsParser {
 
     /**
      * <ul>
-     *     <li>checks if args is Empty @throws NoArgumentProvidedArgsException</li>
-     *     <li>checks if --help or -h was called on the program @throws CalledForHelpArgsException if so</li>
+     *     <li>checks if args is Empty</li>
+     *     <li>checks if --help or -h was called on the program</li>
      *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
      *     <li>checks if all mandatory parameters were given in the args, <strong>if not, exits the program</strong></li>
      * </ul>
@@ -172,10 +206,10 @@ public class ArgsParser {
      * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
      * @throws MissingArgArgsException if a flag was provided without an argument
      * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
-     * @throws CalledForHelpArgsException if --help or -h was called
+     * @throws CalledForHelpNotification if --help or -h was called
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException, CalledForHelpArgsException, InvalidArgTypeArgsException {
+    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException, CalledForHelpNotification, InvalidArgTypeArgsException {
         parseArgsWasCalled = true;
 
         checkIfAnyArgumentsProvided();
@@ -187,6 +221,7 @@ public class ArgsParser {
 
     /**
      * checks if any arguments were provided to the program
+     * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      */
     private void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException{
         if (args == null || args.length == 0) {
@@ -197,16 +232,18 @@ public class ArgsParser {
     /**
      * <ul>checks if --help or -h was called on the program, printing out help Strings for all parameters</ul>
      * <ul>checks if --help or -h was called for a specific parameter, printing out this parameters help string</ul>
-     * <p><strong>Exits the program after the help information were printed!</strong></p>
+     * @throws UnknownFlagArgsException if an unknown flag was provided in args
+     * @throws MissingArgArgsException if a flag was provided without an argument
+     * @throws CalledForHelpNotification if --help or -h was called
      */
-    private void checkForHelpCall() throws UnknownFlagArgsException, MissingArgArgsException, CalledForHelpArgsException {
+    private void checkForHelpCall() throws UnknownFlagArgsException, MissingArgArgsException, CalledForHelpNotification {
         boolean oneArgProvided = args.length == 1;
         boolean twoArgsProvided = args.length == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
 
         if (oneArgProvided) {
             if (args[0].equals("--help") || args[0].equals("-h")) { // if --help or -h was called, the help is printed
-                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<>(parameterMap.values())));
+                throw new CalledForHelpNotification(generateHelpMessage(new HashSet<>(parameterMap.values())));
 
             } else if (firstArgumentIsParameter) { // if the first argument is a parameter but --help was not called, the program notifies the user of a missing argument
                 throw new MissingArgArgsException(args[0]);
@@ -217,7 +254,7 @@ public class ArgsParser {
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
-                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<>(Collections.singletonList(parameterMap.get(args[0])))));
+                throw new CalledForHelpNotification(generateHelpMessage(new HashSet<>(Collections.singletonList(parameterMap.get(args[0])))));
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
@@ -229,6 +266,10 @@ public class ArgsParser {
     /**
      * goes through all entries in args and creates a Parameter instance for each found flag.
      * @return a set of all Parameter instances created based on args
+     * @throws UnknownFlagArgsException if an unknown flag was provided in args
+     * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
+     * @throws MissingArgArgsException if a flag was provided without an argument
+     * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
     private Set<Parameter> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, InvalidArgTypeArgsException {
         Set<Parameter> givenParameters = new HashSet<>();
@@ -268,8 +309,8 @@ public class ArgsParser {
 
     /**
      * checks if all mandatory parameters were given in args!
-     * <p><strong>Exits the program if not all mandatory parameters were given!</strong></p>
      * @param givenParameters a set of all Parameter instances created based on args
+     * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
      */
     private void checkMandatoryArguments(Set<Parameter> givenParameters) throws MandatoryArgNotProvidedArgsException {
         if (!givenParameters.containsAll(mandatoryParameters)) {

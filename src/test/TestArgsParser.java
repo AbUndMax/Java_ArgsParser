@@ -151,7 +151,7 @@ public class TestArgsParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Integer result = integer.getArgument();
+        Integer result = integer.getCastedArgument();
         Integer expected = 5;
 
         assertEquals(expected, result);
@@ -168,7 +168,7 @@ public class TestArgsParser {
             e.printStackTrace();
         }
 
-        assertTrue(bool.getArgument());
+        assertTrue(bool.getCastedArgument());
     }
 
     @Test
@@ -181,8 +181,9 @@ public class TestArgsParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Double result = doub.getArgument();
+        Double result = doub.getCastedArgument();
         Double expected = 5.5;
+        String StringResult = doub.getArgument();
 
         assertEquals(expected, result);
     }

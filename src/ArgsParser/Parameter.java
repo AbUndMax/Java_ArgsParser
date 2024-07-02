@@ -25,9 +25,9 @@ SOFTWARE.
  */
 
 import ArgsParser.Argserror.InvalidArgTypeArgsException;
+import ArgsParser.RuntimeExeptions.ParameterTypeNotDefined;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
@@ -36,7 +36,8 @@ public class Parameter {
     private final String flagName;
     private final boolean isMandatory;
     private final ArgsParser parser;
-    private final Class<?> type;
+    private Class<?> type;
+    private boolean typeWasSet = false;
     private boolean hasArgument = false;
     private String shortName = null;
     private String description = null;
@@ -46,11 +47,27 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
-    protected Parameter(String flagName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+    protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
-        this.isMandatory = isMandatory;
+        this.isMandatory = false;
         this.parser = parserInstance;
+        this.type = String.class;
+    }
+
+    protected Parameter(String flagName, String shortName, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, isMandatory, parserInstance);
+        this.shortName = shortName;
+    }
+
+    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, shortName, isMandatory, parserInstance);
+        this.description = description;
+    }
+
+    protected Parameter(String flagName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+        this(flagName, isMandatory, parserInstance);
         this.type = type;
+        this.typeWasSet = true;
     }
 
     protected Parameter(String flagName, String shortName, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
@@ -97,62 +114,60 @@ public class Parameter {
 
     /**
      * getter method for the argument attribute
+     * @return argument as String
+     * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
+     */
+    public String getArgument() throws IllegalStateException {
+        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
+        if (!hasArgument) return null;
+        return argument;
+    }
+
+    /**
+     * getter method for the argument attribute
      * @return argument
-     * @throws IllegalStateException if parseArgs() was not called before trying to access this argument
+     * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
      * @throws IllegalArgumentException if the argument is not of the expected type
+     * @throws ParameterTypeNotDefined if the type of the parameter was not defined when using {@link ArgsParser#addParameter(String, boolean)} without a specified type
      */
     @SuppressWarnings("unchecked")
-    public <T> T getArgument() throws IllegalStateException{
-        if (!parser.parseArgsWasCalled) throw new IllegalStateException();
+    public <T> T getCastedArgument() throws IllegalStateException, IllegalArgumentException, ParameterTypeNotDefined{
+        if (!typeWasSet) throw new ParameterTypeNotDefined(this.flagName);
+        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
         if (!hasArgument) return null;
 
-        if (type == Integer.class) {
-            return (T) argumentAsInteger;
-
-        } else if (type == Double.class) {
-            return (T) argumentAsDouble;
-
-        } else if (type == Boolean.class) {
-            return (T) argumentAsBoolean;
-
-        } else if (type == Character.class) {
-            return (T) argumentAsChar;
-
-        } else if (type == String.class) {
-            return (T) argument;
-
-        } else {
-            throw new IllegalArgumentException("couldn't cast argument");
+        switch (type.getSimpleName()) {
+            case "Integer" -> { return (T) argumentAsInteger; }
+            case "Double" -> { return (T) argumentAsDouble; }
+            case "Boolean" -> { return (T) argumentAsBoolean; }
+            case "Character" -> { return (T) argumentAsChar; }
+            default -> throw new IllegalArgumentException("Unsupported type: " + type.getName());
         }
 
     }
 
     /**
-     * setter method for the argument attribute, sets parsed status of this parameter to true
+     * setter method for the argument attribute, sets parsed status of this parameter instance to true
      * @param argument argument
      */
     protected void setArgument(String argument) throws InvalidArgTypeArgsException {
-        try {
-            switch (type.getSimpleName()) {
-                case "Integer" -> {
-                    this.argumentAsInteger = Integer.parseInt(argument);
-                }
-                case "Double" -> {
-                    this.argumentAsDouble = Double.parseDouble(argument);
-                }
-                case "Boolean" -> {
-                    this.argumentAsBoolean = Boolean.parseBoolean(argument);
-                }
-                case "Character" -> {
-                    this.argumentAsChar = argument.charAt(0);
-                }
-                case "String" -> this.argument = argument;
-            }
+        this.argument = argument;
 
-            this.hasArgument = true;
-        } catch (Exception e) {
-            throw new InvalidArgTypeArgsException(this.flagName);
+        if (type != String.class) {
+            try {
+                switch (type.getSimpleName()) {
+                    case "Integer" -> this.argumentAsInteger = Integer.parseInt(argument);
+                    case "Double" -> this.argumentAsDouble = Double.parseDouble(argument);
+                    case "Boolean" -> this.argumentAsBoolean = Boolean.parseBoolean(argument);
+                    case "Character" -> this.argumentAsChar = argument.charAt(0);
+                }
+
+            } catch (Exception e) {
+                throw new InvalidArgTypeArgsException(this.flagName);
+            }
         }
+
+        this.hasArgument = true;
     }
 
     /**
