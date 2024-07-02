@@ -11,7 +11,8 @@ import java.util.function.Supplier;
 public class Parameter {
     private final String flagName;
     private final boolean isMandatory;
-    private boolean isParsed = false;
+    private final boolean parseArgsWasCalled;
+    private boolean hasArgument = false;
     private String shortName = null;
     private String description = null;
     private String argument = null;
@@ -20,22 +21,25 @@ public class Parameter {
     private Boolean argumentAsBoolean = null;
     private Character argumentAsChar = null;
 
-    protected Parameter(String flagName, boolean isMandatory) {
+    protected Parameter(String flagName, boolean isMandatory, boolean parseArgsWasCalled) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
+        this.parseArgsWasCalled = parseArgsWasCalled;
     }
 
-    protected Parameter(String flagName, String shortName, boolean isMandatory) {
+    protected Parameter(String flagName, String shortName, boolean isMandatory, boolean parseArgsWasCalled) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
         this.shortName = shortName;
+        this.parseArgsWasCalled = parseArgsWasCalled;
     }
 
-    protected Parameter(String flagName, String shortName, String description, boolean isMandatory) {
+    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, boolean parseArgsWasCalled) {
         this.flagName = flagName;
         this.isMandatory = isMandatory;
         this.shortName = shortName;
         this.description = description.trim();
+        this.parseArgsWasCalled = parseArgsWasCalled;
     }
 
     /**
@@ -73,10 +77,12 @@ public class Parameter {
     /**
      * getter method for the argument attribute
      * @return argument
+     * @throws IllegalStateException if parseArgs() was not called before trying to access this argument
      */
     @SuppressWarnings("unchecked")
-    public <T> T getArgument() {
-        if (!isParsed) throw new IllegaleStateException();
+    public <T> T getArgument() throws IllegalStateExeption{
+        if (!parseArgsWasCalled) throw new IllegaleStateException();
+        if (!hasArgument) return null;
         List<Supplier<Object>> conversionFunctions = Arrays.asList(
                 () -> argument,
                 this::getArgumentAsInteger,
@@ -137,7 +143,7 @@ public class Parameter {
      */
     protected void setArgument(String argument) {
         this.argument = argument;
-        isParsed = true;
+        this.hasArgument = true;
     }
 
     /**
@@ -162,6 +168,7 @@ public class Parameter {
         } else {
             throw new IllegalArgumentException("Unsupported type: " + defaultValue.getClass().getName());
         }
+        this.hasArgument = true;
     }
 
     @Override
