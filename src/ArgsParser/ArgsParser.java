@@ -174,7 +174,7 @@ public class ArgsParser {
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
-                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<Parameter>(Collections.singletonList(parameterMap.get(args[0])))));
+                throw new CalledForHelpArgsException(generateHelpMessage(new HashSet<>(Collections.singletonList(parameterMap.get(args[0])))));
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input

@@ -155,17 +155,13 @@ public class Parameter {
      */
     protected <T> void setDefault(T defaultValue) {
         this.argument = defaultValue.toString();
-    
-        if (defaultValue instanceof Integer) {
-            argumentAsInteger = (Integer) defaultValue;
-        } else if (defaultValue instanceof Double) {
-            argumentAsDouble = (Double) defaultValue;
-        } else if (defaultValue instanceof Character) {
-            argumentAsChar = (Character) defaultValue;
-        } else if (defaultValue instanceof Boolean) {
-            argumentAsBoolean = (Boolean) defaultValue;
-        } else {
-            throw new IllegalArgumentException("Unsupported type: " + defaultValue.getClass().getName());
+
+        switch (defaultValue) {
+            case Integer i -> argumentAsInteger = i;
+            case Double v -> argumentAsDouble = v;
+            case Character c -> argumentAsChar = c;
+            case Boolean b -> argumentAsBoolean = b;
+            default -> throw new IllegalArgumentException("Unsupported type: " + defaultValue.getClass().getName());
         }
         this.hasArgument = true;
     }
