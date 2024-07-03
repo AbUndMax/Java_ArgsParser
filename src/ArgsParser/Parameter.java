@@ -39,6 +39,7 @@ public class Parameter {
     private Class<?> type;
     private boolean typeWasSet = false;
     private boolean hasArgument = false;
+    private String defaultValue = null;
     private String shortName = null;
     private String description = null;
     private String argument = null;
@@ -143,6 +144,7 @@ public class Parameter {
         this.flagName = flagName;
         this.isMandatory = false;
         this.parser = parserInstance;
+        this.defaultValue = defaultValue.toString();
         setDefault(defaultValue);
         type = defaultValue.getClass();
         typeWasSet = true;
@@ -207,8 +209,28 @@ public class Parameter {
         return description;
     }
 
+    /**
+     * getter method for the type attribute
+     * @return type
+     */
     protected String getType() {
         return type.getSimpleName();
+    }
+
+    /**
+     * getter method for the hasArgument attribute
+     * @return true if this Parameter was created with a default value, false otherwise
+     */
+    protected boolean hasDefault() {
+        return this.defaultValue != null;
+    }
+
+    /**
+     * getter method for the defaultValue attribute
+     * @return defaultValue
+     */
+    protected String getDefaultValue() {
+        return this.defaultValue;
     }
 
     /**

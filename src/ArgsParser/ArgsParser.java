@@ -63,7 +63,7 @@ public class ArgsParser {
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
-    private final int consoleWidth = 80;
+    private final int consoleWidth = 100;
 
     /**
      * Constructor demands the args array of the main method to be passed.
@@ -374,6 +374,7 @@ public class ArgsParser {
      */
     private String generateHelpMessage(Set<Parameter> parameters) {
         StringBuilder helpMessage = new StringBuilder();
+        helpMessage.append("\n");
 
         String headTitle = " HELP ";
         int spaceForHeadTitle = headTitle.length();
@@ -438,48 +439,88 @@ public class ArgsParser {
         String type = shortNameTypes.get(parameter.getType());
 
         helpString.append(name).append("  ").append(shortName).append("  [").append(type).append("] ").append(isMandatory).append("  ");
+        int whiteSpace = helpString.length();
 
         // The description String gets checked if it fits inside the info box.
         // If not, a new line will be added and the rest of the description will be aligned.
         String[] descriptionRows = description.split(" \\n| \\n |\\n ", -1);
-        int whiteSpace = helpString.length();
         if (descriptionRows.length == 1) {
-            return helpString.append(concatDescriptionLines(description, whiteSpace)).toString();
+            helpString.append(lineBreakAtWhitespace(description, whiteSpace));
 
         } else {
             for (int i = 0; i < descriptionRows.length; i++) {
                 String row = descriptionRows[i];
-                helpString.append(concatDescriptionLines(row, whiteSpace));
+                helpString.append(lineBreakAtWhitespace(row, whiteSpace));
                 if (i != descriptionRows.length - 1) helpString.append("\n#").append(" ".repeat(whiteSpace - 1));
             }
-            return helpString.toString();
         }
+
+        // print default value if available
+        if (parameter.hasDefault()) {
+            String defaultTitle = "default: ";
+            String defaultValue = parameter.getDefaultValue();
+            helpString.append("\n").append("#").append(" ".repeat(whiteSpace - defaultTitle.length() - 1)).append(defaultTitle);
+
+            if (whiteSpace + defaultValue.length() > consoleWidth) { // if the default is as large as the consoleWindow split default
+                helpString.append(lineBreak(defaultValue, whiteSpace));
+
+            } else {
+                helpString.append(defaultValue);
+            }
+        }
+
+        return helpString.toString();
     }
-    // String integer boolean double character
 
     /**
      * helper function to do correct new lines if the Description is too long to fit into the help box
-     * @param restDescription part of the description that doesn't fit
+     * @param description description that doesn't fit
      * @param whiteSpace int that specifies how many white space before the description should be placed
      * @return the concatenated lines
      */
-    private String concatDescriptionLines(String restDescription, int whiteSpace) {
-        int restLength = restDescription.length();
+    private String lineBreakAtWhitespace(String description, int whiteSpace) {
+        int restLength = description.length();
         StringBuilder lineBuilder = new StringBuilder();
+
 
         while (whiteSpace + restLength > consoleWidth) {
             int i = consoleWidth - whiteSpace;
-            char currentChar = restDescription.charAt(i);
+            char currentChar = description.charAt(i);
             while (currentChar != ' ') {
-                currentChar = restDescription.charAt(--i);
+                currentChar = description.charAt(--i);
             }
 
-            lineBuilder.append(restDescription, 0, i).append("\n#").append(" ".repeat(whiteSpace - 1));
-            restDescription = restDescription.substring(++i);
-            restLength = restDescription.length();
+            lineBuilder.append(description, 0, i).append("\n#").append(" ".repeat(whiteSpace - 1));
+            description = description.substring(++i);
+            restLength = description.length();
         }
 
-        return lineBuilder.append(restDescription).toString();
+        return lineBuilder.append(description).toString();
+    }
+
+    /**
+     * helper function to do correct new lines if the defaultValue is too long to fit into the help box
+     * @param string defaultValue that doesn't fit
+     * @param whiteSpace int that specifies how many white space before the defaultValue should be placed
+     * @return
+     */
+    private String lineBreak(String string, int whiteSpace) {
+        StringBuilder helpString = new StringBuilder();
+
+        int spaceForValue;
+        int staticFreeSpace = spaceForValue = consoleWidth - whiteSpace + 1;
+        String substring = string.substring(0, staticFreeSpace);
+        helpString.append(substring);
+
+        for (int i = 1; i < Math.ceil(string.length() / (double) staticFreeSpace); i++) { // print default line by line
+            if (spaceForValue + staticFreeSpace >= string.length())
+                substring = string.substring(spaceForValue);
+            else substring = string.substring(spaceForValue, spaceForValue += (staticFreeSpace - 1));
+            ;
+            helpString.append("\n").append("#").append(" ".repeat(whiteSpace - 1)).append(substring);
+        }
+
+        return helpString.toString();
     }
 
 }
