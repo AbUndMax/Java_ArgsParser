@@ -264,7 +264,7 @@ public class TestArgsParser {
     @Test
     public void testLargerHelp() {
         ArgsParser parser = new ArgsParser(new String[] {"--help"});
-        Parameter file = parser.addParameter("file", "/Users/max/Library/CloudStorage/OneDrive-Persönlich/Bioinformatics_M.Sc/Module/2_Semester_M.Sc/Grundlagen_der_Bioinformatik/Git-Classrooms/assignment-9-gauppgerbes/src/Fasta.java");
+        Parameter file = parser.addParameter("file", "/Users/max/Library/CloudStorage/OneDrive-Persönlich/Bioinformatics_M.Sc/Module/2_Semester_M.Sc/Grundlagen_der_Bioinformatik/Git-Classrooms/assignment-9-gauppgerbes/src/Fasta.java", "f", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv");
         Parameter doub = parser.addParameter("double", 12.3);
         Parameter bool = parser.addParameter("boolean", true);
         Parameter integer = parser.addParameter("integer", 5);
