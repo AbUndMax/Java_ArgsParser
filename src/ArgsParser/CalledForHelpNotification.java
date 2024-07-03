@@ -1,6 +1,4 @@
-package ArgsParser.ArgsExceptions;
-
-import ArgsParser.ArgsException;
+package ArgsParser;
 
 /**
  * Exception used as Notification that --help was used and after printing the help message the program should exit
