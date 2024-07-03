@@ -57,7 +57,7 @@ public class Parameter {
      */
     protected Parameter(String flagName, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
-        this.isMandatory = false;
+        this.isMandatory = isMandatory;
         this.parser = parserInstance;
         this.type = String.class;
     }
