@@ -1,4 +1,6 @@
-package ArgsParser.Argserror;
+package ArgsParser.ArgsExceptions;
+
+import ArgsParser.ArgsException;
 
 /**
  * Exception to be thrown if a mandatory argument is not provided

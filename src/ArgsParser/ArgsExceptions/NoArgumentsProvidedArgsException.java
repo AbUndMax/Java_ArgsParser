@@ -1,4 +1,6 @@
-package ArgsParser.Argserror;
+package ArgsParser.ArgsExceptions;
+
+import ArgsParser.ArgsException;
 
 /**
  * NoArgumentsProvidedArgsException is thrown when no arguments at all are provided (args.size() == 0)

@@ -1,5 +1,5 @@
 import ArgsParser.*;
-import ArgsParser.Argserror.*;
+import ArgsParser.ArgsExceptions.*;
 import org.junit.Assert;
 import org.junit.Test;
 

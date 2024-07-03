@@ -1,4 +1,6 @@
-package ArgsParser.Argserror;
+package ArgsParser.ArgsExceptions;
+
+import ArgsParser.ArgsException;
 
 /**
  * Exception to be thrown if too many arguments are provided for a parameter

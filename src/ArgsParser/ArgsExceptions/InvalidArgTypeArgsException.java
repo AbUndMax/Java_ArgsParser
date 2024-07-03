@@ -1,4 +1,6 @@
-package ArgsParser.Argserror;
+package ArgsParser.ArgsExceptions;
+
+import ArgsParser.ArgsException;
 
 /**
  * InvalidArgTypeArgsException is thrown when an invalid argument type is provided to a flag.

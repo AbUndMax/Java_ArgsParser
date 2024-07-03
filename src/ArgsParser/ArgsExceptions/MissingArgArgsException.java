@@ -1,4 +1,6 @@
-package ArgsParser.Argserror;
+package ArgsParser.ArgsExceptions;
+
+import ArgsParser.ArgsException;
 
 /**
  * if an argument is missing for a flag

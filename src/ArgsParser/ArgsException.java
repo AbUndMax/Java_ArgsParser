@@ -1,4 +1,4 @@
-package ArgsParser.Argserror;
+package ArgsParser;
 
 /**
  * Exception to be thrown if the user provides wrong arguments
