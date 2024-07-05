@@ -4,7 +4,7 @@ This tool makes it easier to define what arguments a user should input while at 
 the programmer to access the given arguments.
 
 ## How to use
-1. Import the ArgsParser class
+1. #### Import the ArgsParser class
 
 ```Java
 import ArgsParser.ArgsParser;
@@ -12,21 +12,23 @@ import ArgsParser.ArgsParser;
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
 ```
-2. Define the parameters you want the user to input. several fields can be specified:
+2. #### Define the parameters you want the user to input with the following fields:
    - The name of the parameter
    - A short flag for the parameter
-   - If the parameter is mandatory or not
+   - If the parameter is mandatory or not  
+
+   #### Additionally there are optional fields to be set:
    - A description of the parameter
    - An optional default value (which assigns the type of the parameter automatically based on the default value type
    and sets the parameter to optional)
    - An optional type definition for the parameter (default is String)
 ```Java
-    Parameter example = parser.addParameter("parameterFlag", true);
-    Parameter example2 = parser.addParameter("parameterFlag2", "pf2", Integer.class, false);
+    Parameter example = parser.addParameter("parameterFlag", "pf", true);
+    Parameter example2 = parser.addParameter("parameterFlag2", "pf2", false, Integer.class);
     Parameter example3 = parser.addParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
-    Parameter argWithDefault = parser.addParameter("parameterFlag4", "pf4", "description", 5, false);
+    Parameter argWithDefault = parser.addParameter("parameterFlag4", "pf4", "description", 5);
 ```
-3. After all parameters are added, call the parse method and catch possible ArgsExceptions like No Arguemnts provided, 
+3. #### After all parameters are added, call the parse method and catch possible ArgsExceptions like No Arguemnts provided, 
 Missing argument for a specific flag, mandatory Arguments not provided, unknown Flag or too many arguments provided.
 ```Java
     try {
@@ -36,7 +38,7 @@ Missing argument for a specific flag, mandatory Arguments not provided, unknown 
         System.exit(1);
     }
 ```
-4. Now the arguments given by the user can be accessed by calling the .getArgument() method on the parameter variable for the specific parameter.
+4. #### Now the arguments given by the user can be accessed by calling the .getArgument() method on the parameter variable for the specific parameter.
 It is also possible to directly get the argument as a specific type.
 ```Java
     String providedArgument = example.getArgument();
