@@ -11,7 +11,7 @@ public class TestArgsParser {
     @Test
     public void noArgumentsProvided() {
         ArgsParser parser = new ArgsParser(new String[] {});
-        Parameter file = parser.addParameter("-f", true);
+        Parameter file = parser.addParameter("file", "f", " ",true);
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
@@ -23,7 +23,7 @@ public class TestArgsParser {
     @Test
     public void testGetArgument() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter file = parser.addParameter("file", true);
+        Parameter file = parser.addParameter("file", "f", " ", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -39,8 +39,8 @@ public class TestArgsParser {
     @Test
     public void testUnknownParameter() {
         ArgsParser parser = new ArgsParser(new String[] {"-f", "file.txt", "-s", "save.txt"});
-        Parameter file = parser.addParameter("-file", true);
-        Parameter save = parser.addParameter("--save", true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter save = parser.addParameter("save", "s", "descr", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -51,8 +51,8 @@ public class TestArgsParser {
     @Test
     public void testGetArgumentWithMultipleFlagsAndWrongInput() {
         ArgsParser parser = new ArgsParser(new String[] {"-f", "file.txt", "--save", "save.txt", "-s"});
-        Parameter file = parser.addParameter("file", "f", true);
-        Parameter save = parser.addParameter("save", true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter save = parser.addParameter("save", "w", "descr", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -66,8 +66,8 @@ public class TestArgsParser {
     @Test
     public void testMissingArgument() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "--save", "save.txt"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter save = parser.addParameter("save", true);
+        Parameter file = parser.addParameter("file", "m", "descr", true);
+        Parameter save = parser.addParameter("save", "s", "descr", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -79,8 +79,8 @@ public class TestArgsParser {
     @Test
     public void testMissingLastArgument() {
         ArgsParser parser = new ArgsParser(new String[]{"--file", "file.txt", "--save"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter save = parser.addParameter("--save", true);
+        Parameter file = parser.addParameter("--file", "f", "descr", true);
+        Parameter save = parser.addParameter("--save", "s", "descr", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -92,8 +92,8 @@ public class TestArgsParser {
     @Test
     public void testMissingShorts() {
         ArgsParser parser = new ArgsParser(new String[]{"-f", "/to/file", "--save", "save.txt"});
-        Parameter file = parser.addParameter("--file", true);
-        Parameter save = parser.addParameter("--save", true);
+        Parameter file = parser.addParameter("--file", "m", "descr", true);
+        Parameter save = parser.addParameter("--save", "s", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -105,9 +105,9 @@ public class TestArgsParser {
     @Test
     public void testMandatoryArgMissing() {
         ArgsParser parser = new ArgsParser(new String[]{"--file", "file.txt", "--optional", "optional.txt"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter save = parser.addParameter("save", true);
-        Parameter optional = parser.addParameter("optional", false);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter save = parser.addParameter("save", "s", "descr", true);
+        Parameter optional = parser.addParameter("optional", "o", "descr", false);
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
@@ -118,8 +118,8 @@ public class TestArgsParser {
     @Test
     public void testTooManyArguments() {
         ArgsParser parser = new ArgsParser(new String[]{"--file", "file.txt", "--save", "save.txt", "extra"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter save = parser.addParameter("save", true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter save = parser.addParameter("save", "s", "descr", true);
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
@@ -130,8 +130,8 @@ public class TestArgsParser {
     @Test
     public void testGetArgumentAsString() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "-int", "5"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter integer = parser.addParameter("integer", "int", true);
+        Parameter file = parser.addParameter("file", "f", true);
+        Parameter integer = parser.addParameter("integer", "int", "descr", true);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -145,8 +145,8 @@ public class TestArgsParser {
     @Test
     public void testGetArgumentWithGenericType() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--integer", "5"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter integer = parser.addParameter("integer", Integer.class , true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter integer = parser.addParameter("integer", "int", "descr", true, Integer.class);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -161,8 +161,8 @@ public class TestArgsParser {
     @Test
     public void testBooleanGetArgument() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--boolean", "true"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter bool = parser.addParameter("boolean", Boolean.class , true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter bool = parser.addParameter("boolean", "b", "descr", true, Boolean.class);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -175,8 +175,8 @@ public class TestArgsParser {
     @Test
     public void testGetArgumentAsDouble() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", Double.class , true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter doub = parser.addParameter("double", "d", "descr", true, Double.class);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -192,8 +192,8 @@ public class TestArgsParser {
     @Test
     public void testGetArgumentAsDoubleWithWrongInput() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--double", "5.5.5"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", Double.class , true);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter doub = parser.addParameter("double", "d", "descr", true, Double.class);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -204,8 +204,8 @@ public class TestArgsParser {
     @Test
     public void useDefaultValue() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", 12.3);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter doub = parser.addParameter("double", "d", "descr", 12.3);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -219,8 +219,8 @@ public class TestArgsParser {
     @Test
     public void useDefaultValueCast() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter file = parser.addParameter("file", true);
-        Parameter doub = parser.addParameter("double", 12.3);
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter doub = parser.addParameter("double", "d", "descr", 12.3);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -235,8 +235,8 @@ public class TestArgsParser {
     @Test
     public void testStringDefault() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter file = parser.addParameter("file", "default");
-        Parameter doub = parser.addParameter("double", 12.3);
+        Parameter file = parser.addParameter("file", "f", "descr", "default");
+        Parameter doub = parser.addParameter("double", "d", 12.5);
         try {
             parser.parseArgs();
         } catch (Exception e) {
@@ -251,8 +251,8 @@ public class TestArgsParser {
     @Test
     public void testHelp() {
         ArgsParser parser = new ArgsParser(new String[] {"--help"});
-        Parameter file = parser.addParameter("file", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
-        Parameter doub = parser.addParameter("double", 12.3);
+        Parameter file = parser.addParameter("file", "f", "descri", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
+        Parameter doub = parser.addParameter("double", "d", "des", 12.3);
         try {
             parser.parseArgs();
         } catch (CalledForHelpNotification e) {
@@ -264,10 +264,10 @@ public class TestArgsParser {
     @Test
     public void testLargerHelp() {
         ArgsParser parser = new ArgsParser(new String[] {"--help"});
-        Parameter file = parser.addParameter("file", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java", "f", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv");
-        Parameter doub = parser.addParameter("double", 12.3);
-        Parameter bool = parser.addParameter("boolean", true);
-        Parameter integer = parser.addParameter("integer", 5);
+        Parameter file = parser.addParameter("file", "s", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
+        Parameter doub = parser.addParameter("double", "d", 12.3);
+        Parameter bool = parser.addParameter("boolean", "b", "des", true);
+        Parameter integer = parser.addParameter("integer", "i", "des", 5);
         try {
             parser.parseArgs();
         } catch (CalledForHelpNotification e) {
