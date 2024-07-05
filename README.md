@@ -33,10 +33,15 @@ Missing argument for a specific flag, mandatory Arguments not provided, unknown 
 ```Java
     try {
         parser.parseArgs();
-    } catch (ArgsException e) {
-        System.out.println(e.getMessage());
+        
+    } catch (CalledForHelpNotification help) {
+        System.out.println(help.getMessage());
+        System.exit(0);
+        
+    } catch (ArgsException argsE) {
+        System.out.println(argsE.getMessage());
         System.exit(1);
-    }
+        }
 ```
 4. #### Now the arguments given by the user can be accessed by calling the .getArgument() method on the parameter variable for the specific parameter.
 It is also possible to directly get the argument as a specific type.
