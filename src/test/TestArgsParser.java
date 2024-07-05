@@ -275,4 +275,18 @@ public class TestArgsParser {
         } catch (ArgsException e) {
         }
     }
+
+    @Test
+    public void testWrongArguemntTypeProvided() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--integer", "5.5"});
+        Parameter file = parser.addParameter("file", "f", "descr", true);
+        Parameter integer = parser.addParameter("integer", "int", "descr", true, Integer.class);
+        try {
+            parser.parseArgs();
+        } catch (InvalidArgTypeArgsException e) {
+            assertEquals(new InvalidArgTypeArgsException("--integer").getMessage(), e.getMessage());
+        } catch (Exception e) {
+            System.exit(1);
+        }
+    }
 }
