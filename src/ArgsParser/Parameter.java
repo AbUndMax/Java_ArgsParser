@@ -176,7 +176,7 @@ public class Parameter {
      * @return argument
      * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
      * @throws IllegalArgumentException if the argument is not of the expected type
-     * @throws ParameterTypeNotDefined if the type of the parameter was not defined when using {@link ArgsParser#addParameter(String, boolean)} without a specified type
+     * @throws ParameterTypeNotDefined if the type of the parameter was not defined when using {@link ArgsParser#addParameter(String, String, String, boolean)} without a specified type
      */
     @SuppressWarnings("unchecked")
     public <T> T getCastedArgument() throws IllegalStateException, IllegalArgumentException, ParameterTypeNotDefined{
