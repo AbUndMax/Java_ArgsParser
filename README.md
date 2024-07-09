@@ -4,7 +4,7 @@ This tool makes it easier to define what arguments a user should input while at 
 the programmer to access the given arguments.
 
 ## How to use
-1. Import the ArgsParser class
+1. #### Import the ArgsParser class
 
 ```Java
 import ArgsParser.ArgsParser;
@@ -12,6 +12,7 @@ import ArgsParser.ArgsParser;
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
 ```
+
 2. Define the parameters you want the user to input. several fields can be specified: (see below for all available "addParameter" methods)
    - The name of the parameter
    - A short flag for the parameter
@@ -25,10 +26,12 @@ public static void main(String[] args) {
     Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
     Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
 ```
+
 3. After all parameters are added, call the parse method and catch possible ArgsExceptions like No Arguments provided, 
 Missing argument for a specific flag, mandatory Arguments not provided, unknown Flag or too many arguments provided. 
 Additionally, a CalledForHelpNotification can be thrown if the user wants to see the help message. Thus, we want to 
 exit with status code 0 if the user asks for help and with status code 1 if an error occurred.
+
 ```Java
     try {
         parser.parseArgs();
@@ -37,15 +40,18 @@ exit with status code 0 if the user asks for help and with status code 1 if an e
         System.out.println(help.getMessage());
         System.exit(0);
         
+
     } catch (ArgsException e) {
         System.out.println(e.getMessage());
         System.exit(1);
     }
     
 ```
+
 4. Now the arguments given by the user can be accessed by calling the .getArgument() method on the parameter variable for the specific parameter.
 The return type of the .getArgument() method is the type that was defined when adding the parameter. The Arguments can 
 directly be used in the code and have not to be assigned to a new variable.
+
 ```Java
     String providedArgument = example.getArgument();
     Double result = example2.getArgument() + argWithDefault.getArgument();
