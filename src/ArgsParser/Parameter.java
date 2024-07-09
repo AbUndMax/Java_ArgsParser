@@ -32,8 +32,8 @@ import java.util.*;
  * Parameter class with fields for each attribute of the Parameter including the argument.
  */
 public class Parameter<T> {
-    private final String flagName;
-    private final String shortName;
+    private final String fullFlag;
+    private final String shortFlag;
     private final String description;
     private final boolean isMandatory;
     private final ArgsParser parser;
@@ -45,16 +45,16 @@ public class Parameter<T> {
 
     /**
      * Constructor for the Parameter class with type definition
-     * @param flagName name of the parameter
-     * @param shortName short name of the parameter
+     * @param fullFlag name of the parameter
+     * @param shortFlag short name of the parameter
      * @param description description of the parameter
      * @param type type of the parameter
      * @param isMandatory true if the parameter is mandatory, false otherwise
      * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String flagName, String shortName, String description, Class<T> type, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.shortName = shortName;
+    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory, ArgsParser parserInstance) {
+        this.fullFlag = fullFlag;
+        this.shortFlag = shortFlag;
         this.description = description;
         this.parser = parserInstance;
         this.isMandatory = isMandatory;
@@ -62,11 +62,11 @@ public class Parameter<T> {
     }
 
     /**
-     * getter method for the flagName
-     * @return flagName
+     * getter method for the fullFlag
+     * @return fullFlag
      */
-    protected String getFlagName() {
-        return flagName;
+    protected String getFullFlag() {
+        return fullFlag;
     }
 
     /**
@@ -78,11 +78,11 @@ public class Parameter<T> {
     }
 
     /**
-     * getter method for the shortName attribute
-     * @return shortName
+     * getter method for the shortFlag attribute
+     * @return shortFlag
      */
-    protected String getShortName() {
-        return shortName;
+    protected String getShortFlag() {
+        return shortFlag;
     }
 
     /**
@@ -149,13 +149,13 @@ public class Parameter<T> {
                         if (argument.length() == 1) {
                             this.argument = (T) Character.valueOf(argument.charAt(0));
                         } else {
-                            throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), "Argument must be a single character!");
+                            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Argument must be a single character!");
                         }
                     }
-                    default -> throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), "Unsupported type!");
+                    default -> throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
                 }
             } catch (Exception e) {
-                throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), e.getMessage());
+                throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
             }
         }
         this.hasArgument = true;
@@ -178,12 +178,12 @@ public class Parameter<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Parameter<?> parameter = (Parameter<?>) o;
-        return Objects.equals(flagName, parameter.flagName);
+        return Objects.equals(fullFlag, parameter.fullFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(flagName);
+        return Objects.hash(fullFlag);
     }
 
 }
