@@ -259,4 +259,266 @@ public class TestArgsParser {
         } catch (ArgsException e) {
         }
     }
+
+    @Test
+    public void testAddIntegerParameterWithDescriptionAndMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--number", "42"});
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = number.getArgument();
+        assertEquals(Integer.valueOf(42), result);
+    }
+
+    // Test für addIntegerParameter(String, String, boolean)
+    @Test
+    public void testAddIntegerParameterMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--number", "42"});
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = number.getArgument();
+        assertEquals(Integer.valueOf(42), result);
+    }
+
+    // Test für addIntegerParameter(String, String, String, Integer)
+    @Test
+    public void testAddIntegerParameterWithDescriptionAndDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", 42);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = number.getArgument();
+        assertEquals(Integer.valueOf(42), result);
+    }
+
+    // Test für addIntegerParameter(String, String, Integer)
+    @Test
+    public void testAddIntegerParameterDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", 42);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Integer result = number.getArgument();
+        assertEquals(Integer.valueOf(42), result);
+    }
+
+    // Test für addDoubleParameter(String, String, String, boolean)
+    @Test
+    public void testAddDoubleParameterWithDescriptionAndMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--number", "42.5"});
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = number.getArgument();
+        assertEquals(Double.valueOf(42.5), result);
+    }
+
+    // Test für addDoubleParameter(String, String, boolean)
+    @Test
+    public void testAddDoubleParameterMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--number", "42.5"});
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = number.getArgument();
+        assertEquals(Double.valueOf(42.5), result);
+    }
+
+    // Test für addDoubleParameter(String, String, String, Double)
+    @Test
+    public void testAddDoubleParameterWithDescriptionAndDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", 42.5);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = number.getArgument();
+        assertEquals(Double.valueOf(42.5), result);
+    }
+
+    // Test für addDoubleParameter(String, String, Double)
+    @Test
+    public void testAddDoubleParameterDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", 42.5);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Double result = number.getArgument();
+        assertEquals(Double.valueOf(42.5), result);
+    }
+
+    // Test für addBooleanParameter(String, String, String, boolean)
+    @Test
+    public void testAddBooleanParameterWithDescriptionAndMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--flag", "true"});
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = flag.getArgument();
+        assertTrue(result);
+    }
+
+    // Test für addBooleanParameter(String, String, boolean)
+    @Test
+    public void testAddBooleanParameterMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--flag", "true"});
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = flag.getArgument();
+        assertTrue(result);
+    }
+
+    // Test für addBooleanParameter(String, String, String, Boolean)
+    @Test
+    public void testAddBooleanParameterWithDescriptionAndDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {"--flag", "false"});
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = !flag.getArgument();
+        assertTrue(result);
+    }
+
+    // Test für addBooleanParameter(String, String, Boolean)
+    @Test
+    public void testAddBooleanParameterDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {"-f", "true"});
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = flag.getArgument();
+        assertTrue(result);
+    }
+
+    // Test für addCharacterParameter(String, String, String, boolean)
+    @Test
+    public void testAddCharacterParameterWithDescriptionAndMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--char", "c"});
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Character result = character.getArgument();
+        assertEquals(Character.valueOf('c'), result);
+    }
+
+    // Test für addCharacterParameter(String, String, boolean)
+    @Test
+    public void testAddCharacterParameterMandatory() {
+        ArgsParser parser = new ArgsParser(new String[] {"--char", "c"});
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Character result = character.getArgument();
+        assertEquals(Character.valueOf('c'), result);
+    }
+
+    // Test für addCharacterParameter(String, String, String, Character)
+    @Test
+    public void testAddCharacterParameterWithDescriptionAndDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", 'c');
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Character result = character.getArgument();
+        assertEquals(Character.valueOf('c'), result);
+    }
+
+    // Test für addCharacterParameter(String, String, Character)
+    @Test
+    public void testAddCharacterParameterDefaultValue() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", 'c');
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Character result = character.getArgument();
+        assertEquals(Character.valueOf('c'), result);
+    }
+
+    @Test
+    public void testStringDeafult() {
+        ArgsParser parser = new ArgsParser(new String[] {});
+        Parameter<String> string = parser.addStringParameter("string", "s", "default");
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String result = string.getArgument();
+        assertEquals("default", result);
+    }
+
+    @Test
+    public void testBool() {
+        ArgsParser parser = new ArgsParser(new String[] {"--bool", "true"});
+        Parameter<Boolean> bool = parser.addBooleanParameter(true, "bool", "b", "descr");
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = bool.getArgument();
+        assertTrue(result);
+    }
+
+    @Test
+    public void testBool2() {
+        ArgsParser parser = new ArgsParser(new String[] {"--bool", "false"});
+        Parameter<Boolean> bool = parser.addBooleanParameter(false, "bool", "b");
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Boolean result = bool.getArgument();
+        assertFalse(result);
+    }
 }

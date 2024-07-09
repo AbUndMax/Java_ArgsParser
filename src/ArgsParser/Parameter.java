@@ -177,7 +177,7 @@ public class Parameter<T> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Parameter parameter = (Parameter) o;
+        Parameter<?> parameter = (Parameter<?>) o;
         return Objects.equals(flagName, parameter.flagName);
     }
 

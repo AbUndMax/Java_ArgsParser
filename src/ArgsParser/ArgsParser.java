@@ -322,7 +322,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(String flagName, String shortName, String description, Boolean defaultValue) {
+    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String flagName, String shortName, String description) {
         return createParameter(flagName, shortName, description, Boolean.class, false, defaultValue);
     }
 
@@ -333,7 +333,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(String flagName, String shortName, Boolean defaultValue) {
+    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String flagName, String shortName) {
         return createParameter(flagName, shortName, null, Boolean.class, false, defaultValue);
     }
 
@@ -495,7 +495,6 @@ public class ArgsParser {
                 throw new MissingArgArgsException(args[i]);
 
             }  else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
-                System.out.println(args[i]);
                 currentParameter.setArgument(args[i]);
                 givenParameters.add(currentParameter);
 
@@ -669,7 +668,7 @@ public class ArgsParser {
             if (spaceForValue + staticFreeSpace >= string.length())
                 substring = string.substring(spaceForValue);
             else substring = string.substring(spaceForValue, spaceForValue += (staticFreeSpace - 1));
-            ;
+
             helpString.append("\n").append("#").append(" ".repeat(whiteSpace - 1)).append(substring);
         }
 
