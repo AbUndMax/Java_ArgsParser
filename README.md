@@ -1,6 +1,6 @@
 [![Badge](https://img.shields.io/badge/release-v1.0.0-brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v1.0.0)
 # ArgsParser Tool
-This tool makes it easier to define what arguments a user should input while at the same time it makes it easer for 
+This tool makes it easier to define what arguments a user should input while at the same time it makes it easier for 
 the programmer to access the given arguments.
 
 ## How to use
@@ -27,7 +27,7 @@ public static void main(String[] args) {
 ```
 3. After all parameters are added, call the parse method and catch possible ArgsExceptions like No Arguments provided, 
 Missing argument for a specific flag, mandatory Arguments not provided, unknown Flag or too many arguments provided. 
-Additionally a CalledForHelpNotification can be thrown if the user wants to see the help message. Thus, we want to 
+Additionally, a CalledForHelpNotification can be thrown if the user wants to see the help message. Thus, we want to 
 exit with status code 0 if the user asks for help and with status code 1 if an error occurred.
 ```Java
     try {
