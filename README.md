@@ -1,4 +1,4 @@
-[![Badge](https://img.shields.io/badge/release-v1.0.0-brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v1.0.0)
+[![Badge](https://img.shields.io/badge/release-v2.0.0-brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v2.0.0)
 # ArgsParser Tool
 This tool makes it easier to define what arguments a user should input while at the same time it makes it easier for 
 the programmer to access the given arguments.
@@ -12,7 +12,7 @@ import ArgsParser.ArgsParser;
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
 ```
-2. Define the parameters you want the user to input. several fields can be specified:
+2. Define the parameters you want the user to input. several fields can be specified: (see below for all available "addParameter" methods)
    - The name of the parameter
    - A short flag for the parameter
    - If the parameter is mandatory or not
