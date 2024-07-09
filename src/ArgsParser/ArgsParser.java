@@ -60,6 +60,8 @@ public class ArgsParser {
     private final String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
+    private final Set<String> fullFlags = new HashSet<>();
+    private final Set<String> shortFlags = new HashSet<>();
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
@@ -92,6 +94,11 @@ public class ArgsParser {
                                              boolean isMandatory,
                                              T defaultValue) {
 
+        // check if the flag names are already used
+        if (fullFlags.contains(fullFlag)) throw new IllegalArgumentException("Flag already exists: " + fullFlag);
+        if (shortFlags.contains(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
+
+        // create new parameter instance
         Parameter<T> parameter = new Parameter<T>(makeFlag(fullFlag, false),
                                                   makeFlag(shortFlag, true),
                                                   description, type, isMandatory, this);
@@ -100,17 +107,22 @@ public class ArgsParser {
             parameter.setDefault(defaultValue);
         }
 
+        // add parameter to the map
         parameterMap.put(parameter.getFullFlag(), parameter);
         if (parameter.getShortFlag() != null) parameterMap.put(parameter.getShortFlag(), parameter);
 
+        // check for the lengths of the name
         int nameSize = parameter.getFullFlag().length();
         if (longestFlagSize < nameSize) longestFlagSize = nameSize;
 
-        if (parameter.getShortFlag() != null) {
-            int shortSize = parameter.getShortFlag().length();
-            if (longestShortFlag < shortSize) longestShortFlag = shortSize;
-        }
+        int shortSize = parameter.getShortFlag().length();
+        if (longestShortFlag < shortSize) longestShortFlag = shortSize;
 
+        // add names to the name sets
+        fullFlags.add(fullFlag);
+        shortFlags.add(shortFlag);
+
+        // add to mandatory parameters if parameter is mandatory
         if (parameter.isMandatory()) mandatoryParameters.add(parameter);
 
         return parameter;
