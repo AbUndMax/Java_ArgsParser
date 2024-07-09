@@ -27,6 +27,7 @@ SOFTWARE.
 import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
@@ -42,6 +43,23 @@ public class Parameter<T> {
     private boolean hasDefault = false;
     private T argument = null;
     private boolean hasArgument = false;
+
+    /**
+     * converter map for converting a string argument to T used in {@link #setArgument(String)}
+     */
+    private static final Map<Class<?>, Function<String, ?>> converters = new HashMap<>();
+    static {
+        converters.put(Integer.class, Integer::valueOf);
+        converters.put(Double.class, Double::valueOf);
+        converters.put(Boolean.class, Boolean::valueOf);
+        converters.put(Character.class, s -> {
+            if (s.length() != 1) {
+                throw new IllegalArgumentException("Argument must be a single character!");
+            }
+            return s.charAt(0);
+        });
+    }
+
 
     /**
      * Constructor for the Parameter class with type definition
@@ -138,24 +156,17 @@ public class Parameter<T> {
      */
     protected void setArgument(String argument) throws InvalidArgTypeArgsException {
         if (type.equals(String.class)) {
-            this.argument = (T) argument;
+            this.argument = type.cast(argument);
         } else {
-            try {
-                switch (type.getSimpleName()) {
-                    case "Integer" -> this.argument = (T) Integer.valueOf(argument);
-                    case "Double" -> this.argument = (T) Double.valueOf(argument);
-                    case "Boolean" -> this.argument = (T) Boolean.valueOf(argument);
-                    case "Character" -> {
-                        if (argument.length() == 1) {
-                            this.argument = (T) Character.valueOf(argument.charAt(0));
-                        } else {
-                            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Argument must be a single character!");
-                        }
-                    }
-                    default -> throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
+            Function<String, ?> converter = converters.get(type);
+            if (converter != null) {
+                try {
+                    this.argument = type.cast(converter.apply(argument));
+                } catch (Exception e) {
+                    throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
                 }
-            } catch (Exception e) {
-                throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
+            } else {
+                throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
             }
         }
         this.hasArgument = true;
