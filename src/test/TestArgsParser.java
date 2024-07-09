@@ -521,4 +521,16 @@ public class TestArgsParser {
         Boolean result = bool.getArgument();
         assertFalse(result);
     }
+
+    @Test
+    public void testSameFlagNameException() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt", "--file", "file2.txt"});
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        try {
+            Parameter<String> file2 = parser.addStringParameter("file", "f2", "descr", true);
+            parser.parseArgs();
+        } catch (Exception e) {
+            assertEquals("Flag already exists: file", e.getMessage());
+        }
+    }
 }
