@@ -41,7 +41,7 @@ import java.util.*;
  *
  * <ol>
  *     <li>The ArgsParser constructor {@link #ArgsParser(String[])} is called and the args array of the main method provided.</li>
- *     <li>Now we can specify the parameters we want to have for the program by using {@link #addParameter(String, String, String, boolean)}</li>
+ *     <li>Now we can specify the parameters we want to have for the program by using {@link #addStringParameter(String, String, String, boolean)}</li>
        <ul>
  *         <li>Parameters can be mandatory or optional</li>
  *         <li>Parameters can have a short version flags</li>
@@ -50,7 +50,7 @@ import java.util.*;
  *     </ul>
  *     <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
- *          and type specific arguments can be accessed if a type i.e. Integer.Class was provided in {@link #addParameter(String, String, String, boolean)} </li>
+ *          and type specific arguments can be accessed if a type i.e. Integer.Class was provided in {@link #addStringParameter(String, String, String, boolean)} </li>
  * </ol>
  * available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a>
  * @author Niklas Max G. 2024
@@ -58,8 +58,8 @@ import java.util.*;
 public class ArgsParser {
 
     private final String[] args;
-    private final Map<String, Parameter> parameterMap = new HashMap<>();
-    private final Set<Parameter> mandatoryParameters = new HashSet<>();
+    private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
+    private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
@@ -74,127 +74,317 @@ public class ArgsParser {
     }
 
     /**
+     * creates a new Parameter instance and sets it accordingly with the given fields
      * Adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
-     * @param parameter parameter to be processed
+     * @param fullFlag name of the parameter
+     * @param shortFlag short name of the parameter
+     * @param description description of the parameter
+     * @param type type of the parameter
+     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance
+     * @param <T> type of the parameter
      */
-    private void prepareParameter(Parameter parameter) {
-        parameterMap.put(parameter.getFlagName(), parameter);
-        if (parameter.getShortName() != null) parameterMap.put(parameter.getShortName(), parameter);
+    private <T> Parameter<T> createParameter(String fullFlag,
+                                             String shortFlag,
+                                             String description,
+                                             Class<T> type,
+                                             boolean isMandatory,
+                                             T defaultValue) {
 
-        int nameSize = parameter.getFlagName().length();
+        Parameter<T> parameter = new Parameter<T>(makeFlag(fullFlag, false),
+                                                  makeFlag(shortFlag, true),
+                                                  description, type, isMandatory, this);
+
+        if (defaultValue != null) {
+            parameter.setDefault(defaultValue);
+        }
+
+        parameterMap.put(parameter.getFullFlag(), parameter);
+        if (parameter.getShortFlag() != null) parameterMap.put(parameter.getShortFlag(), parameter);
+
+        int nameSize = parameter.getFullFlag().length();
         if (longestFlagSize < nameSize) longestFlagSize = nameSize;
 
-        if (parameter.getShortName() != null) {
-            int shortSize = parameter.getShortName().length();
+        if (parameter.getShortFlag() != null) {
+            int shortSize = parameter.getShortFlag().length();
             if (longestShortFlag < shortSize) longestShortFlag = shortSize;
         }
 
         if (parameter.isMandatory()) mandatoryParameters.add(parameter);
+
+        return parameter;
     }
 
     /**
-     * Creates a flag from the given flagName, if the flagName is already in the correct format, it will be returned as is.
-     * If not, it will add a leading or -- to the flagName
-     * @param flagName name of the flag
+     * Creates a flag from the given fullFlag, if the fullFlag is already in the correct format, it will be returned as is.
+     * If not, it will add a leading or -- to the fullFlag
+     * @param fullFlag name of the flag
      * @param isShortName true if the flag is a short flag
-     * @return flag in the correct format (e.g. --flagName or -f)
+     * @return flag in the correct format (e.g. --fullFlag or -f)
      */
-    private String makeFlag(String flagName, boolean isShortName) {
+    private String makeFlag(String fullFlag, boolean isShortName) {
         int i = 0;
-        while (flagName.charAt(i) == '-') {
+        while (fullFlag.charAt(i) == '-') {
             i++;
         }
 
-        if (i == 2 && !isShortName) return flagName;
-        else if (i == 1 && isShortName) return flagName;
+        if (i == 2 && !isShortName) return fullFlag;
+        else if (i == 1 && isShortName) return fullFlag;
         else {
             String newFlag = isShortName ? "-" : "--";
-            return newFlag + flagName.substring(i);
+            return newFlag + fullFlag.substring(i);
         }
     }
 
 
-    /**
-     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param shortName short version of the parameter (- will automatically be added)
-     * @param isMandatory true if parameter is mandatory, false if optional
-     * @param type type of the parameter (Class.Integer, Class.Double, Class.Boolean, Class.Character)
-     * @return the created Parameter instance
-     */
-    public Parameter addParameter(String flagName, String shortName, boolean isMandatory, Class<?> type) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), "", type, isMandatory, this);
-        prepareParameter(parameter);
-        return parameter;
-    }
+    // String Parameter constructors
+
 
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param defaultValue default value of the parameter - by usage sets the parameter to optional
-     * @param shortName short version of the parameter (- will automatically be added)
-     * @return the created Parameter instance
-     */
-    public Parameter addParameter(String flagName, String shortName, Object defaultValue) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, makeFlag(shortName, true), "", this);
-        prepareParameter(parameter);
-        return parameter;
-    }
-
-    /**
-     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param shortName short version of the parameter (- will automatically be added)
-     * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance
-     */
-    public Parameter addParameter(String flagName, String shortName, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), "", isMandatory, this);
-        prepareParameter(parameter);
-        return parameter;
-    }
-
-    /**
-     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param shortName short version of the parameter (- will automatically be added)
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance
+     * @return the created Parameter instance of type String
      */
-    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, isMandatory, this);
-        prepareParameter(parameter);
-        return parameter;
+    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, description, String.class, isMandatory, null);
     }
 
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param shortName short version of the parameter (- will automatically be added)
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String
+     */
+    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, null, String.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type String
+     */
+    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, String defaultValue) {
+        return createParameter(fullFlag, shortFlag, description, String.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type String
+     */
+    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String defaultValue) {
+        return createParameter(fullFlag, shortFlag, null, String.class, false, defaultValue);
+    }
+
+
+    // Integer Parameter constructors
+
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @param type type of the parameter (Class.Integer, Class.Double, Class.Boolean, Class.Character)
-     * @return the created Parameter instance
+     * @return the created Parameter instance of type Integer
      */
-    public Parameter addParameter(String flagName, String shortName, String description, boolean isMandatory, Class<?> type) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), makeFlag(shortName, true), description, type, isMandatory, this);
-        prepareParameter(parameter);
-        return parameter;
+    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, description, Integer.class, isMandatory, null);
     }
 
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
-     * @param flagName name of the parameter (-- will automatically be added)
-     * @param defaultValue default value of the parameter - by usage sets the parameter to optional
-     * @param shortName short version of the parameter (- will automatically be added)
-     * @param description description of the parameter
-     * @return the created Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Integer
      */
-    public Parameter addParameter(String flagName, String shortName, String description, Object defaultValue) {
-        Parameter parameter = new Parameter(makeFlag(flagName, false), defaultValue, makeFlag(shortName, true), description, this);
-        prepareParameter(parameter);
-        return parameter;
+    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, null, Integer.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Integer
+     */
+    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue) {
+        return createParameter(fullFlag, shortFlag, description, Integer.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Integer
+     */
+    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, Integer defaultValue) {
+        return createParameter(fullFlag, shortFlag, null, Integer.class, false, defaultValue);
+    }
+
+
+    // Double Parameter constructors
+
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Double
+     */
+    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, description, Double.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Double
+     */
+    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, null, Double.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Double
+     */
+    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue) {
+        return createParameter(fullFlag, shortFlag, description, Double.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Double
+     */
+    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, Double defaultValue) {
+        return createParameter(fullFlag, shortFlag, null, Double.class, false, defaultValue);
+    }
+
+
+    // Boolean Parameter constructors
+
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Boolean
+     */
+    public Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, description, Boolean.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Boolean
+     */
+    public Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, null, Boolean.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Boolean
+     */
+    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag, String description) {
+        return createParameter(fullFlag, shortFlag, description, Boolean.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Boolean
+     */
+    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag) {
+        return createParameter(fullFlag, shortFlag, null, Boolean.class, false, defaultValue);
+    }
+
+
+    // Character Parameter constructors
+
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Character
+     */
+    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, description, Character.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type Character
+     */
+    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+        return createParameter(fullFlag, shortFlag, null, Character.class, isMandatory, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Character
+     */
+    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue) {
+        return createParameter(fullFlag, shortFlag, description, Character.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param defaultValue default value of the parameter
+     * @return the created Parameter instance of type Character
+     */
+    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, Character defaultValue) {
+        return createParameter(fullFlag, shortFlag, null, Character.class, false, defaultValue);
     }
 
     /**
@@ -212,12 +402,15 @@ public class ArgsParser {
      * @throws CalledForHelpNotification if --help or -h was called
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException, CalledForHelpNotification, InvalidArgTypeArgsException {
+    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
+            TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
+            CalledForHelpNotification, InvalidArgTypeArgsException {
+
         parseArgsWasCalled = true;
 
         checkIfAnyArgumentsProvided();
         checkForHelpCall();
-        Set<Parameter> givenParameters = parseArguments();
+        Set<Parameter<?>> givenParameters = parseArguments();
         checkMandatoryArguments(givenParameters);
 
     }
@@ -274,10 +467,11 @@ public class ArgsParser {
      * @throws MissingArgArgsException if a flag was provided without an argument
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    private Set<Parameter> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException, MissingArgArgsException, InvalidArgTypeArgsException {
-        Set<Parameter> givenParameters = new HashSet<>();
+    private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
+            MissingArgArgsException, InvalidArgTypeArgsException {
+        Set<Parameter<?>> givenParameters = new HashSet<>();
 
-        Parameter currentParameter = null;
+        Parameter<?> currentParameter = null;
         for (int i = 0; i < args.length; i++) {
 
             boolean currentPositionIsFlag = args[i].startsWith("-");
@@ -285,14 +479,14 @@ public class ArgsParser {
             boolean flagExists = parameterMap.get(args[i]) != null;
             boolean isLastEntry = i == args.length - 1;
             boolean currentParameterNotNull = currentParameter != null;
-            boolean argumentSet = currentParameterNotNull && currentParameter.getArgument() != null;
+            boolean argumentSet = currentParameterNotNull && currentParameter.hasArgument();
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
 
             if (currentPositionIsFlag && !flagExists) { // if flag is unknown
                 throw new UnknownFlagArgsException(args[i]);
 
             } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
-                throw new TooManyArgumentsArgsException(currentParameter.getFlagName());
+                throw new TooManyArgumentsArgsException(currentParameter.getFullFlag());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
                 throw new MissingArgArgsException(args[i - 1]);
@@ -315,13 +509,13 @@ public class ArgsParser {
      * @param givenParameters a set of all Parameter instances created based on args
      * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
      */
-    private void checkMandatoryArguments(Set<Parameter> givenParameters) throws MandatoryArgNotProvidedArgsException {
+    private void checkMandatoryArguments(Set<Parameter<?>> givenParameters) throws MandatoryArgNotProvidedArgsException {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
             StringBuilder errorMessage = new StringBuilder();
             errorMessage.append("Mandatory parameters are missing:\n");
-            for (Parameter param : mandatoryParameters) {
-                errorMessage.append(param.getFlagName()).append("\n");
+            for (Parameter<?> param : mandatoryParameters) {
+                errorMessage.append(param.getFullFlag()).append("\n");
             }
             throw new MandatoryArgNotProvidedArgsException(errorMessage.toString());
         }
@@ -330,7 +524,7 @@ public class ArgsParser {
     /**
      * prints all available Parameters found in argumentsList to the console
      */
-    private String generateHelpMessage(Set<Parameter> parameters) {
+    private String generateHelpMessage(Set<Parameter<?>> parameters) {
         StringBuilder helpMessage = new StringBuilder();
         helpMessage.append("\n");
 
@@ -348,7 +542,7 @@ public class ArgsParser {
         }
         helpMessage.append("#").append("\n");
 
-        for (Parameter param : parameters) {
+        for (Parameter<?> param : parameters) {
             String helpString = parameterHelpString(param);
             helpMessage.append(helpString).append("\n");
             helpMessage.append("#").append("\n");
@@ -368,12 +562,12 @@ public class ArgsParser {
     }
 
     /**
-     * generates the help String (flagName, shortFlag, description) for a single Parameter
+     * generates the help String (fullFlag, shortFlag, description) for a single Parameter
      * @param parameter parameter Instance of which the help String should be generated
      * @return String with all information for the given Parameter
      */
-    private String parameterHelpString(Parameter parameter) {
-        Map<String, String> shortNameTypes = new HashMap<>(){{
+    private String parameterHelpString(Parameter<?> parameter) {
+        Map<String, String> shortFlagTypes = new HashMap<>(){{
             put("String", "s");
             put("Integer", "i");
             put("Double", "d");
@@ -381,22 +575,22 @@ public class ArgsParser {
             put("Character", "c");
         }};
 
-        String name = parameter.getFlagName();
-        String shortName = parameter.getShortName() == null ? "/" : parameter.getShortName();
-        String description = parameter.getDescription().trim().isEmpty() ? "No description available!" : parameter.getDescription();
+        String name = parameter.getFullFlag();
+        String shortFlag = parameter.getShortFlag() == null ? "/" : parameter.getShortFlag();
+        String description = parameter.getDescription() == null ? "No description available!" : parameter.getDescription();
         String isMandatory = parameter.isMandatory() ? "(!)" : "(+)";
         StringBuilder helpString = new StringBuilder("###  ");
 
         // align the parameter names nicely
         int nameWhiteSpaceSize = longestFlagSize - name.length();
         name = name + " ".repeat(nameWhiteSpaceSize);
-        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortName.length();
-        shortName = shortName + " ".repeat(shortWhiteSpaceSize);
+        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortFlag.length();
+        shortFlag = shortFlag + " ".repeat(shortWhiteSpaceSize);
 
         // get type
-        String type = shortNameTypes.get(parameter.getType());
+        String type = shortFlagTypes.get(parameter.getType());
 
-        helpString.append(name).append("  ").append(shortName).append("  [").append(type).append("] ").append(isMandatory).append("  ");
+        helpString.append(name).append("  ").append(shortFlag).append("  [").append(type).append("] ").append(isMandatory).append("  ");
         int whiteSpace = helpString.length();
 
         // The description String gets checked if it fits inside the info box.
@@ -416,7 +610,7 @@ public class ArgsParser {
         // print default value if available
         if (parameter.hasDefault()) {
             String defaultTitle = "default: ";
-            String defaultValue = parameter.getDefaultValue();
+            String defaultValue = parameter.getDefaultValue().toString();
             helpString.append("\n").append("#").append(" ".repeat(whiteSpace - defaultTitle.length() - 1)).append(defaultTitle);
 
             if (whiteSpace + defaultValue.length() > consoleWidth) { // if the default is as large as the consoleWindow split default
@@ -460,7 +654,7 @@ public class ArgsParser {
      * helper function to do correct new lines if the defaultValue is too long to fit into the help box
      * @param string defaultValue that doesn't fit
      * @param whiteSpace int that specifies how many white space before the defaultValue should be placed
-     * @return
+     * @return the concatenated lines
      */
     private String lineBreak(String string, int whiteSpace) {
         StringBuilder helpString = new StringBuilder();
@@ -474,7 +668,7 @@ public class ArgsParser {
             if (spaceForValue + staticFreeSpace >= string.length())
                 substring = string.substring(spaceForValue);
             else substring = string.substring(spaceForValue, spaceForValue += (staticFreeSpace - 1));
-            ;
+
             helpString.append("\n").append("#").append(" ".repeat(whiteSpace - 1)).append(substring);
         }
 
