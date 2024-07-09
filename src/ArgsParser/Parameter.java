@@ -25,45 +25,23 @@ SOFTWARE.
  */
 
 import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
-import ArgsParser.RuntimeExeptions.ParameterTypeNotDefined;
 
 import java.util.*;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
  */
-public class Parameter {
+public class Parameter<T> {
     private final String flagName;
     private final String shortName;
     private final String description;
     private final boolean isMandatory;
     private final ArgsParser parser;
-    private final Class<?> type;
-    private boolean typeWasSet = false;
+    private final Class<T> type;
+    private T defaultValue = null;
+    private boolean hasDefault = false;
+    private T argument = null;
     private boolean hasArgument = false;
-    private String defaultValue = null;
-    private String argument = null;
-    private Integer argumentAsInteger = null;
-    private Double argumentAsDouble = null;
-    private Boolean argumentAsBoolean = null;
-    private Character argumentAsChar = null;
-
-    /**
-     * Constructor for the Parameter class
-     * @param flagName name of the parameter
-     * @param shortName short name of the parameter
-     * @param description description of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
-     * @param parserInstance instance of the ArgsParser class
-     */
-    protected Parameter(String flagName, String shortName, String description, boolean isMandatory, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.shortName = shortName;
-        this.description = description;
-        this.parser = parserInstance;
-        this.isMandatory = isMandatory;
-        this.type = String.class;
-    }
 
     /**
      * Constructor for the Parameter class with type definition
@@ -74,34 +52,13 @@ public class Parameter {
      * @param isMandatory true if the parameter is mandatory, false otherwise
      * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String flagName, String shortName, String description, Class<?> type, boolean isMandatory, ArgsParser parserInstance) {
+    protected Parameter(String flagName, String shortName, String description, Class<T> type, boolean isMandatory, ArgsParser parserInstance) {
         this.flagName = flagName;
         this.shortName = shortName;
         this.description = description;
         this.parser = parserInstance;
         this.isMandatory = isMandatory;
         this.type = type;
-        this.typeWasSet = true;
-    }
-
-    /**
-     * Constructor for the Parameter class with default value
-     * (sets type of Parameter based on the type of the default value)
-     * @param flagName name of the parameter
-     * @param shortName short name of the parameter
-     * @param description description of the parameter
-     * @param defaultValue default value of the parameter
-     * @param parserInstance instance of the ArgsParser class
-     */
-    protected Parameter(String flagName, Object defaultValue, String shortName, String description, ArgsParser parserInstance) {
-        this.flagName = flagName;
-        this.shortName = shortName;
-        this.description = description;
-        this.parser = parserInstance;
-        this.isMandatory = false;
-        setDefault(defaultValue);
-        type = defaultValue.getClass();
-        typeWasSet = true;
     }
 
     /**
@@ -149,15 +106,19 @@ public class Parameter {
      * @return true if this Parameter was created with a default value, false otherwise
      */
     protected boolean hasDefault() {
-        return this.defaultValue != null;
+        return hasDefault;
     }
 
     /**
      * getter method for the defaultValue attribute
      * @return defaultValue
      */
-    protected String getDefaultValue() {
+    protected T getDefaultValue() {
         return this.defaultValue;
+    }
+
+    protected boolean hasArgument() {
+        return hasArgument;
     }
 
     /**
@@ -165,33 +126,10 @@ public class Parameter {
      * @return argument as String
      * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
      */
-    public String getArgument() throws IllegalStateException {
+    public T getArgument() throws IllegalStateException {
         if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
-        if (!hasArgument) return null;
+        if (!hasArgument && !hasDefault) return null;
         return argument;
-    }
-
-    /**
-     * getter method for the argument attribute
-     * @return argument
-     * @throws IllegalStateException if {@link ArgsParser#parseArgs()} was not called before trying to access this argument
-     * @throws IllegalArgumentException if the argument is not of the expected type
-     * @throws ParameterTypeNotDefined if the type of the parameter was not defined when using {@link ArgsParser#addParameter(String, boolean)} without a specified type
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getCastedArgument() throws IllegalStateException, IllegalArgumentException, ParameterTypeNotDefined{
-        if (!typeWasSet) throw new ParameterTypeNotDefined(this.flagName);
-        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
-        if (!hasArgument) return null;
-
-        switch (type.getSimpleName()) {
-            case "Integer" -> { return (T) argumentAsInteger; }
-            case "Double" -> { return (T) argumentAsDouble; }
-            case "Boolean" -> { return (T) argumentAsBoolean; }
-            case "Character" -> { return (T) argumentAsChar; }
-            default -> throw new IllegalArgumentException("Unsupported type: " + type.getName());
-        }
-
     }
 
     /**
@@ -199,22 +137,27 @@ public class Parameter {
      * @param argument argument
      */
     protected void setArgument(String argument) throws InvalidArgTypeArgsException {
-        this.argument = argument;
-
-        if (type != String.class) {
+        if (type.equals(String.class)) {
+            this.argument = (T) argument;
+        } else {
             try {
                 switch (type.getSimpleName()) {
-                    case "Integer" -> this.argumentAsInteger = Integer.parseInt(argument);
-                    case "Double" -> this.argumentAsDouble = Double.parseDouble(argument);
-                    case "Boolean" -> this.argumentAsBoolean = Boolean.parseBoolean(argument);
-                    case "Character" -> this.argumentAsChar = argument.charAt(0);
+                    case "Integer" -> this.argument = (T) Integer.valueOf(argument);
+                    case "Double" -> this.argument = (T) Double.valueOf(argument);
+                    case "Boolean" -> this.argument = (T) Boolean.valueOf(argument);
+                    case "Character" -> {
+                        if (argument.length() == 1) {
+                            this.argument = (T) Character.valueOf(argument.charAt(0));
+                        } else {
+                            throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), "Argument must be a single character!");
+                        }
+                    }
+                    default -> throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), "Unsupported type!");
                 }
-
             } catch (Exception e) {
-                throw new InvalidArgTypeArgsException(this.flagName);
+                throw new InvalidArgTypeArgsException(this.flagName, type.getSimpleName(), e.getMessage());
             }
         }
-
         this.hasArgument = true;
     }
 
@@ -222,22 +165,12 @@ public class Parameter {
      * Sets the default value for the argument and assigns it to the corresponding type-specific field.
      * The value is also converted to a string and stored in the 'argument' field.
      *
-     * @param <T> the type of the default value
      * @param defaultValue the default value to be set, which can be of type Integer, Double, Character, or Boolean
      * @throws IllegalArgumentException if the type of defaultValue is unsupported
      */
-    protected <T> void setDefault(T defaultValue) {
-        this.argument = this.defaultValue = defaultValue.toString();
-
-        switch (defaultValue) {
-            case String s -> argument = s;
-            case Integer i -> argumentAsInteger = i;
-            case Double v -> argumentAsDouble = v;
-            case Character c -> argumentAsChar = c;
-            case Boolean b -> argumentAsBoolean = b;
-            default -> throw new IllegalArgumentException("Unsupported type: " + defaultValue.getClass().getName());
-        }
-        this.hasArgument = true;
+    protected void setDefault(T defaultValue) {
+        this.defaultValue = this.argument = defaultValue;
+        hasDefault = true;
     }
 
     @Override
