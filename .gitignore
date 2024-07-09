@@ -31,4 +31,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 /src/test/TestPrintout.java
-/docs/
+/doc/
+/lib/
