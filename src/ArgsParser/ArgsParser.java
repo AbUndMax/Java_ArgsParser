@@ -530,8 +530,17 @@ public class ArgsParser {
         }
     }
 
-    public static String getArgument(String flag) {
-        return parameterMapStatic.get(flag).getArgument().toString();
+    /**
+     * getter method for the argument of a specific parameter
+     * <p>Make sure T is of same type as given fullFlag parameter type! </p>
+     * @param fullFlag name of the parameter
+     * @param <T> type of the parameter
+     * @return the argument of the parameter
+     * @throws ClassCastException if the argument is not of the correct type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getArgument(String fullFlag) throws ClassCastException {
+        return (T) parameterMapStatic.get(makeFlag(fullFlag, false)).getArgument();
     }
 
 }

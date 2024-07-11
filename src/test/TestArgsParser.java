@@ -609,8 +609,8 @@ public class TestArgsParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Parameter<String> result = ArgsParser.getParameter("file");
+        String filePath = ArgsParser.getArgument("file");
 
-        assertEquals(file, result);
+        assertEquals(file.getArgument(), filePath);
     }
 }
