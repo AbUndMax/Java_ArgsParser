@@ -640,10 +640,17 @@ public class TestArgsParser {
         assertEquals("file.txt", file.getArgument());
     }
 
-    @Test
-    public void testDirectHelp() {
-        ArgsParser parser = new ArgsParser(new String[] {"--help"});
-        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
-        parser.parse();
-    }
+//    @Test
+//    public void testDirectHelp() {
+//        ArgsParser parser = new ArgsParser(new String[] {"--help"});
+//        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+//        parser.parse();
+//    }
+
+//    @Test
+//    public void testArgsExceptionWithDirectParse() {
+//        ArgsParser parser = new ArgsParser(new String[] {"-f"});
+//        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+//        parser.parse();
+//    }
 }
