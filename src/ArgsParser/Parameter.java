@@ -138,7 +138,7 @@ public class Parameter<T> {
     /**
      * getter method for the argument attribute
      * @return argument as String
-     * @throws IllegalStateException if {@link ArgsParser#parse(String)} was not called before trying to access this argument
+     * @throws IllegalStateException if {@link ArgsParser#parse(String[])} was not called before trying to access this argument
      */
     public T getArgument() throws IllegalStateException {
         if (!ArgsParser.parseArgsWasCalled()) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");

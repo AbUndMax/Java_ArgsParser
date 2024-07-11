@@ -48,7 +48,7 @@ import java.util.*;
  *         <li>Parameters can have a description</li>
  *         <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
  *     </ul>
- *     <li>After all parameters are added, the {@link #parse()} method has to be called! (this is mandatory!)</li>
+ *     <li>After all parameters are added, the {@link ArgsParser#parse(String[])} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
  *          which will return the parsed argument of that parameter as the specified type </li>
  * </ol>
@@ -94,7 +94,7 @@ public class ArgsParser {
         if (shortFlags.contains(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
 
         // create new parameter instance
-        Parameter<T> parameter = new Parameter<T>(makeFlag(fullFlag, false),
+        Parameter<T> parameter = new Parameter<>(makeFlag(fullFlag, false),
                                                   makeFlag(shortFlag, true),
                                                   description, type, isMandatory);
 

@@ -23,15 +23,16 @@ catering to diverse application needs.
   streamlining the use in application logic.
 
 ## How to Use
-### 1. Import the `ArgsParser` Package and initialize the `ArgsParser` class
+### 1. Import the `ArgsParser` Package
 Import the ArgsParser package.
-Then initialize the `ArgsParser` class with the String[] args array of the main method.
+With 3.0 an initialization of the `ArgsParser` class with the String[] args array of the main method is no longer necessary
+since the whole parser is now static. 
+Thus providing access to arguments globally with the `getArgumentOf(String fullFlag)` method.
 
 ```java
 import ArgsParser.*;
 
 public static void main(String[] args) {
-    ArgsParser parser = new ArgsParser(args);
 ```
 
 ### 2. Define the Parameters
@@ -45,14 +46,16 @@ You can specify several fields for each parameter:
 - **Type**: Type definition by calling the respective "addParameter" method.
 
 ```java
-    Parameter<String> example = parser.addStringParameter("parameterFlag", "pf", true);
-    Parameter<Integer> example2 = parser.addIntegerParameter("parameterFlag2", "pf2", false);
-    Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
-    Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+    import ArgsParser.ArgsParser;
+
+Parameter<String> example = ArgsParser.addStringParameter("parameterFlag", "pf", true);
+Parameter<Integer> example2 = ArgsParser.addIntegerParameter("parameterFlag2", "pf2", false);
+Parameter<String> example3 = ArgsParser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
+Parameter<Double> argWithDefault = ArgsParser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
 ```
 
 ### 3. Parse the Arguments
-Call the `parseArgs()` method after adding all parameters.
+Call the `parse(String[] args)` method after adding all parameters.
 Catch possible `ArgsException` errors for common parsing 
 issues such as:
 
@@ -67,7 +70,7 @@ Exit with status code 0 for help requests and 1 for errors is recommended.
 
 ```java
     try {
-        parser.parseArgs();
+        ArgsParser.parse(args);
         
     } catch (CalledForHelpNotification help) {
         System.out.println(help.getMessage());
@@ -87,6 +90,20 @@ The arguments can be used directly in your code.
 ```java
     String providedArgument = example.getArgument();
     Double result = example2.getArgument() + argWithDefault.getArgument();
+```
+
+With version 3.0.0 the `ArgsParser` class is now static and the `getArgumentOf(String fullFlag)` method can be used to access the arguments globally.
+But this comes with some restrictions:
+- `getArgumentOf()` is generic, thus the returned value cannot be directly used in the program but has to be 
+  assigned first.
+- The type of the variable which gets the argument assigned has to be of the same type as the type of the parameter 
+  when adding it with any `addParameter()`method!
+
+```java
+    String providedArgument = ArgsParser.getArgumentOf("parameterFlag");
+    Integer getInteger = ArgsParser.getArgumentOf("parameterFlag2");
+    Double getDouble = ArgsParser.getArgumentOf("parameterFlag4");
+    Double result = getInteger + getDouble;
 }
 ```
 
