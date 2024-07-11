@@ -60,6 +60,7 @@ public class ArgsParser {
 
     private final String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
+    private static Map<String, Parameter<?>> parameterMapStatic;
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     private final Set<String> fullFlags = new HashSet<>();
     private final Set<String> shortFlags = new HashSet<>();
@@ -73,6 +74,7 @@ public class ArgsParser {
      */
     public ArgsParser(String[] args) {
         this.args = args;
+        parameterMapStatic = this.parameterMap;
     }
 
     /**
@@ -526,6 +528,10 @@ public class ArgsParser {
             }
             throw new MandatoryArgNotProvidedArgsException(errorMessage.toString());
         }
+    }
+
+    public static Parameter<?> getParameter(String fullFlag) {
+        return parameterMapStatic.get(fullFlag);
     }
 
 }
