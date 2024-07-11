@@ -599,4 +599,18 @@ public class TestArgsParser {
         }
 
     }
+
+    @Test
+    public void testGetParameter() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Parameter<String> result = ArgsParser.getParameter("file");
+
+        assertEquals(file, result);
+    }
 }

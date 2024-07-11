@@ -137,7 +137,7 @@ public class ArgsParser {
      * @param isShortName true if the flag is a short flag
      * @return flag in the correct format (e.g. --fullFlag or -f)
      */
-    private String makeFlag(String fullFlag, boolean isShortName) {
+    private static String makeFlag(String fullFlag, boolean isShortName) {
         int i = 0;
         while (fullFlag.charAt(i) == '-') {
             i++;
@@ -530,8 +530,8 @@ public class ArgsParser {
         }
     }
 
-    public static Parameter<?> getParameter(String fullFlag) {
-        return parameterMapStatic.get(fullFlag);
+    public static String getArgument(String flag) {
+        return parameterMapStatic.get(flag).getArgument().toString();
     }
 
 }
