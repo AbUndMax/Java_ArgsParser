@@ -1,4 +1,8 @@
-[![Badge](https://img.shields.io/badge/latest_release-v2.0.0-brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/tag/Release_v2.0.0)
+[![GitHub](https://img.shields.io/badge/GitHub-Java__ArgsParser-blue?logo=github)](https://github.com/AbUndMax/Java_ArgsParser)
+[![License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/AbUndMax/Java_ArgsParser/blob/main/LICENSE)
+![Java](https://img.shields.io/badge/Java-11+-e37929)
+[![Badge](https://img.shields.io/github/v/release/AbUndMax/Java_ArgsParser?color=brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/latest)
+
 # ArgsParser Library
 The ArgsParser Library is a comprehensive solution 
 designed to simplify the process of handling command-line arguments in Java applications.
