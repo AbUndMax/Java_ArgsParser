@@ -60,6 +60,7 @@ public class ArgsParser {
 
     private final String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
+    private static Map<String, Parameter<?>> parameterMapStatic;
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     private final Set<String> fullFlags = new HashSet<>();
     private final Set<String> shortFlags = new HashSet<>();
@@ -73,6 +74,7 @@ public class ArgsParser {
      */
     public ArgsParser(String[] args) {
         this.args = args;
+        parameterMapStatic = this.parameterMap;
     }
 
     /**
@@ -135,7 +137,7 @@ public class ArgsParser {
      * @param isShortName true if the flag is a short flag
      * @return flag in the correct format (e.g. --fullFlag or -f)
      */
-    private String makeFlag(String fullFlag, boolean isShortName) {
+    private static String makeFlag(String fullFlag, boolean isShortName) {
         int i = 0;
         while (fullFlag.charAt(i) == '-') {
             i++;
@@ -526,6 +528,19 @@ public class ArgsParser {
             }
             throw new MandatoryArgNotProvidedArgsException(errorMessage.toString());
         }
+    }
+
+    /**
+     * getter method for the argument of a specific parameter
+     * <p>Make sure T is of same type as given fullFlag parameter type! </p>
+     * @param fullFlag name of the parameter
+     * @param <T> type of the parameter
+     * @return the argument of the parameter
+     * @throws ClassCastException if the argument is not of the correct type
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getArgumentOf(String fullFlag) throws ClassCastException {
+        return (T) parameterMapStatic.get(makeFlag(fullFlag, false)).getArgument();
     }
 
 }
