@@ -595,12 +595,8 @@ public class TestArgsParser {
             System.exit(0);
 
         } catch (ArgsException e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
+            assertEquals(new TooManyArgumentsArgsException("-pf4").getMessage(), e.getMessage());
         }
-
-        String providedArgument = example.getArgument();
-        Double result = example2.getArgument() + argWithDefault.getArgument();
 
     }
 }
