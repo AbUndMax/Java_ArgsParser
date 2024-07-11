@@ -475,10 +475,14 @@ public class ArgsParser {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
         Parameter<?> currentParameter = null;
+        boolean longFlagUsed = false;
         for (int i = 0; i < args.length; i++) {
 
             boolean currentPositionIsFlag = args[i].startsWith("-");
-            if (currentPositionIsFlag) currentParameter = parameterMap.get(args[i]);
+            if (currentPositionIsFlag) {
+                currentParameter = parameterMap.get(args[i]);
+                longFlagUsed = args[i].startsWith("--");
+            }
             boolean flagExists = parameterMap.get(args[i]) != null;
             boolean isLastEntry = i == args.length - 1;
             boolean currentParameterNotNull = currentParameter != null;
@@ -489,7 +493,7 @@ public class ArgsParser {
                 throw new UnknownFlagArgsException(args[i]);
 
             } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
-                throw new TooManyArgumentsArgsException(currentParameter.getFullFlag());
+                throw new TooManyArgumentsArgsException(longFlagUsed ? currentParameter.getFullFlag() : currentParameter.getShortFlag());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
                 throw new MissingArgArgsException(args[i - 1]);

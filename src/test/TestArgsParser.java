@@ -579,4 +579,28 @@ public class TestArgsParser {
         } catch (ArgsException e) {
         }
     }
+
+    @Test
+    public void testShortFlag() {
+        ArgsParser parser = new ArgsParser(new String[]{"-pf4", "5.6", "5.6"});
+        Parameter<String> example = parser.addStringParameter("parameterFlag", "pf", true);
+        Parameter<Integer> example2 = parser.addIntegerParameter("parameterFlag2", "pf2", false);
+        Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
+        Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+        try {
+            parser.parseArgs();
+
+        } catch (CalledForHelpNotification help) {
+            System.out.println(help.getMessage());
+            System.exit(0);
+
+        } catch (ArgsException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+
+        String providedArgument = example.getArgument();
+        Double result = example2.getArgument() + argWithDefault.getArgument();
+
+    }
 }
