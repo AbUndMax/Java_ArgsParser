@@ -24,7 +24,7 @@ public class TestArgsParser {
     }
 
     @Test
-    public void testGetArgument() {
+    public void testParameterDotGetArgument() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", " ", true);
         try {
@@ -601,7 +601,7 @@ public class TestArgsParser {
     }
 
     @Test
-    public void testGetParameter() {
+    public void testGetArgument() {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
