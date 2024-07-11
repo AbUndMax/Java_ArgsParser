@@ -7,6 +7,6 @@ import ArgsParser.ArgsException;
  */
 public class TooManyArgumentsArgsException extends ArgsException {
     public TooManyArgumentsArgsException(String flagName) {
-        super("Too many arguments provided for parameter: " + flagName);
+        super("Too many arguments provided to flag: " + flagName);
     }
 }

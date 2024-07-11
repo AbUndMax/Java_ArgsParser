@@ -28,7 +28,7 @@ import ArgsParser.ArgsExceptions.*;
 import java.util.*;
 
 /**
- * Class to parse arguments given in the command line, the tool checks for several conditions:
+ * Class, to parse arguments given in the command line, the tool checks for several conditions:
  * <ul>
  *     <li>if no arguments were provided</li>
  *     <li>if an unknown flag was provided</li>
@@ -43,14 +43,15 @@ import java.util.*;
  *     <li>The ArgsParser constructor {@link #ArgsParser(String[])} is called and the args array of the main method provided.</li>
  *     <li>Now we can specify the parameters we want to have for the program by using {@link #addStringParameter(String, String, String, boolean)}</li>
        <ul>
- *         <li>Parameters can be mandatory or optional</li>
- *         <li>Parameters can have a short version flags</li>
+ *         <li>Parameters have to be specified mandatory or optional</li>
+ *         <li>Parameters have a full flag name</li>
+ *         <li>Parameters have a short version flags</li>
  *         <li>Parameters can have a description</li>
  *         <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
  *     </ul>
  *     <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
- *          and type specific arguments can be accessed if a type i.e. Integer.Class was provided in {@link #addStringParameter(String, String, String, boolean)} </li>
+ *          which will return the parsed argument of that parameter as the specified type </li>
  * </ol>
  * available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a>
  * @author Niklas Max G. 2024
@@ -75,7 +76,7 @@ public class ArgsParser {
     }
 
     /**
-     * creates a new Parameter instance and sets it accordingly with the given fields
+     * creates a new Parameter instance and sets it accordingly with the given fields.
      * Adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
      * @param fullFlag name of the parameter
      * @param shortFlag short name of the parameter
@@ -108,7 +109,7 @@ public class ArgsParser {
 
         // add parameter to the map
         parameterMap.put(parameter.getFullFlag(), parameter);
-        if (parameter.getShortFlag() != null) parameterMap.put(parameter.getShortFlag(), parameter);
+        parameterMap.put(parameter.getShortFlag(), parameter);
 
         // check for the lengths of the name
         int nameSize = parameter.getFullFlag().length();
@@ -440,24 +441,15 @@ public class ArgsParser {
      * <ul>checks if --help or -h was called on the program, printing out help Strings for all parameters</ul>
      * <ul>checks if --help or -h was called for a specific parameter, printing out this parameters help string</ul>
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
-     * @throws MissingArgArgsException if a flag was provided without an argument
      * @throws CalledForHelpNotification if --help or -h was called
      */
-    private void checkForHelpCall() throws UnknownFlagArgsException, MissingArgArgsException, CalledForHelpNotification {
+    private void checkForHelpCall() throws UnknownFlagArgsException, CalledForHelpNotification {
         boolean oneArgProvided = args.length == 1;
         boolean twoArgsProvided = args.length == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
 
-        if (oneArgProvided) {
-            if (args[0].equals("--help") || args[0].equals("-h")) { // if --help or -h was called, the help is printed
-                throw new CalledForHelpNotification(new HashSet<>(parameterMap.values()), longestFlagSize, longestShortFlag);
-
-            } else if (firstArgumentIsParameter) { // if the first argument is a parameter but --help was not called, the program notifies the user of a missing argument
-                throw new MissingArgArgsException(args[0]);
-
-            } else { // if the first argument is not a parameter and --help was not called, the program notifies the user of an unknown parameter input
-                throw new UnknownFlagArgsException(args[0]);
-            }
+        if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
+            throw new CalledForHelpNotification(new HashSet<>(parameterMap.values()), longestFlagSize, longestShortFlag);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
@@ -524,9 +516,9 @@ public class ArgsParser {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
             StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Mandatory parameters are missing:\n");
+            errorMessage.append("Mandatory parameters are missing:");
             for (Parameter<?> param : mandatoryParameters) {
-                errorMessage.append(param.getFullFlag()).append("\n");
+                errorMessage.append("\n").append(param.getFullFlag());
             }
             throw new MandatoryArgNotProvidedArgsException(errorMessage.toString());
         }

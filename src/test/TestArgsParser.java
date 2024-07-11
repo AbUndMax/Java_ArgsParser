@@ -9,13 +9,16 @@ import static org.junit.Assert.*;
 public class TestArgsParser {
 
     @Test
-    public void noArgumentsProvided() {
+    public void testNoArgumentsProvided() {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<String> file = parser.addStringParameter("file", "f", " ",true);
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
+            System.out.println(e.getMessage());
             assertEquals(new NoArgumentsProvidedArgsException().getMessage(), e.getMessage());
+        } catch (CalledForHelpNotification e) {
+            System.out.println(e.getMessage());
         }
         String result = file.getArgument();
     }
@@ -44,6 +47,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
         }
     }
@@ -56,6 +60,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-s").getMessage(), e.getMessage());
         }
         String result = file.getArgument();
@@ -71,6 +76,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--file").getMessage(), e.getMessage());
         }
         String result = save.getArgument();
@@ -84,6 +90,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--save").getMessage(), e.getMessage());
         }
         String result = save.getArgument();
@@ -97,6 +104,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
         }
         String result = file.getArgument();
@@ -111,7 +119,10 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
-            assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n").getMessage(), e.getMessage());
+            System.out.println(e.getMessage());
+            assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(), e.getMessage());
+        } catch (CalledForHelpNotification e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -123,7 +134,10 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (ArgsException e) {
+            System.out.println(e.getMessage());
             assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), e.getMessage());
+        } catch (CalledForHelpNotification e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -196,6 +210,7 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             assertEquals(new InvalidArgTypeArgsException("--double", "Double", "multiple points").getMessage(), e.getMessage());
         }
     }
@@ -295,7 +310,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Integer result = number.getArgument();
         assertEquals(Integer.valueOf(42), result);
@@ -309,7 +323,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Integer result = number.getArgument();
         assertEquals(Integer.valueOf(42), result);
@@ -351,7 +364,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Double result = number.getArgument();
         assertEquals(Double.valueOf(42.5), result);
@@ -365,7 +377,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Double result = number.getArgument();
         assertEquals(Double.valueOf(42.5), result);
@@ -463,7 +474,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Character result = character.getArgument();
         assertEquals(Character.valueOf('c'), result);
@@ -477,7 +487,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         Character result = character.getArgument();
         assertEquals(Character.valueOf('c'), result);
@@ -490,7 +499,6 @@ public class TestArgsParser {
         try {
             parser.parseArgs();
         } catch (Exception e) {
-            e.printStackTrace();
         }
         String result = string.getArgument();
         assertEquals("default", result);
@@ -531,6 +539,44 @@ public class TestArgsParser {
             parser.parseArgs();
         } catch (Exception e) {
             assertEquals("Flag already exists: file", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testNoFlags() {
+        ArgsParser parser = new ArgsParser(new String[] {"file.txt"});
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--file").getMessage(), e.getMessage());
+        }
+    }
+
+    @Test
+    public void testMultipleMandatoryArgumentsMissing() {
+        ArgsParser parser = new ArgsParser(new String[] {"--load", "file.txt"});
+        Parameter<String> load = parser.addStringParameter("load", "l", "descr", false);
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
+        try {
+            parser.parseArgs();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(), e.getMessage());
+        }
+    }
+
+    @Test
+    public void testHelpForOneFlag() {
+        ArgsParser parser = new ArgsParser(new String[] {"--file", "--help"});
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        try {
+            parser.parseArgs();
+        } catch (CalledForHelpNotification e) {
+            System.out.println(e.getMessage());
+        } catch (ArgsException e) {
         }
     }
 }

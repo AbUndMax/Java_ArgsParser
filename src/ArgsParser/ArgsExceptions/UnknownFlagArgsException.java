@@ -7,6 +7,6 @@ import ArgsParser.ArgsException;
  */
 public class UnknownFlagArgsException extends ArgsException {
     public UnknownFlagArgsException(String flagName) {
-        super("unknown parameter: " + flagName);
+        super("unknown flag: " + flagName);
     }
 }

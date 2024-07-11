@@ -5,9 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Exception used as Notification that --help was used and after printing the help message the program should exit
+ * Exception used as Notification that --help was used.
+ * It will print all available flags to the console if only --help was provided in args
+ * It will print the help message for a single flag if --help was provided behind a flag
+ *
+ * <p>It is recommended to call {@link System#exit(int status)}  with status = 0, after outputting the message.</p>
  */
-public class CalledForHelpNotification extends ArgsException {
+public class CalledForHelpNotification extends Exception {
 
     private static final int consoleWidth = 100;
     private static final Map<String, String> shortFlagTypes = new HashMap<>(){{
@@ -34,14 +38,14 @@ public class CalledForHelpNotification extends ArgsException {
         int numberOfHashes = consoleWidth / 2 - spaceForHeadTitle / 2;
         String header = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
         helpMessage.append(header).append("\n");
-        helpMessage.append(centerString("[s]=String | [i]=Integer | [d]=Double | [b]=Boolean | [c]=Character")).append("\n");
-        helpMessage.append(centerString("(!)=mandatory parameter | (+)=optional parameter")).append("\n");
+        helpMessage.append(centerString("[s]=String | [i]=Integer | [c]=Character | [b]=Boolean | [d]=Double")).append("\n");
+        helpMessage.append(centerString("(!)=mandatory | (+)=optional")).append("\n");
         helpMessage.append("#").append("\n");
 
         if (parameters.size() > 1) {
             helpMessage.append(centerString("Available Parameters:")).append("\n");
+            helpMessage.append("#").append("\n");
         }
-        helpMessage.append("#").append("\n");
 
         for (Parameter<?> param : parameters) {
             String helpString = parameterHelpString(param, longestFlagSize, longestShortFlag);
