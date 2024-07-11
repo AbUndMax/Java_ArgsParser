@@ -609,7 +609,7 @@ public class TestArgsParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String filePath = ArgsParser.getArgument("file");
+        String filePath = ArgsParser.getArgumentOf("file");
 
         assertEquals(file.getArgument(), filePath);
     }
@@ -624,7 +624,7 @@ public class TestArgsParser {
             e.printStackTrace();
         }
         try {
-            Integer filePath = ArgsParser.getArgument("file");
+            Integer filePath = ArgsParser.getArgumentOf("file");
         } catch (ClassCastException e) {
             assertEquals(new ClassCastException("class java.lang.String cannot be cast to class java.lang.Integer " +
                                                         "(java.lang.String and java.lang.Integer are in module java.base " +

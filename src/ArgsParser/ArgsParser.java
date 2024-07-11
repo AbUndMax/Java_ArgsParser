@@ -539,7 +539,7 @@ public class ArgsParser {
      * @throws ClassCastException if the argument is not of the correct type
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getArgument(String fullFlag) throws ClassCastException {
+    public static <T> T getArgumentOf(String fullFlag) throws ClassCastException {
         return (T) parameterMapStatic.get(makeFlag(fullFlag, false)).getArgument();
     }
 
