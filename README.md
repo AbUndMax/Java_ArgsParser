@@ -52,8 +52,13 @@ You can specify several fields for each parameter:
 ```
 
 ### 3. Parse the Arguments
-Call the `parseArgs()` method after adding all parameters.
-Catch possible `ArgsException` errors for common parsing 
+Call the `parse()` or `parseAndThrow()` method after adding all parameters.
+
+- The `parse()` method directly handles all ArgsExceptions and uses `System.exit()` if any invalid argument is 
+provided to the console or `--help` / `-h` was used.
+- The `parseAndThrow()` method throws the exceptions, which you can catch and handle manually.
+
+The ArgsParser catches possible `ArgsException` errors for common parsing 
 issues such as:
 
 - No arguments provided
@@ -65,9 +70,15 @@ issues such as:
 A `CalledForHelpNotification` can also be thrown if the user requests the help message.  
 Exit with status code 0 for help requests and 1 for errors is recommended.
 
+The Code example look like this:
+```Java
+    parser.parse();
+```
+
+or like this for manually handling the ArgsExceptions:
 ```java
     try {
-        parser.parseArgs();
+        parser.parseAndThrow();
         
     } catch (CalledForHelpNotification help) {
         System.out.println(help.getMessage());
