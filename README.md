@@ -22,9 +22,8 @@ catering to diverse application needs.
 - **Suggestions for misspelled flags:** The parser will suggest the correct flag if a misspelled flag was provided.
 - **Integrated Help Function:** Automatically generates a help message displaying all parameters,
   their types, and descriptions.
-- **Access arguments directly as correct type:** Accessing the argument of a parameter will directly return the 
-  argument of the defined type when creating the parameter.
 - **Global Access to Arguments:** Access arguments from anywhere in your code.
+- **Arguments directly casted:** Accessing a parameter's argument returns it as the defined type.
 
 ## How to Use
 ### 1. Import the `ArgsParser` Package
