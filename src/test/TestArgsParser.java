@@ -12,7 +12,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<String> file = parser.addStringParameter("file", "f", " ",true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new NoArgumentsProvidedArgsException().getMessage(), e.getMessage());
@@ -27,7 +27,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", " ", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,7 +44,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
@@ -57,7 +57,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = parser.addStringParameter("save", "w", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-s").getMessage(), e.getMessage());
@@ -73,7 +73,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "m", "descr", true);
         Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--file").getMessage(), e.getMessage());
@@ -87,7 +87,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("--file", "f", "descr", true);
         Parameter<String> save = parser.addStringParameter("--save", "s", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--save").getMessage(), e.getMessage());
@@ -101,7 +101,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("--file", "m", "descr", true);
         Parameter<String> save = parser.addStringParameter("--save", "s", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
@@ -116,7 +116,7 @@ public class TestArgsParser {
         Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         Parameter<String> optional = parser.addStringParameter("optional", "o", "descr", false);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(), e.getMessage());
@@ -131,7 +131,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), e.getMessage());
@@ -146,7 +146,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", true);
         Parameter<Integer> integer = parser.addIntegerParameter("integer", "int", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -161,7 +161,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Integer> integer = parser.addIntegerParameter("integer", "int", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -177,7 +177,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Boolean> bool = parser.addBooleanParameter("boolean", "b", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -191,7 +191,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -207,7 +207,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new InvalidArgTypeArgsException("--double", "Double", "multiple points").getMessage(), e.getMessage());
@@ -220,7 +220,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", 12.3);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
 
@@ -236,7 +236,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", 12.3);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
 
@@ -252,7 +252,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descri", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
         Parameter<Double> doub = parser.addDoubleParameter("double", "d", "des", 12.3);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -267,7 +267,7 @@ public class TestArgsParser {
         Parameter<Boolean> bool = parser.addBooleanParameter("boolean", "b", "des", true);
         Parameter<Integer> integer = parser.addIntegerParameter("integer", "i", "des", 5);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -279,7 +279,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--number", "42"});
         Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -293,7 +293,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--number", "42"});
         Parameter<Integer> number = parser.addIntegerParameter("number", "n", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -307,7 +307,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", 42);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Integer result = number.getArgument();
@@ -320,7 +320,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Integer> number = parser.addIntegerParameter("number", "n", 42);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Integer result = number.getArgument();
@@ -333,7 +333,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--number", "42.5"});
         Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -347,7 +347,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--number", "42.5"});
         Parameter<Double> number = parser.addDoubleParameter("number", "n", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -361,7 +361,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", 42.5);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Double result = number.getArgument();
@@ -374,7 +374,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Double> number = parser.addDoubleParameter("number", "n", 42.5);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Double result = number.getArgument();
@@ -387,7 +387,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--flag", "true"});
         Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -401,7 +401,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--flag", "true"});
         Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -415,7 +415,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--flag", "false"});
         Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -429,7 +429,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"-f", "true"});
         Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -443,7 +443,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--char", "c"});
         Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -457,7 +457,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--char", "c"});
         Parameter<Character> character = parser.addCharacterParameter("char", "c", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -471,7 +471,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", 'c');
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Character result = character.getArgument();
@@ -484,7 +484,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<Character> character = parser.addCharacterParameter("char", "c", 'c');
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Character result = character.getArgument();
@@ -496,7 +496,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {});
         Parameter<String> string = parser.addStringParameter("string", "s", "default");
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         String result = string.getArgument();
@@ -508,7 +508,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--bool", "true"});
         Parameter<Boolean> bool = parser.addBooleanParameter(true, "bool", "b", "descr");
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -521,7 +521,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--bool", "false"});
         Parameter<Boolean> bool = parser.addBooleanParameter(false, "bool", "b");
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -535,7 +535,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
             Parameter<String> file2 = parser.addStringParameter("file", "f2", "descr", true);
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             assertEquals("Flag already exists: file", e.getMessage());
         }
@@ -546,7 +546,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--file").getMessage(), e.getMessage());
@@ -560,7 +560,7 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(), e.getMessage());
@@ -572,7 +572,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "--help"});
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -587,7 +587,7 @@ public class TestArgsParser {
         Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
         Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -604,7 +604,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -618,7 +618,7 @@ public class TestArgsParser {
         ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
         Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            parser.parseAndThrow();
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -639,6 +639,8 @@ public class TestArgsParser {
 
         assertEquals("file.txt", file.getArgument());
     }
+
+    // tests for the checked parse() method
 
 //    @Test
 //    public void testDirectHelp() {

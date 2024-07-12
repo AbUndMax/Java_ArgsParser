@@ -52,11 +52,11 @@ You can specify several fields for each parameter:
 ```
 
 ### 3. Parse the Arguments
-Call the `parse()` or `parseAndThrow()` method after adding all parameters.
+Call the `parse()` or `parseUnchecked()` method after adding all parameters.
 
 - The `parse()` method directly handles all ArgsExceptions and uses `System.exit()` if any invalid argument is 
 provided to the console or `--help` / `-h` was used.
-- The `parseAndThrow()` method throws the exceptions, which you can catch and handle manually.
+- The `parseUnchecked()` method throws the exceptions, which you can catch and handle manually.
 
 The ArgsParser catches possible `ArgsException` errors for common parsing 
 issues such as:
@@ -78,7 +78,7 @@ The Code example look like this:
 or like this for manually handling the ArgsExceptions:
 ```java
     try {
-        parser.parseAndThrow();
+        parser.parseUnchecked();
         
     } catch (CalledForHelpNotification help) {
         System.out.println(help.getMessage());
