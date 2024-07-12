@@ -188,6 +188,18 @@ or
 
 ```
 
+for misspelled flags, the Parser will even do a suggestion:
+
+`> exampleProgramm --paraeterflg4, 5.6`
+```
+
+<!> unknown flag: --paraeterflg4
+> did you mean: --parameterFlag4 ?
+
+> Use --help for more information.
+
+```
+
 ## List of all available "addParameter" methods
 
 #### String type:

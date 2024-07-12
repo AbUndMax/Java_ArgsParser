@@ -14,6 +14,13 @@ public class UnknownFlagArgsException extends ArgsException {
         super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags));
     }
 
+    /**
+     * Compute a suggestion for the user based on the flag name
+     * @param userInput the flag name provided by the user
+     * @param fullFlags the full flags available
+     * @param shortFlags the short flags available
+     * @return a suggestion for the user
+     */
     protected static String computeSuggestion(String userInput, Set<String> fullFlags, Set<String> shortFlags) {
         fullFlags.add("help");
         shortFlags.add("h");
@@ -47,10 +54,21 @@ public class UnknownFlagArgsException extends ArgsException {
 
     }
 
+    /**
+     * Strip the flag prefix from the flag name
+     * @param flag the flag name
+     * @return the flag name without the prefix
+     */
     private static String stripFlagPrefix(String flag) {
         return flag.replaceFirst("^-+", "");
     }
 
+    /**
+     * Compute the similarity score between the user input and the parameter using Levenshtein distance
+     * @param userInput the user input
+     * @param parameter the parameter
+     * @return the similarity score
+     */
     private static double SimilarityScore(String userInput, String parameter) {
         int[][] dp = new int[userInput.length() + 1][parameter.length() + 1];
         for (int i = 0; i <= userInput.length(); i++) {
