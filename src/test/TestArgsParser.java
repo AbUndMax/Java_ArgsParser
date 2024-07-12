@@ -4,7 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,6 +21,10 @@ public class TestArgsParser {
             Class<?> cls = Class.forName("ArgsParser.ArgsParser");
             Method resetMethod = cls.getDeclaredMethod("reset");
             resetMethod.setAccessible(true);
+            Field field = cls.getDeclaredField("fullFlags");
+            field.setAccessible(true);
+            Field field2 = cls.getDeclaredField("shortFlags");
+            field2.setAccessible(true);
             resetMethod.invoke(null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,13 +62,19 @@ public class TestArgsParser {
 
     @Test
     public void testUnknownParameter() {
+
+
         Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
+        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
+        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"f", "s"}));
         try {
-            ArgsParser.parseUnchecked(new String[] {"-f", "file.txt", "-s", "save.txt"});
+            ArgsParser.parseUnchecked(new String[] {"-w", "file.txt", "-s", "save.txt"});
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
+            assertEquals("\n<!> unknown flag: -w\n" +
+                                 "\n" +
+                                 "> Use --help for more information.\n", e.getMessage());
         }
     }
 
@@ -68,15 +82,74 @@ public class TestArgsParser {
     public void testGetArgumentWithMultipleFlagsAndWrongInput() {
         Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
         Parameter<String> save = ArgsParser.addStringParameter("save", "w", "descr", true);
+        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
+        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"f", "w"}));
         try {
             ArgsParser.parseUnchecked(new String[] {"-f", "file.txt", "--save", "save.txt", "-s"});
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            assertEquals(new UnknownFlagArgsException("-s").getMessage(), e.getMessage());
+            assertEquals("\n<!> unknown flag: -s\n" +
+                                 "> did you mean: --save ?\n" +
+                                 "\n" +
+                                 "> Use --help for more information.\n", e.getMessage());
         }
         String result = file.getArgument();
 
         assertEquals("file.txt", result);
+    }
+
+    @Test
+    public void testMissingShorts() {
+        Parameter<String> file = ArgsParser.addStringParameter("--file", "m", "descr", true);
+        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
+        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"m", "s"}));
+        try {
+            ArgsParser.parseUnchecked(new String[]{"-f", "/to/file", "--save", "save.txt"});
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            assertEquals("\n<!> unknown flag: -f\n" +
+                                 "> did you mean: --file ?\n" +
+                                 "\n" +
+                                 "> Use --help for more information.\n", e.getMessage());
+        }
+        String result = file.getArgument();
+    }
+
+    @Test
+    public void testSuggestionForFullFlag() {
+        Parameter<String> file = ArgsParser.addStringParameter("--file", "f", "descr", true);
+        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"--file", "--save"}));
+        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"-m", "-s"}));
+        try {
+            ArgsParser.parseUnchecked(new String[]{"-f", "/to/file", "--sve", "save.txt"});
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            assertEquals("\n<!> unknown flag: --sve\n" +
+                                 "> did you mean: --save ?\n" +
+                                 "\n" +
+                                 "> Use --help for more information.\n", e.getMessage());
+        }
+        String result = file.getArgument();
+    }
+
+    @Test
+    public void testMissspelledHelp() {
+        Parameter<String> file = ArgsParser.addStringParameter("--file", "f", "descr", true);
+        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"--file", "--save"}));
+        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"-m", "-s"}));
+        try {
+            ArgsParser.parseUnchecked(new String[]{"--hp"});
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            assertEquals("\n<!> unknown flag: --hp\n" +
+                                 "> did you mean: --help ?\n" +
+                                 "\n" +
+                                 "> Use --help for more information.\n", e.getMessage());
+        }
+        String result = file.getArgument();
     }
 
     @Test
@@ -103,19 +176,6 @@ public class TestArgsParser {
             assertEquals(new MissingArgArgsException("--save").getMessage(), e.getMessage());
         }
         String result = save.getArgument();
-    }
-
-    @Test
-    public void testMissingShorts() {
-        Parameter<String> file = ArgsParser.addStringParameter("--file", "m", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
-        try {
-            ArgsParser.parseUnchecked(new String[]{"-f", "/to/file", "--save", "save.txt"});
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            assertEquals(new UnknownFlagArgsException("-f").getMessage(), e.getMessage());
-        }
-        String result = file.getArgument();
     }
 
     @Test

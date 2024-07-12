@@ -66,6 +66,10 @@ public class ArgsParser {
     private static int longestFlagSize = 0;
     private static int longestShortFlag = 0;
 
+    /**
+     * checks if the parse method was called
+     * @return true if the parse method was called, false otherwise
+     */
     protected static boolean parseArgsWasCalled() {
         return parseArgsWasCalled;
     }
@@ -88,15 +92,15 @@ public class ArgsParser {
                                              Class<T> type,
                                              boolean isMandatory,
                                              T defaultValue) {
+        fullFlag = makeFlag(fullFlag, false);
+        shortFlag = makeFlag(shortFlag, true);
 
         // check if the flag names are already used
         if (fullFlags.contains(fullFlag)) throw new IllegalArgumentException("Flag already exists: " + fullFlag);
         if (shortFlags.contains(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
 
         // create new parameter instance
-        Parameter<T> parameter = new Parameter<>(makeFlag(fullFlag, false),
-                                                  makeFlag(shortFlag, true),
-                                                  description, type, isMandatory);
+        Parameter<T> parameter = new Parameter<>(fullFlag, shortFlag, description, type, isMandatory);
 
         if (defaultValue != null) {
             parameter.setDefault(defaultValue);
@@ -481,7 +485,7 @@ public class ArgsParser {
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
-                throw new UnknownFlagArgsException(args[0]);
+                throw new UnknownFlagArgsException(args[0], fullFlags, shortFlags);
             }
         }
     }
@@ -514,7 +518,7 @@ public class ArgsParser {
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
 
             if (currentPositionIsFlag && !flagExists) { // if flag is unknown
-                throw new UnknownFlagArgsException(args[i]);
+                throw new UnknownFlagArgsException(args[i], fullFlags, shortFlags);
 
             } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
                 throw new TooManyArgumentsArgsException(longFlagUsed ? currentParameter.getFullFlag() : currentParameter.getShortFlag());
