@@ -17,10 +17,14 @@ catering to diverse application needs.
   mandatory/optional status, as well as optional default values and descriptions.
 - **Robust Parsing-Error Handling:** Catch and handle custom exceptions for missing arguments, 
   invalid types, and other common parsing errors.
+- **Automatic exception handling** Alternatively of handling parsing errors manually, you can use a parsing method that 
+  automatically handles all exceptions and exits the program with the appropriate status code.
+- **Suggestions for misspelled flags:** The parser will suggest the correct flag if a misspelled flag was provided.
 - **Integrated Help Function:** Automatically generates a help message displaying all parameters,
   their types, and descriptions.
-- **Flexible Parameter Access:** Directly access parsed arguments with their defined types,
-  streamlining the use in application logic.
+- **Access arguments directly as correct type:** Accessing the argument of a parameter will directly return the 
+  argument of the defined type when creating the parameter.
+- **Global Access to Arguments:** Access arguments from anywhere in your code.
 
 ## How to Use
 ### 1. Import the `ArgsParser` Package
