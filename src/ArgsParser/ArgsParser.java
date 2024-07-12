@@ -49,7 +49,7 @@ import java.util.*;
  *         <li>Parameters can have a description</li>
  *         <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
  *     </ul>
- *     <li>After all parameters are added, the {@link #parseArgs()} method has to be called! (this is mandatory!)</li>
+ *     <li>After all parameters are added, the {@link #parseUnchecked()} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
  *          which will return the parsed argument of that parameter as the specified type </li>
  * </ol>
@@ -408,6 +408,31 @@ public class ArgsParser {
      *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
      *     <li>checks if all mandatory parameters were given in the args
      * </ul>
+     * <p>Directly handles any ArgsException by printing the message to the console than <strong>exiting the program!</strong></p>
+     */
+    public void parse() {
+
+        try {
+        parseUnchecked();
+
+        } catch (CalledForHelpNotification help) {
+            System.out.println(help.getMessage());
+            System.exit(0);
+
+        } catch (ArgsException e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+
+    }
+
+    /**
+     * <ul>
+     *     <li>checks if args is Empty</li>
+     *     <li>checks if --help or -h was called on the program</li>
+     *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
+     *     <li>checks if all mandatory parameters were given in the args
+     * </ul>
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
      * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
@@ -416,7 +441,7 @@ public class ArgsParser {
      * @throws CalledForHelpNotification if --help or -h was called
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    public void parseArgs() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
+    public void parseUnchecked() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
             CalledForHelpNotification, InvalidArgTypeArgsException {
 
