@@ -24,6 +24,25 @@ catering to diverse application needs.
   their types, and descriptions.
 - **Global Access to Arguments:** Access arguments from anywhere in your code.
 - **Arguments directly casted:** Accessing a parameter's argument returns it as the defined type.
+- **Lightweight:** Using the ArgsParser library is very simply and straight forward as shown in the example below.
+
+## Example Code:
+```java
+import ArgsParser.*;
+
+public class Example {
+    public static void main(String[] args) {
+        Parameter<String> param1 = ArgsParser.addStringParameter("parameterFlag", "pf", true);
+        ArgsParser.parse(args);
+
+        System.out.println(param1.getArgument());
+    }
+}
+```
+Using  
+`> java Example -pf "Hello World!"`  
+in the CLI will print:  
+`> Hello World!`
 
 ## How to Use
 ### 1. Import the `ArgsParser` Package
