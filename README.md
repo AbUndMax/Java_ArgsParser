@@ -96,7 +96,7 @@ issues such as:
 A `CalledForHelpNotification` can also be thrown if the user requests the help message.  
 Exit with status code 0 for help requests and 1 for errors is recommended.
 
-The Code example look like this:
+The Code example looks like this:
 ```Java
     ArgsParser.parse();
 ```
