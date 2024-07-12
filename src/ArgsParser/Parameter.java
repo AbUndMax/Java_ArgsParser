@@ -37,7 +37,6 @@ public class Parameter<T> {
     private final String shortFlag;
     private final String description;
     private final boolean isMandatory;
-    private final ArgsParser parser;
     private final Class<T> type;
     private T defaultValue = null;
     private boolean hasDefault = false;
@@ -60,7 +59,6 @@ public class Parameter<T> {
         });
     }
 
-
     /**
      * Constructor for the Parameter class with type definition
      * @param fullFlag name of the parameter
@@ -68,13 +66,11 @@ public class Parameter<T> {
      * @param description description of the parameter
      * @param type type of the parameter
      * @param isMandatory true if the parameter is mandatory, false otherwise
-     * @param parserInstance instance of the ArgsParser class
      */
-    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory, ArgsParser parserInstance) {
+    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory) {
         this.fullFlag = fullFlag;
         this.shortFlag = shortFlag;
         this.description = description;
-        this.parser = parserInstance;
         this.isMandatory = isMandatory;
         this.type = type;
     }
@@ -142,10 +138,10 @@ public class Parameter<T> {
     /**
      * getter method for the argument attribute
      * @return argument as String
-     * @throws IllegalStateException if {@link ArgsParser#parseUnchecked()} was not called before trying to access this argument
+     * @throws IllegalStateException if {@link ArgsParser#parse(String[])} was not called before trying to access this argument
      */
     public T getArgument() throws IllegalStateException {
-        if (!parser.parseArgsWasCalled) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
+        if (!ArgsParser.parseArgsWasCalled()) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
         if (!hasArgument && !hasDefault) return null;
         return argument;
     }

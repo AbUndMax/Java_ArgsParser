@@ -40,8 +40,7 @@ import java.util.*;
  * <p>The Parser functions as follows:</p>
  *
  * <ol>
- *     <li>The ArgsParser constructor {@link #ArgsParser(String[])} is called and the args array of the main method provided.</li>
- *     <li>Now we can specify the parameters we want to have for the program by using {@link #addStringParameter(String, String, String, boolean)}</li>
+ *     <li>Specify the parameters we want to have for the program by using {@link ArgsParser#addStringParameter(String, String, String, boolean)}</li>
        <ul>
  *         <li>Parameters have to be specified mandatory or optional</li>
  *         <li>Parameters have a full flag name</li>
@@ -49,7 +48,7 @@ import java.util.*;
  *         <li>Parameters can have a description</li>
  *         <li>Parameters can be of type String, Integer, Double, Boolean or Character</li>
  *     </ul>
- *     <li>After all parameters are added, the {@link #parseUnchecked()} method has to be called! (this is mandatory!)</li>
+ *     <li>After all parameters are added, the {@link ArgsParser#parse(String[])} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
  *          which will return the parsed argument of that parameter as the specified type </li>
  * </ol>
@@ -58,23 +57,17 @@ import java.util.*;
  */
 public class ArgsParser {
 
-    private final String[] args;
-    private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
-    private static Map<String, Parameter<?>> parameterMapStatic;
-    private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
-    private final Set<String> fullFlags = new HashSet<>();
-    private final Set<String> shortFlags = new HashSet<>();
-    protected boolean parseArgsWasCalled = false;
-    private int longestFlagSize = 0;
-    private int longestShortFlag = 0;
+    private static String[] args;
+    private static final Map<String, Parameter<?>> parameterMap = new HashMap<>();
+    private static final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
+    private static final Set<String> fullFlags = new HashSet<>();
+    private static final Set<String> shortFlags = new HashSet<>();
+    protected static boolean parseArgsWasCalled = false;
+    private static int longestFlagSize = 0;
+    private static int longestShortFlag = 0;
 
-    /**
-     * Constructor demands the args array of the main method to be passed.
-     * @param args args array of type String[] from the main method
-     */
-    public ArgsParser(String[] args) {
-        this.args = args;
-        parameterMapStatic = this.parameterMap;
+    protected static boolean parseArgsWasCalled() {
+        return parseArgsWasCalled;
     }
 
     /**
@@ -89,7 +82,7 @@ public class ArgsParser {
      * @return the created Parameter instance
      * @param <T> type of the parameter
      */
-    private <T> Parameter<T> createParameter(String fullFlag,
+    private static <T> Parameter<T> createParameter(String fullFlag,
                                              String shortFlag,
                                              String description,
                                              Class<T> type,
@@ -101,9 +94,9 @@ public class ArgsParser {
         if (shortFlags.contains(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
 
         // create new parameter instance
-        Parameter<T> parameter = new Parameter<T>(makeFlag(fullFlag, false),
+        Parameter<T> parameter = new Parameter<>(makeFlag(fullFlag, false),
                                                   makeFlag(shortFlag, true),
-                                                  description, type, isMandatory, this);
+                                                  description, type, isMandatory);
 
         if (defaultValue != null) {
             parameter.setDefault(defaultValue);
@@ -163,7 +156,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type String
      */
-    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public static Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, description, String.class, isMandatory, null);
     }
 
@@ -174,7 +167,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type String
      */
-    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+    public static Parameter<String> addStringParameter(String fullFlag, String shortFlag, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, null, String.class, isMandatory, null);
     }
 
@@ -186,7 +179,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type String
      */
-    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, String defaultValue) {
+    public static Parameter<String> addStringParameter(String fullFlag, String shortFlag, String description, String defaultValue) {
         return createParameter(fullFlag, shortFlag, description, String.class, false, defaultValue);
     }
 
@@ -197,7 +190,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type String
      */
-    public Parameter<String> addStringParameter(String fullFlag, String shortFlag, String defaultValue) {
+    public static Parameter<String> addStringParameter(String fullFlag, String shortFlag, String defaultValue) {
         return createParameter(fullFlag, shortFlag, null, String.class, false, defaultValue);
     }
 
@@ -213,7 +206,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Integer
      */
-    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public static Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, description, Integer.class, isMandatory, null);
     }
 
@@ -224,7 +217,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Integer
      */
-    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+    public static Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, null, Integer.class, isMandatory, null);
     }
 
@@ -236,7 +229,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Integer
      */
-    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue) {
+    public static Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue) {
         return createParameter(fullFlag, shortFlag, description, Integer.class, false, defaultValue);
     }
 
@@ -247,7 +240,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Integer
      */
-    public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, Integer defaultValue) {
+    public static Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, Integer defaultValue) {
         return createParameter(fullFlag, shortFlag, null, Integer.class, false, defaultValue);
     }
 
@@ -263,7 +256,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Double
      */
-    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public static Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, description, Double.class, isMandatory, null);
     }
 
@@ -274,7 +267,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Double
      */
-    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+    public static Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, null, Double.class, isMandatory, null);
     }
 
@@ -286,7 +279,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Double
      */
-    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue) {
+    public static Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue) {
         return createParameter(fullFlag, shortFlag, description, Double.class, false, defaultValue);
     }
 
@@ -297,7 +290,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Double
      */
-    public Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, Double defaultValue) {
+    public static Parameter<Double> addDoubleParameter(String fullFlag, String shortFlag, Double defaultValue) {
         return createParameter(fullFlag, shortFlag, null, Double.class, false, defaultValue);
     }
 
@@ -313,7 +306,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public static Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, description, Boolean.class, isMandatory, null);
     }
 
@@ -324,7 +317,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+    public static Parameter<Boolean> addBooleanParameter(String fullFlag, String shortFlag, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, null, Boolean.class, isMandatory, null);
     }
 
@@ -336,7 +329,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag, String description) {
+    public static Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag, String description) {
         return createParameter(fullFlag, shortFlag, description, Boolean.class, false, defaultValue);
     }
 
@@ -347,7 +340,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Boolean
      */
-    public Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag) {
+    public static Parameter<Boolean> addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag) {
         return createParameter(fullFlag, shortFlag, null, Boolean.class, false, defaultValue);
     }
 
@@ -363,7 +356,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Character
      */
-    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public static Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, description, Character.class, isMandatory, null);
     }
 
@@ -374,7 +367,7 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type Character
      */
-    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, boolean isMandatory) {
+    public static Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, boolean isMandatory) {
         return createParameter(fullFlag, shortFlag, null, Character.class, isMandatory, null);
     }
 
@@ -386,7 +379,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Character
      */
-    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue) {
+    public static Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue) {
         return createParameter(fullFlag, shortFlag, description, Character.class, false, defaultValue);
     }
 
@@ -397,7 +390,7 @@ public class ArgsParser {
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Character
      */
-    public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, Character defaultValue) {
+    public static Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, Character defaultValue) {
         return createParameter(fullFlag, shortFlag, null, Character.class, false, defaultValue);
     }
 
@@ -409,11 +402,13 @@ public class ArgsParser {
      *     <li>checks if all mandatory parameters were given in the args
      * </ul>
      * <p>Directly handles any ArgsException by printing the message to the console than <strong>exiting the program!</strong></p>
+     *
+     * @param args String array args of the main method
      */
-    public void parse() {
+    public void parse(String[] args) {
 
         try {
-        parseUnchecked();
+        parseUnchecked(args);
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -433,6 +428,7 @@ public class ArgsParser {
      *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
      *     <li>checks if all mandatory parameters were given in the args
      * </ul>
+     * @param args String array args of the main method
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
      * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
@@ -441,10 +437,11 @@ public class ArgsParser {
      * @throws CalledForHelpNotification if --help or -h was called
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    public void parseUnchecked() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
+    public static void parseUnchecked(String[] args) throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
             CalledForHelpNotification, InvalidArgTypeArgsException {
 
+        ArgsParser.args = args;
         parseArgsWasCalled = true;
 
         checkIfAnyArgumentsProvided();
@@ -458,7 +455,7 @@ public class ArgsParser {
      * checks if any arguments were provided to the program
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      */
-    private void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException{
+    private static void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException{
         if (args == null || args.length == 0) {
             throw new NoArgumentsProvidedArgsException();
         }
@@ -470,7 +467,7 @@ public class ArgsParser {
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
      * @throws CalledForHelpNotification if --help or -h was called
      */
-    private void checkForHelpCall() throws UnknownFlagArgsException, CalledForHelpNotification {
+    private static void checkForHelpCall() throws UnknownFlagArgsException, CalledForHelpNotification {
         boolean oneArgProvided = args.length == 1;
         boolean twoArgsProvided = args.length == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
@@ -497,7 +494,7 @@ public class ArgsParser {
      * @throws MissingArgArgsException if a flag was provided without an argument
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
-    private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
+    private static Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
             MissingArgArgsException, InvalidArgTypeArgsException {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
@@ -543,7 +540,7 @@ public class ArgsParser {
      * @param givenParameters a set of all Parameter instances created based on args
      * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
      */
-    private void checkMandatoryArguments(Set<Parameter<?>> givenParameters) throws MandatoryArgNotProvidedArgsException {
+    private static void checkMandatoryArguments(Set<Parameter<?>> givenParameters) throws MandatoryArgNotProvidedArgsException {
         if (!givenParameters.containsAll(mandatoryParameters)) {
             mandatoryParameters.removeAll(givenParameters);
             StringBuilder errorMessage = new StringBuilder();
@@ -565,7 +562,22 @@ public class ArgsParser {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getArgumentOf(String fullFlag) throws ClassCastException {
-        return (T) parameterMapStatic.get(makeFlag(fullFlag, false)).getArgument();
+        return (T) parameterMap.get(makeFlag(fullFlag, false)).getArgument();
+    }
+
+    /**
+     * resets all fields of the ArgsParser class for testing purposes only!
+     */
+    private static void reset() {
+        // reset all fields
+        args = null;
+        parameterMap.clear();
+        mandatoryParameters.clear();
+        fullFlags.clear();
+        shortFlags.clear();
+        parseArgsWasCalled = false;
+        longestFlagSize = 0;
+        longestShortFlag = 0;
     }
 
 }
