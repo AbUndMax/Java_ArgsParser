@@ -605,9 +605,8 @@ public class TestArgsParser {
 
     @Test
     public void testDirectParse() {
-        ArgsParser parser = new ArgsParser(new String[] {"--file", "file.txt"});
-        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
-        parser.parse();
+        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        ArgsParser.parse(new String[] {"--file", "file.txt"});
 
         assertEquals("file.txt", file.getArgument());
     }

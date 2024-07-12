@@ -405,7 +405,7 @@ public class ArgsParser {
      *
      * @param args String array args of the main method
      */
-    public void parse(String[] args) {
+    public static void parse(String[] args) {
 
         try {
         parseUnchecked(args);
