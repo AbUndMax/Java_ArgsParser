@@ -16,6 +16,7 @@ import java.util.function.Function;
  * Parameter class with fields for each attribute of the Parameter including the argument.
  */
 public class Parameter<T> {
+    private final ArgsParser argsParser;
     private final String fullFlag;
     private final String shortFlag;
     private final String description;
@@ -50,12 +51,13 @@ public class Parameter<T> {
      * @param type type of the parameter
      * @param isMandatory true if the parameter is mandatory, false otherwise
      */
-    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory) {
+    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory, ArgsParser argsParser) {
         this.fullFlag = fullFlag;
         this.shortFlag = shortFlag;
         this.description = description;
         this.isMandatory = isMandatory;
         this.type = type;
+        this.argsParser = argsParser;
     }
 
     /**
@@ -121,10 +123,10 @@ public class Parameter<T> {
     /**
      * getter method for the argument attribute
      * @return argument as String
-     * @throws IllegalStateException if {@link ArgsParser#parse(String[])} was not called before trying to access this argument
+     * @throws IllegalStateException if {@link ArgsParser#parse()} was not called before trying to access this argument
      */
     public T getArgument() throws IllegalStateException {
-        if (!ArgsParser.parseArgsWasCalled()) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
+        if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
         if (!hasArgument && !hasDefault) return null;
         return argument;
     }
