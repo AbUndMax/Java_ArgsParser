@@ -2,10 +2,6 @@ import ArgsParser.*;
 import ArgsParser.ArgsExceptions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,27 +11,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestArgsParser {
 
-    @BeforeEach
-    void setup() {
-        try {
-            Class<?> cls = Class.forName("ArgsParser.ArgsParser");
-            Method resetMethod = cls.getDeclaredMethod("reset");
-            resetMethod.setAccessible(true);
-            Field field = cls.getDeclaredField("fullFlags");
-            field.setAccessible(true);
-            Field field2 = cls.getDeclaredField("shortFlags");
-            field2.setAccessible(true);
-            resetMethod.invoke(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @Test
     public void testNoArgumentsProvided() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", " ",true);
+        String[] args = new String[0];
+        ArgsParser parser = new ArgsParser(args);
+        Parameter<String> file = parser.addStringParameter("file", "f", " ",true);
         try {
-            ArgsParser.parseUnchecked(new String[]{});
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new NoArgumentsProvidedArgsException().getMessage(), e.getMessage());
@@ -47,9 +29,11 @@ public class TestArgsParser {
 
     @Test
     public void testParameterDotGetArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", " ", true);
+        String[] args = {"--file", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+        Parameter<String> file = parser.addStringParameter("file", "f", " ", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,14 +46,13 @@ public class TestArgsParser {
 
     @Test
     public void testUnknownParameter() {
+        String[] args = {"-w", "file.txt", "-s", "save.txt"};
+        ArgsParser parser = new ArgsParser(args);
 
-
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
-        Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
-        Set<String> shortFlags = new HashSet<>(List.of(new String[]{"f", "s"}));
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"-w", "file.txt", "-s", "save.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals("\n<!> unknown flag: -w\n" +
@@ -80,12 +63,15 @@ public class TestArgsParser {
 
     @Test
     public void testGetArgumentWithMultipleFlagsAndWrongInput() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "w", "descr", true);
+        String[] args = {"-f", "file.txt", "--save", "save.txt", "-s"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "w", "descr", true);
         Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
         Set<String> shortFlags = new HashSet<>(List.of(new String[]{"f", "w"}));
         try {
-            ArgsParser.parseUnchecked(new String[] {"-f", "file.txt", "--save", "save.txt", "-s"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals("\n<!> unknown flag: -s\n" +
@@ -100,12 +86,15 @@ public class TestArgsParser {
 
     @Test
     public void testMissingShorts() {
-        Parameter<String> file = ArgsParser.addStringParameter("--file", "m", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        String[] args = {"-f", "/to/file", "--save", "save.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("--file", "m", "descr", true);
+        Parameter<String> save = parser.addStringParameter("--save", "s", true);
         Set<String> fullFlags = new HashSet<>(List.of(new String[]{"file", "save"}));
         Set<String> shortFlags = new HashSet<>(List.of(new String[]{"m", "s"}));
         try {
-            ArgsParser.parseUnchecked(new String[]{"-f", "/to/file", "--save", "save.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals("\n<!> unknown flag: -f\n" +
@@ -118,12 +107,15 @@ public class TestArgsParser {
 
     @Test
     public void testSuggestionForFullFlag() {
-        Parameter<String> file = ArgsParser.addStringParameter("--file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        String[] args = {"-f", "/to/file", "--sve", "save.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("--file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("--save", "s", true);
         Set<String> fullFlags = new HashSet<>(List.of(new String[]{"--file", "--save"}));
         Set<String> shortFlags = new HashSet<>(List.of(new String[]{"-m", "-s"}));
         try {
-            ArgsParser.parseUnchecked(new String[]{"-f", "/to/file", "--sve", "save.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals("\n<!> unknown flag: --sve\n" +
@@ -136,12 +128,15 @@ public class TestArgsParser {
 
     @Test
     public void testMissspelledHelp() {
-        Parameter<String> file = ArgsParser.addStringParameter("--file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", true);
+        String[] args = {"--hp"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("--file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("--save", "s", true);
         Set<String> fullFlags = new HashSet<>(List.of(new String[]{"--file", "--save"}));
         Set<String> shortFlags = new HashSet<>(List.of(new String[]{"-m", "-s"}));
         try {
-            ArgsParser.parseUnchecked(new String[]{"--hp"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals("\n<!> unknown flag: --hp\n" +
@@ -154,10 +149,13 @@ public class TestArgsParser {
 
     @Test
     public void testMissingArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "m", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
+        String[] args = {"--file", "--save", "save.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "m", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "--save", "save.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--file").getMessage(), e.getMessage());
@@ -167,10 +165,13 @@ public class TestArgsParser {
 
     @Test
     public void testMissingLastArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("--file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("--save", "s", "descr", true);
+        String[] args = {"--file", "file.txt", "--save"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("--file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("--save", "s", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[]{"--file", "file.txt", "--save"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--save").getMessage(), e.getMessage());
@@ -180,11 +181,14 @@ public class TestArgsParser {
 
     @Test
     public void testMandatoryArgMissing() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
-        Parameter<String> optional = ArgsParser.addStringParameter("optional", "o", "descr", false);
+        String[] args = {"--file", "file.txt", "--optional", "optional.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
+        Parameter<String> optional = parser.addStringParameter("optional", "o", "descr", false);
         try {
-            ArgsParser.parseUnchecked(new String[]{"--file", "file.txt", "--optional", "optional.txt"});
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(), e.getMessage());
@@ -195,10 +199,13 @@ public class TestArgsParser {
 
     @Test
     public void testTooManyArguments() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
+        String [] args = {"--file", "file.txt", "--save", "save.txt", "extra"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[]{"--file", "file.txt", "--save", "save.txt", "extra"});
+            parser.parseUnchecked();
         } catch (ArgsException e) {
             System.out.println(e.getMessage());
             assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), e.getMessage());
@@ -209,24 +216,28 @@ public class TestArgsParser {
 
     @Test
     public void testGetArgumentAsString() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", true);
-        Parameter<Integer> integer = ArgsParser.addIntegerParameter("integer", "int", "descr", true);
+        String[] args = {"--file", "file.txt", "-int", "5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", true);
+        Parameter<Integer> integer = parser.addIntegerParameter("integer", "int", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "-int", "5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String result = file.getArgument();
-
-        assertEquals("file.txt", result);
+        assertEquals("file.txt", file.getArgument());
     }
 
     @Test
     public void testGetArgumentWithGenericType() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Integer> integer = ArgsParser.addIntegerParameter("integer", "int", "descr", true);
+        String[] args = {"--file", "file.txt", "--integer", "5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Integer> integer = parser.addIntegerParameter("integer", "int", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--integer", "5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -238,10 +249,13 @@ public class TestArgsParser {
 
     @Test
     public void testBooleanGetArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Boolean> bool = ArgsParser.addBooleanParameter("boolean", "b", "descr", true);
+        String[] args = {"--file", "file.txt", "--boolean", "true"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Boolean> bool = parser.addBooleanParameter("boolean", "b", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--boolean", "true"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -251,10 +265,13 @@ public class TestArgsParser {
 
     @Test
     public void testGetArgumentAsDouble() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", "descr", true);
+        String[] args = {"--file", "file.txt", "--double", "5.5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--double", "5.5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -266,10 +283,13 @@ public class TestArgsParser {
 
     @Test
     public void testGetArgumentAsDoubleWithWrongInput() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", "descr", true);
+        String[] args = {"--file", "file.txt", "--double", "5.5.5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--double", "5.5.5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new InvalidArgTypeArgsException("--double", "Double", "multiple points").getMessage(), e.getMessage());
@@ -278,10 +298,13 @@ public class TestArgsParser {
 
     @Test
     public void useDefaultValue() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", "descr", 12.3);
+        String[] args = {"--file", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", 12.3);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
 
@@ -293,10 +316,13 @@ public class TestArgsParser {
 
     @Test
     public void testDefaultOverride() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", "descr", 12.3);
+        String[] args = {"--file", "file.txt", "--double", "5.5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", "descr", 12.3);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--double", "5.5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
 
@@ -308,10 +334,13 @@ public class TestArgsParser {
 
     @Test
     public void testHelp() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descri", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", "des", 12.3);
+        String[] args = {"--file", "file.txt", "--help"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descri", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", "des", 12.3);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--help"});
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -320,12 +349,15 @@ public class TestArgsParser {
 
     @Test
     public void testLargerHelp() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "s", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
-        Parameter<Double> doub = ArgsParser.addDoubleParameter("double", "d", 12.3);
-        Parameter<Boolean> bool = ArgsParser.addBooleanParameter("boolean", "b", "des", true);
-        Parameter<Integer> integer = ArgsParser.addIntegerParameter("integer", "i", "des", 5);
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "s", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
+        Parameter<Double> doub = parser.addDoubleParameter("double", "d", 12.3);
+        Parameter<Boolean> bool = parser.addBooleanParameter("boolean", "b", "des", true);
+        Parameter<Integer> integer = parser.addIntegerParameter("integer", "i", "des", 5);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--help"});
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -334,22 +366,28 @@ public class TestArgsParser {
 
     @Test
     public void testAddIntegerParameterWithDescriptionAndMandatory() {
-        Parameter<Integer> number = ArgsParser.addIntegerParameter("number", "n", "An integer number", true);
+        String[] args = {"--number", "42"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--number", "42"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Integer result = number.getArgument();
-        assertEquals(Integer.valueOf(42), result);
+
+        assertEquals(Integer.valueOf(42), number.getArgument());
     }
 
     // Test für addIntegerParameter(String, String, boolean)
     @Test
     public void testAddIntegerParameterMandatory() {
-        Parameter<Integer> number = ArgsParser.addIntegerParameter("number", "n", true);
+        String[] args = {"--number", "42"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--number", "42"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -357,13 +395,16 @@ public class TestArgsParser {
         assertEquals(Integer.valueOf(42), result);
     }
 
-    // Test für addIntegerParameter(String, String, String, Integer)
     @Test
     public void testAddIntegerParameterWithDescriptionAndDefaultValue() {
-        Parameter<Integer> number = ArgsParser.addIntegerParameter("number", "n", "An integer number", 42);
+        String[] args = {"--number", "42"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", "An integer number", 42);
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Integer result = number.getArgument();
         assertEquals(Integer.valueOf(42), result);
@@ -372,10 +413,14 @@ public class TestArgsParser {
     // Test für addIntegerParameter(String, String, Integer)
     @Test
     public void testAddIntegerParameterDefaultValue() {
-        Parameter<Integer> number = ArgsParser.addIntegerParameter("number", "n", 42);
+        String[] args = {"--number", "42"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Integer> number = parser.addIntegerParameter("number", "n", 42);
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Integer result = number.getArgument();
         assertEquals(Integer.valueOf(42), result);
@@ -384,9 +429,12 @@ public class TestArgsParser {
     // Test für addDoubleParameter(String, String, String, boolean)
     @Test
     public void testAddDoubleParameterWithDescriptionAndMandatory() {
-        Parameter<Double> number = ArgsParser.addDoubleParameter("number", "n", "A double number", true);
+        String[] args = {"--number", "42.5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--number", "42.5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -397,9 +445,12 @@ public class TestArgsParser {
     // Test für addDoubleParameter(String, String, boolean)
     @Test
     public void testAddDoubleParameterMandatory() {
-        Parameter<Double> number = ArgsParser.addDoubleParameter("number", "n", true);
+        String[] args = {"--number", "42.5"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--number", "42.5"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -410,9 +461,11 @@ public class TestArgsParser {
     // Test für addDoubleParameter(String, String, String, Double)
     @Test
     public void testAddDoubleParameterWithDescriptionAndDefaultValue() {
-        Parameter<Double> number = ArgsParser.addDoubleParameter("number", "n", "A double number", 42.5);
+        ArgsParser parser = new ArgsParser(new String[] {});
+
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", "A double number", 42.5);
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Double result = number.getArgument();
@@ -422,9 +475,11 @@ public class TestArgsParser {
     // Test für addDoubleParameter(String, String, Double)
     @Test
     public void testAddDoubleParameterDefaultValue() {
-        Parameter<Double> number = ArgsParser.addDoubleParameter("number", "n", 42.5);
+        ArgsParser parser = new ArgsParser(new String[] {});
+
+        Parameter<Double> number = parser.addDoubleParameter("number", "n", 42.5);
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Double result = number.getArgument();
@@ -434,9 +489,12 @@ public class TestArgsParser {
     // Test für addBooleanParameter(String, String, String, boolean)
     @Test
     public void testAddBooleanParameterWithDescriptionAndMandatory() {
-        Parameter<Boolean> flag = ArgsParser.addBooleanParameter("flag", "f", "A boolean flag", true);
+        String[] args = {"--flag", "true"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--flag", "true"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -447,9 +505,12 @@ public class TestArgsParser {
     // Test für addBooleanParameter(String, String, boolean)
     @Test
     public void testAddBooleanParameterMandatory() {
-        Parameter<Boolean> flag = ArgsParser.addBooleanParameter("flag", "f", true);
+        String[] args = {"--flag", "true"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--flag", "true"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -460,9 +521,12 @@ public class TestArgsParser {
     // Test für addBooleanParameter(String, String, String, Boolean)
     @Test
     public void testAddBooleanParameterWithDescriptionAndDefaultValue() {
-        Parameter<Boolean> flag = ArgsParser.addBooleanParameter("flag", "f", "A boolean flag", true);
+        String[] args = {"--flag", "false"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", "A boolean flag", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--flag", "false"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -473,9 +537,12 @@ public class TestArgsParser {
     // Test für addBooleanParameter(String, String, Boolean)
     @Test
     public void testAddBooleanParameterDefaultValue() {
-        Parameter<Boolean> flag = ArgsParser.addBooleanParameter("flag", "f", true);
+        String[] args = {"-f", "true"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> flag = parser.addBooleanParameter("flag", "f", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"-f", "true"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -486,9 +553,12 @@ public class TestArgsParser {
     // Test für addCharacterParameter(String, String, String, boolean)
     @Test
     public void testAddCharacterParameterWithDescriptionAndMandatory() {
-        Parameter<Character> character = ArgsParser.addCharacterParameter("char", "c", "A character", true);
+        String[] args = {"--char", "c"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--char", "c"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -499,9 +569,12 @@ public class TestArgsParser {
     // Test für addCharacterParameter(String, String, boolean)
     @Test
     public void testAddCharacterParameterMandatory() {
-        Parameter<Character> character = ArgsParser.addCharacterParameter("char", "c", true);
+        String[] args = {"--char", "c"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--char", "c"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -512,9 +585,11 @@ public class TestArgsParser {
     // Test für addCharacterParameter(String, String, String, Character)
     @Test
     public void testAddCharacterParameterWithDescriptionAndDefaultValue() {
-        Parameter<Character> character = ArgsParser.addCharacterParameter("char", "c", "A character", 'c');
+        ArgsParser parser = new ArgsParser(new String[] {});
+
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", "A character", 'c');
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Character result = character.getArgument();
@@ -524,9 +599,11 @@ public class TestArgsParser {
     // Test für addCharacterParameter(String, String, Character)
     @Test
     public void testAddCharacterParameterDefaultValue() {
-        Parameter<Character> character = ArgsParser.addCharacterParameter("char", "c", 'c');
+        ArgsParser parser = new ArgsParser(new String[] {});
+
+        Parameter<Character> character = parser.addCharacterParameter("char", "c", 'c');
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         Character result = character.getArgument();
@@ -535,9 +612,11 @@ public class TestArgsParser {
 
     @Test
     public void testStringDeafult() {
-        Parameter<String> string = ArgsParser.addStringParameter("string", "s", "default");
+        ArgsParser parser = new ArgsParser(new String[] {});
+
+        Parameter<String> string = parser.addStringParameter("string", "s", "default");
         try {
-            ArgsParser.parseUnchecked(new String[] {});
+            parser.parseUnchecked();
         } catch (Exception e) {
         }
         String result = string.getArgument();
@@ -546,9 +625,12 @@ public class TestArgsParser {
 
     @Test
     public void testBool() {
-        Parameter<Boolean> bool = ArgsParser.addBooleanParameter(true, "bool", "b", "descr");
+        String[] args = {"--bool", "true"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> bool = parser.addBooleanParameter(true, "bool", "b", "descr");
         try {
-            ArgsParser.parseUnchecked(new String[] {"--bool", "true"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -558,9 +640,12 @@ public class TestArgsParser {
 
     @Test
     public void testBool2() {
-        Parameter<Boolean> bool = ArgsParser.addBooleanParameter(false, "bool", "b");
+        String[] args = {"--bool", "false"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean> bool = parser.addBooleanParameter(false, "bool", "b");
         try {
-            ArgsParser.parseUnchecked(new String[] {"--bool", "false"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -570,10 +655,13 @@ public class TestArgsParser {
 
     @Test
     public void testSameFlagNameException() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        String[] args = {"--file", "file.txt", "--file", "file2.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            Parameter<String> file2 = ArgsParser.addStringParameter("file", "f2", "descr", true);
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt", "--file", "file2.txt"});
+            Parameter<String> file2 = parser.addStringParameter("file", "f2", "descr", true);
+            parser.parseUnchecked();
         } catch (Exception e) {
             assertEquals("Flag already exists: --file", e.getMessage());
         }
@@ -581,9 +669,12 @@ public class TestArgsParser {
 
     @Test
     public void testNoFlags() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        String[] args = {"file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--file").getMessage(), e.getMessage());
@@ -592,11 +683,14 @@ public class TestArgsParser {
 
     @Test
     public void testMultipleMandatoryArgumentsMissing() {
-        Parameter<String> load = ArgsParser.addStringParameter("load", "l", "descr", false);
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        Parameter<String> save = ArgsParser.addStringParameter("save", "s", "descr", true);
+        String[] args = {"--load", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> load = parser.addStringParameter("load", "l", "descr", false);
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        Parameter<String> save = parser.addStringParameter("save", "s", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--load", "file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(), e.getMessage());
@@ -605,9 +699,12 @@ public class TestArgsParser {
 
     @Test
     public void testHelpForOneFlag() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        String [] args = {"--file", "--help"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "--help"});
+            parser.parseUnchecked();
         } catch (CalledForHelpNotification e) {
             System.out.println(e.getMessage());
         } catch (ArgsException e) {
@@ -616,12 +713,15 @@ public class TestArgsParser {
 
     @Test
     public void testShortFlag() {
-        Parameter<String> example = ArgsParser.addStringParameter("parameterFlag", "pf", true);
-        Parameter<Integer> example2 = ArgsParser.addIntegerParameter("parameterFlag2", "pf2", false);
-        Parameter<String> example3 = ArgsParser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
-        Parameter<Double> argWithDefault = ArgsParser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+        String[] args = {"-pf4", "5.6", "5.6"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> example = parser.addStringParameter("parameterFlag", "pf", true);
+        Parameter<Integer> example2 = parser.addIntegerParameter("parameterFlag2", "pf2", false);
+        Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
+        Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
         try {
-            ArgsParser.parseUnchecked(new String[]{"-pf4", "5.6", "5.6"});
+            parser.parseUnchecked();
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -635,12 +735,15 @@ public class TestArgsParser {
 
     @Test
     public void testReadmeExample() {
-        Parameter<String> example = ArgsParser.addStringParameter("parameterFlag", "pf", true);
-        Parameter<Integer> example2 = ArgsParser.addIntegerParameter("parameterFlag2", "pf2", false);
-        Parameter<String> example3 = ArgsParser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
-        Parameter<Double> argWithDefault = ArgsParser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+        String[] args = {"--paraeterflg4", "5.6"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> example = parser.addStringParameter("parameterFlag", "pf", true);
+        Parameter<Integer> example2 = parser.addIntegerParameter("parameterFlag2", "pf2", false);
+        Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
+        Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
         try {
-            ArgsParser.parseUnchecked(new String[]{"--paraeterflg4", "5.6"});
+            parser.parseUnchecked();
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -657,27 +760,33 @@ public class TestArgsParser {
 
     @Test
     public void testGetArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        String[] args = {"--file", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String filePath = ArgsParser.getArgumentOf("file");
+        String filePath = parser.getArgumentOf("file");
 
         assertEquals(file.getArgument(), filePath);
     }
 
     @Test
     public void testClassCastExceptionInGetArgument() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
+        String[] args = {"--file", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
         try {
-            ArgsParser.parseUnchecked(new String[] {"--file", "file.txt"});
+            parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
         try {
-            Integer filePath = ArgsParser.getArgumentOf("file");
+            Integer filePath = parser.getArgumentOf("file");
         } catch (ClassCastException e) {
             assertEquals(new ClassCastException("class java.lang.String cannot be cast to class java.lang.Integer " +
                                                         "(java.lang.String and java.lang.Integer are in module java.base " +
@@ -687,8 +796,11 @@ public class TestArgsParser {
 
     @Test
     public void testDirectParse() {
-        Parameter<String> file = ArgsParser.addStringParameter("file", "f", "descr", true);
-        ArgsParser.parse(new String[] {"--file", "file.txt"});
+        String[] args = {"--file", "file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addStringParameter("file", "f", "descr", true);
+        parser.parse();
 
         assertEquals("file.txt", file.getArgument());
     }
