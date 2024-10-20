@@ -804,6 +804,123 @@ public class TestArgsParser {
         assertEquals("file.txt", file.getArgument());
     }
 
+    @Test
+    public void testStringArrayParameter() {
+        String[] args = {"--file", "file1.txt", "file2.txt", "file3.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String[]> files = parser.addStringArrayParameter("file", "f", "descr", true);
+        try {
+            parser.parseUnchecked();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String[] result = files.getArgument();
+        String[] expected = new String[] {"file1.txt", "file2.txt", "file3.txt"};
+
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testIntegerArrayParameter() {
+        String[] args = {"--integer", "1", "2", "3"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<int[]> integers = parser.addIntegerArrayParameter("integer", "f", "descr", true);
+        try {
+            parser.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        int[] result = integers.getArgument();
+        int[] expected = new int[] {1, 2, 3};
+
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testDoubleArrayParameter() {
+        String[] args = {"--double", "1.34", "2.45", "3.56"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<double[]> doubles = parser.addDoubleArrayParameter("double", "f", "descr", true);
+        try {
+            parser.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        double[] result = doubles.getArgument();
+        double[] expected = new double[] {1.34, 2.45, 3.56};
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testBooleanArrayParameter() {
+        String[] args = {"--boolean", "true", "false"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<Boolean[]> booleans = parser.addBooleanArrayParameter("boolean", "f", "descr", true);
+        try {
+            parser.parseUnchecked();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Boolean[] result = booleans.getArgument();
+        Boolean[] expected = new Boolean[] {true, false};
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testCharacterArrayParameter() {
+        String[] args = {"--character", "a", "b", "c"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<char[]> characters = parser.addCharacterArrayParameter("character", "f", "descr", true);
+        try {
+            parser.parse();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        char[] result = characters.getArgument();
+        char[] expected = new char[] {'a', 'b', 'c'};
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testArrayParameterWithMultipleFlags() {
+        String[] args = {"--file", "file1.txt", "file2.txt", "file3.txt", "-str", "vierzig"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String[]> files = parser.addStringArrayParameter("file", "f", "descr", true);
+        Parameter<String> stringNumber = parser.addStringParameter("string", "str", "descr", true);
+        parser.parse();
+
+        String[] result = files.getArgument();
+        String[] expected = new String[] {"file1.txt", "file2.txt", "file3.txt"};
+        assertArrayEquals(expected, result);
+    }
+
+    @Test
+    public void testTwoArrayParameterBetweenNormalParameters() {
+        String[] args = {"--text", "hello friend", "--file", "file1.txt", "file2.txt", "file3.txt", "-n", "12.4", "13.5", "--end", "testEnd"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> text = parser.addStringParameter("text", "t", "descr", true);
+        Parameter<String[]> files = parser.addStringArrayParameter("file", "f", "descr", true);
+        Parameter<double[]> doubles = parser.addDoubleArrayParameter("double", "n", "descr", true);
+        Parameter<String> end = parser.addStringParameter("end", "e", "descr", true);
+        parser.parse();
+
+        double[] result = doubles.getArgument();
+        double[] expected = new double[] {12.4, 13.5};
+        assertArrayEquals(expected, result);
+    }
+
     // tests for the checked parse() method
 
 //    @Test

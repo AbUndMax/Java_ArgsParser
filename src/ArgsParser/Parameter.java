@@ -35,6 +35,12 @@ public class Parameter<T> {
         converters.put(Integer.class, Integer::valueOf);
         converters.put(Double.class, Double::valueOf);
         converters.put(Boolean.class, Boolean::valueOf);
+        converters.put(String[].class, s -> s.split("==="));
+        converters.put(int[].class, s -> Arrays.stream(s.split("===")).mapToInt(Integer::parseInt).toArray());
+        converters.put(double[].class, s -> Arrays.stream(s.split("===")).mapToDouble(Double::parseDouble).toArray());
+        converters.put(Boolean[].class, s -> Arrays.stream(s.split("===")).map(Boolean::parseBoolean).toArray(Boolean[]::new));
+        converters.put(char[].class, s -> Arrays.stream(s.split("===")).map(c -> c.charAt(0))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString().toCharArray());
         converters.put(Character.class, s -> {
             if (s.length() != 1) {
                 throw new IllegalArgumentException("Argument must be a single character!");

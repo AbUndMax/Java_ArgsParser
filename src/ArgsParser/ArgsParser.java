@@ -43,6 +43,7 @@ public class ArgsParser {
     private String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
+    private final Set<String> arrayParameters = new HashSet<>();
     private final Set<String> fullFlags = new HashSet<>();
     private final Set<String> shortFlags = new HashSet<>();
     protected boolean parseArgsWasCalled = false;
@@ -191,6 +192,21 @@ public class ArgsParser {
         return createParameter(fullFlag, shortFlag, null, String.class, false, defaultValue);
     }
 
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * Array Parameters can take multiple arguments behind their flag
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String[]
+     */
+    public Parameter<String[]> addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        arrayParameters.add(makeFlag(fullFlag, false));
+        arrayParameters.add(makeFlag(shortFlag, true));
+        return createParameter(fullFlag, shortFlag, description, String[].class, isMandatory, null);
+    }
+
 
     // Integer Parameter constructors
 
@@ -239,6 +255,21 @@ public class ArgsParser {
      */
     public Parameter<Integer> addIntegerParameter(String fullFlag, String shortFlag, Integer defaultValue) {
         return createParameter(fullFlag, shortFlag, null, Integer.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * Array Parameters can take multiple arguments behind their flag
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String[]
+     */
+    public Parameter<int[]> addIntegerArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        arrayParameters.add(makeFlag(fullFlag, false));
+        arrayParameters.add(makeFlag(shortFlag, true));
+        return createParameter(fullFlag, shortFlag, description, int[].class, isMandatory, null);
     }
 
 
@@ -291,6 +322,21 @@ public class ArgsParser {
         return createParameter(fullFlag, shortFlag, null, Double.class, false, defaultValue);
     }
 
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * Array Parameters can take multiple arguments behind their flag
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String[]
+     */
+    public Parameter<double[]> addDoubleArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        arrayParameters.add(makeFlag(fullFlag, false));
+        arrayParameters.add(makeFlag(shortFlag, true));
+        return createParameter(fullFlag, shortFlag, description, double[].class, isMandatory, null);
+    }
+
 
     // Boolean Parameter constructors
 
@@ -341,6 +387,21 @@ public class ArgsParser {
         return createParameter(fullFlag, shortFlag, null, Boolean.class, false, defaultValue);
     }
 
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * Array Parameters can take multiple arguments behind their flag
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String[]
+     */
+    public Parameter<Boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        arrayParameters.add(makeFlag(fullFlag, false));
+        arrayParameters.add(makeFlag(shortFlag, true));
+        return createParameter(fullFlag, shortFlag, description, Boolean[].class, isMandatory, null);
+    }
+
 
     // Character Parameter constructors
 
@@ -389,6 +450,21 @@ public class ArgsParser {
      */
     public Parameter<Character> addCharacterParameter(String fullFlag, String shortFlag, Character defaultValue) {
         return createParameter(fullFlag, shortFlag, null, Character.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * Array Parameters can take multiple arguments behind their flag
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter
+     * @param isMandatory true if parameter is mandatory, false if optional
+     * @return the created Parameter instance of type String[]
+     */
+    public Parameter<char[]> addCharacterArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+        arrayParameters.add(makeFlag(fullFlag, false));
+        arrayParameters.add(makeFlag(shortFlag, true));
+        return createParameter(fullFlag, shortFlag, description, char[].class, isMandatory, null);
     }
 
     /**
@@ -522,9 +598,21 @@ public class ArgsParser {
                 throw new MissingArgArgsException(args[i]);
 
             }  else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
-                currentParameter.setArgument(args[i]);
-                givenParameters.add(currentParameter);
 
+                boolean isArrayParam = arrayParameters.contains(args[i - 1]);
+                if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder
+                    StringBuilder arguments = new StringBuilder();
+                    arguments.append(args[i]).append("==="); // every entry in the array gets seperated by ===
+                    while(i + 1 < args.length && !args[i + 1].startsWith("-")) { // loop through all arguments
+                        arguments.append(args[++i]).append("===");
+                    }
+                    currentParameter.setArgument(arguments.toString());
+
+                } else {
+                currentParameter.setArgument(args[i]);
+
+                }
+                givenParameters.add(currentParameter); // add parameter to the given Parameter Set
             }
         }
 
