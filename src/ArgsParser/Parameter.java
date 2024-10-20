@@ -126,7 +126,7 @@ public class Parameter<T> {
      * @throws IllegalStateException if {@link ArgsParser#parse()} was not called before trying to access this argument
      */
     public T getArgument() throws IllegalStateException {
-        if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parseArgs() was not called before trying to access the argument!");
+        if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parse() was not called before trying to access the argument!");
         if (!hasArgument && !hasDefault) return null;
         return argument;
     }

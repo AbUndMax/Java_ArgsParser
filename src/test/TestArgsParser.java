@@ -18,11 +18,10 @@ public class TestArgsParser {
         Parameter<String> file = parser.addStringParameter("file", "f", " ",true);
         try {
             parser.parseUnchecked();
-        } catch (ArgsException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             assertEquals(new NoArgumentsProvidedArgsException().getMessage(), e.getMessage());
-        } catch (CalledForHelpNotification e) {
-            System.out.println(e.getMessage());
+            return;
         }
         String result = file.getArgument();
     }
@@ -78,6 +77,7 @@ public class TestArgsParser {
                                  "> did you mean: --save ?\n" +
                                  "\n" +
                                  "> Use --help for more information.\n", e.getMessage());
+            return;
         }
         String result = file.getArgument();
 
@@ -101,6 +101,7 @@ public class TestArgsParser {
                                  "> did you mean: --file ?\n" +
                                  "\n" +
                                  "> Use --help for more information.\n", e.getMessage());
+            return;
         }
         String result = file.getArgument();
     }
@@ -123,7 +124,6 @@ public class TestArgsParser {
                                  "\n" +
                                  "> Use --help for more information.\n", e.getMessage());
         }
-        String result = file.getArgument();
     }
 
     @Test
@@ -144,7 +144,6 @@ public class TestArgsParser {
                                  "\n" +
                                  "> Use --help for more information.\n", e.getMessage());
         }
-        String result = file.getArgument();
     }
 
     @Test
@@ -160,7 +159,6 @@ public class TestArgsParser {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--file").getMessage(), e.getMessage());
         }
-        String result = save.getArgument();
     }
 
     @Test
@@ -176,7 +174,6 @@ public class TestArgsParser {
             System.out.println(e.getMessage());
             assertEquals(new MissingArgArgsException("--save").getMessage(), e.getMessage());
         }
-        String result = save.getArgument();
     }
 
     @Test
@@ -481,6 +478,7 @@ public class TestArgsParser {
         try {
             parser.parseUnchecked();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         Double result = number.getArgument();
         assertEquals(Double.valueOf(42.5), result);
@@ -611,13 +609,14 @@ public class TestArgsParser {
     }
 
     @Test
-    public void testStringDeafult() {
+    public void testStringDefault() {
         ArgsParser parser = new ArgsParser(new String[] {});
 
         Parameter<String> string = parser.addStringParameter("string", "s", "default");
         try {
             parser.parseUnchecked();
         } catch (Exception e) {
+            System.out.print(e.getMessage());
         }
         String result = string.getArgument();
         assertEquals("default", result);
