@@ -1,7 +1,7 @@
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
-!**/src/test/**/out/
+!**/src/scribble/**/out/
 *.iml
 /.idea/
 /bin/
@@ -16,7 +16,7 @@ out/
 .sts4-cache
 bin/
 !**/src/main/**/bin/
-!**/src/test/**/bin/
+!**/src/scribble/**/bin/
 
 ### NetBeans ###
 /nbproject/private/
@@ -30,6 +30,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-/src/test/TestPrintout.java
+/src/scribble/TestPrintout.java
 /doc/
 /lib/
