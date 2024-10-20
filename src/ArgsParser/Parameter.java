@@ -11,6 +11,7 @@ import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
@@ -38,7 +39,7 @@ public class Parameter<T> {
         converters.put(String[].class, s -> s.split("==="));
         converters.put(int[].class, s -> Arrays.stream(s.split("===")).mapToInt(Integer::parseInt).toArray());
         converters.put(double[].class, s -> Arrays.stream(s.split("===")).mapToDouble(Double::parseDouble).toArray());
-        converters.put(Boolean[].class, s -> Arrays.stream(s.split("===")).map(Boolean::parseBoolean).toArray(Boolean[]::new));
+        converters.put(boolean[].class, s -> boolArrayStream(s));
         converters.put(char[].class, s -> Arrays.stream(s.split("===")).map(c -> c.charAt(0))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString().toCharArray());
         converters.put(Character.class, s -> {
@@ -47,6 +48,22 @@ public class Parameter<T> {
             }
             return s.charAt(0);
         });
+    }
+
+    /**
+     * manual way to stream a bool "array string" to a boolean[] array
+     * @param s array string "bool1===bool2===bool3==="
+     * @return boolean[] array {bool1, bool2, bool3}
+     */
+    private static boolean[] boolArrayStream(String s) {
+        List<Boolean> booleanList = Arrays.stream(s.split("==="))
+                .map(Boolean::parseBoolean)
+                .toList();
+        boolean[] booleanArray = new boolean[booleanList.size()];
+        for (int i = 0; i < booleanList.size(); i++) {
+            booleanArray[i] = booleanList.get(i);
+        }
+        return booleanArray;
     }
 
     /**

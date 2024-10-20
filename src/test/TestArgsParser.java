@@ -862,15 +862,15 @@ public class TestArgsParser {
         String[] args = {"--boolean", "true", "false"};
         ArgsParser parser = new ArgsParser(args);
 
-        Parameter<Boolean[]> booleans = parser.addBooleanArrayParameter("boolean", "f", "descr", true);
+        Parameter<boolean[]> booleans = parser.addBooleanArrayParameter("boolean", "f", "descr", true);
         try {
             parser.parseUnchecked();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Boolean[] result = booleans.getArgument();
-        Boolean[] expected = new Boolean[] {true, false};
+        boolean[] result = booleans.getArgument();
+        boolean[] expected = new boolean[] {true, false};
         assertArrayEquals(expected, result);
     }
 

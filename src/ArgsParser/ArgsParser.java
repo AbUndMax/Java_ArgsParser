@@ -396,10 +396,10 @@ public class ArgsParser {
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type String[]
      */
-    public Parameter<Boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
-        return createParameter(fullFlag, shortFlag, description, Boolean[].class, isMandatory, null);
+        return createParameter(fullFlag, shortFlag, description, boolean[].class, isMandatory, null);
     }
 
 
