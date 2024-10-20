@@ -51,8 +51,11 @@ public class ArgsParser {
 
     /**
      * Constructor
+     * @param args arguments given to the program
+     * @throws IllegalArgumentException if args is null
      */
-    public ArgsParser(String[] args) {
+    public ArgsParser(String[] args) throws IllegalArgumentException {
+        if (args == null) throw new IllegalArgumentException("Args cannot be null!");
         this.args = args;
     }
 
@@ -420,7 +423,7 @@ public class ArgsParser {
      *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
      *     <li>checks if all mandatory parameters were given in the args
      * </ul>
-     * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
+     * @throws NoArgumentsProvidedArgsException if no arguments were provided in args and mandatory params were defined
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
      * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
      * @throws MissingArgArgsException if a flag was provided without an argument
@@ -433,23 +436,25 @@ public class ArgsParser {
             CalledForHelpNotification, InvalidArgTypeArgsException {
 
         parseArgsWasCalled = true;
-        checkIfAnyArgumentsProvided();
-        checkForHelpCall();
-        Set<Parameter<?>> givenParameters = parseArguments();
-        checkMandatoryArguments(givenParameters);
 
+        checkIfAnyArgumentsProvided();
+        if (args.length > 0) {
+            checkForHelpCall();
+            Set<Parameter<?>> givenParameters = parseArguments();
+            checkMandatoryArguments(givenParameters);
+        }
     }
 
     /**
-     * checks if any arguments were provided to the program
+     * Checks if any arguments were provided to the program.
+     * It allows the script
+     * to run without any arguments as long as no mandatory parameters were defined on this ArgsParser.
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      */
     private void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException {
-        if (args == null || args.length == 0) {
+        if (args.length == 0 & !mandatoryParameters.isEmpty()) {
             throw new NoArgumentsProvidedArgsException();
         }
-        // allow run the script with no arguments if all mandatory parameters have a default which is then used
-        // if there is no mandatory parameter set, the program will run without any arguments
     }
 
     /**
@@ -555,20 +560,4 @@ public class ArgsParser {
     public <T> T getArgumentOf(String fullFlag) throws ClassCastException {
         return (T) parameterMap.get(makeFlag(fullFlag, false)).getArgument();
     }
-
-    /**
-     * resets all fields of the ArgsParser class for testing purposes only!
-     */
-    private void reset() {
-        // reset all fields
-        args = null;
-        parameterMap.clear();
-        mandatoryParameters.clear();
-        fullFlags.clear();
-        shortFlags.clear();
-        parseArgsWasCalled = false;
-        longestFlagSize = 0;
-        longestShortFlag = 0;
-    }
-
 }
