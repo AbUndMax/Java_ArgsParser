@@ -9,9 +9,9 @@ For a quick overview, visit https://creativecommons.org/licenses/by-nc/4.0/
 
 import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Parameter class with fields for each attribute of the Parameter including the argument.
@@ -27,44 +27,6 @@ public class Parameter<T> {
     private boolean hasDefault = false;
     private T argument = null;
     private boolean hasArgument = false;
-
-    /**
-     * converter map for converting a string argument to T used in {@link #setArgument(String)}
-     */
-    private static final Map<Class<?>, Function<String, ?>> converters = new HashMap<>();
-    static {
-        converters.put(Integer.class, Integer::valueOf);
-        converters.put(Double.class, Double::valueOf);
-        converters.put(Boolean.class, Boolean::valueOf);
-        converters.put(String[].class, s -> s.split("==="));
-        converters.put(int[].class, s -> Arrays.stream(s.split("===")).mapToInt(Integer::parseInt).toArray());
-        converters.put(double[].class, s -> Arrays.stream(s.split("===")).mapToDouble(Double::parseDouble).toArray());
-        converters.put(boolean[].class, s -> boolArrayStream(s));
-        converters.put(char[].class, s -> Arrays.stream(s.split("===")).map(c -> c.charAt(0))
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append).toString().toCharArray());
-        converters.put(Character.class, s -> {
-            if (s.length() != 1) {
-                throw new IllegalArgumentException("Argument must be a single character!");
-            }
-            return s.charAt(0);
-        });
-    }
-
-    /**
-     * manual way to stream a bool "array string" to a boolean[] array
-     * @param s array string "bool1===bool2===bool3==="
-     * @return boolean[] array {bool1, bool2, bool3}
-     */
-    private static boolean[] boolArrayStream(String s) {
-        List<Boolean> booleanList = Arrays.stream(s.split("==="))
-                .map(Boolean::parseBoolean)
-                .toList();
-        boolean[] booleanArray = new boolean[booleanList.size()];
-        for (int i = 0; i < booleanList.size(); i++) {
-            booleanArray[i] = booleanList.get(i);
-        }
-        return booleanArray;
-    }
 
     /**
      * Constructor for the Parameter class with type definition
@@ -159,21 +121,15 @@ public class Parameter<T> {
      * @param argument argument
      */
     protected void setArgument(String argument) throws InvalidArgTypeArgsException {
-        if (type.equals(String.class)) {
-            this.argument = type.cast(argument);
-        } else {
-            Function<String, ?> converter = converters.get(type);
-            if (converter != null) {
-                try {
-                    this.argument = type.cast(converter.apply(argument));
-                } catch (Exception e) {
-                    throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
-                }
-            } else {
-                throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
-            }
+        try {
+            ArgumentConverter argumentConverter = ArgumentConverter.fromClass(type);
+            this.argument = type.cast(argumentConverter.convert(argument));
+            this.hasArgument = true;
+        } catch (IllegalArgumentException e) {
+            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
+        } catch (Exception e) {
+            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
         }
-        this.hasArgument = true;
     }
 
     /**
@@ -199,6 +155,74 @@ public class Parameter<T> {
     @Override
     public int hashCode() {
         return Objects.hash(fullFlag);
+    }
+
+    /**
+     * The ArgumentConverter enum provides a mapping between argument types and their
+     * corresponding conversion logic. It supports both array and non-array types for
+     * several common data types such as Integer, String, Boolean, Double, and Character.
+     */
+    private enum ArgumentConverter {
+        INTEGER_ARRAY(Integer[].class, Integer::parseInt),
+        INTEGER(Integer.class, Integer::parseInt),
+        STRING_ARRAY(String[].class, Function.identity()),
+        STRING(String.class, Function.identity()),
+        BOOLEAN_ARRAY(Boolean[].class, Boolean::parseBoolean),
+        BOOLEAN(Boolean.class, Boolean::parseBoolean),
+        DOUBLE_ARRAY(Double[].class, Double::parseDouble),
+        DOUBLE(Double.class, Double::parseDouble),
+        CHARACTER_ARRAY(Character[].class, s -> s.charAt(0)),
+        CHARACTER(Character.class, s -> s.charAt(0));
+
+        private final Class<?> typeClass;
+        private final Function<String, ?> mapper;
+
+        /**
+         * Constructs an ArgumentConverter with the specified type class and mapping function.
+         *
+         * @param typeClass the class type this ArgumentConverter will handle. Can be an array class or a single class.
+         * @param mapper a function that converts a String argument to an instance of the specified class type.
+         */
+        ArgumentConverter(Class<?> typeClass, Function<String, ?> mapper) {
+            this.typeClass = typeClass;
+            this.mapper = mapper;
+        }
+
+        /**
+         * Converts the provided argument string into an Object of the appropriate type,
+         * handling both array and non-array types.
+         *
+         * @param argument the argument string to be converted
+         * @return the converted object, either as a single instance or an array
+         */
+        private Object convert(String argument) {
+            if (typeClass.isArray()) {
+                String[] parts = argument.split("===");
+                Object array = Array.newInstance(typeClass.getComponentType(), parts.length);
+                for (int i = 0; i < parts.length; i++) {
+                    Array.set(array, i, mapper.apply(parts[i]));
+                }
+                return array;
+            } else {
+                return mapper.apply(argument);
+            }
+        }
+
+        /**
+         * Returns an ArgumentConverter that matches the provided class type.
+         *
+         * @param cls the class type to match against the available ArgumentConverters
+         * @return the ArgumentConverter corresponding to the provided class type
+         * @throws IllegalArgumentException if the provided class type is not supported
+         */
+        private static ArgumentConverter fromClass(Class<?> cls) {
+            for (ArgumentConverter argumentConverter : values()) {
+                if (argumentConverter.typeClass.equals(cls)) {
+                    return argumentConverter;
+                }
+            }
+            throw new IllegalArgumentException("Unsupported type: " + cls.getSimpleName());
+        }
     }
 
 }
