@@ -20,6 +20,11 @@ public class CalledForHelpNotification extends Exception {
         put("Double", "d");
         put("Boolean", "b");
         put("Character", "c");
+        put("String[]", "s[]");
+        put("int[]", "i[]");
+        put("double[]", "d[]");
+        put("boolean[]", "b[]");
+        put("char[]", "c[]");
     }};
 
     public CalledForHelpNotification(Set<Parameter<?>> parameters, int longestFlagSize, int longestShortFlag) {
@@ -38,7 +43,8 @@ public class CalledForHelpNotification extends Exception {
         int numberOfHashes = consoleWidth / 2 - spaceForHeadTitle / 2;
         String header = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
         helpMessage.append(header).append("\n");
-        helpMessage.append(centerString("[s]=String | [i]=Integer | [c]=Character | [b]=Boolean | [d]=Double")).append("\n");
+        helpMessage.append(centerString("<s>=String | <i>=Integer | <c>=Character | <b>=Boolean | <d>=Double")).append("\n");
+        helpMessage.append(centerString("<s[]>=StringArray | <i[]>=IntegerArray | <c[]>=CharacterArray | <b[]>=BooleanArray | <d[]>=DoubleArray")).append("\n");
         helpMessage.append(centerString("(!)=mandatory | (+)=optional")).append("\n");
         helpMessage.append("#").append("\n");
 
@@ -74,9 +80,16 @@ public class CalledForHelpNotification extends Exception {
     private static String parameterHelpString(Parameter<?> parameter, int longestFlagSize, int longestShortFlag) {
         String name = parameter.getFullFlag();
         String shortFlag = parameter.getShortFlag() == null ? "/" : parameter.getShortFlag();
-        String description = parameter.getDescription() == null ? "No description available!" : parameter.getDescription();
+        String description = parameter.getDescription();
         String isMandatory = parameter.isMandatory() ? "(!)" : "(+)";
         StringBuilder helpString = new StringBuilder("###  ");
+
+        // check if a description is available:
+        if (description == null || description.isEmpty()) {
+            description = "No description available!";
+        } else {
+            description = description.trim();
+        }
 
         // align the parameter names nicely
         int nameWhiteSpaceSize = longestFlagSize - name.length();
@@ -87,7 +100,7 @@ public class CalledForHelpNotification extends Exception {
         // get type
         String type = shortFlagTypes.get(parameter.getType());
 
-        helpString.append(name).append("  ").append(shortFlag).append("  [").append(type).append("] ").append(isMandatory).append("  ");
+        helpString.append(name).append("  ").append(shortFlag).append("  <").append(type).append("> ").append(isMandatory).append("  ");
         int whiteSpace = helpString.length();
 
         // The description String gets checked if it fits inside the info box.
