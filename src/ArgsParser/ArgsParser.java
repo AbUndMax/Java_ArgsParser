@@ -536,7 +536,9 @@ public class ArgsParser {
      */
     public void parseUnchecked() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
-            CalledForHelpNotification, InvalidArgTypeArgsException {
+            CalledForHelpNotification, InvalidArgTypeArgsException, IllegalStateException, FlagAlreadyProvidedArgsException {
+
+        if(parseArgsWasCalled) throw new IllegalStateException(".parse() was already called!");
 
         parseArgsWasCalled = true;
 
@@ -594,7 +596,7 @@ public class ArgsParser {
      * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
      */
     private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
-            MissingArgArgsException, InvalidArgTypeArgsException {
+            MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
         Parameter<?> currentParameter = null;
@@ -611,9 +613,14 @@ public class ArgsParser {
             boolean currentParameterNotNull = currentParameter != null;
             boolean argumentSet = currentParameterNotNull && currentParameter.hasArgument();
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
+            boolean flagAlreadyProvided = false;
+            if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
 
             if (currentPositionIsFlag && !flagExists) { // if flag is unknown
                 throw new UnknownFlagArgsException(args[i], fullFlags, shortFlags);
+
+            } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
+                throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(), currentParameter.getShortFlag());
 
             } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
                 throw new TooManyArgumentsArgsException(longFlagUsed ? currentParameter.getFullFlag() : currentParameter.getShortFlag());
