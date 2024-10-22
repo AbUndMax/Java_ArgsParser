@@ -171,11 +171,10 @@ public class TestArgsExceptions {
 
     @Test
     public void testHelp() {
-        String[] args = {"--file", "--help"};
+        String[] args = {"-pf4", "--help"};
         ArgsParser parser = new ArgsParser(args);
 
-        Parameter<String> file = parser.addDefaultStringParameter("file", "f", "set the path to the input file", "this/is/the/default/path");
-        Parameter<Double> doub = parser.addDefaultDoubleParameter("double", "d", "", 12.3);
+        Parameter<Double> doub = parser.addDefaultDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
 
         Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
         System.out.println(exception.getMessage());
@@ -186,10 +185,9 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser(args);
 
-        Parameter<String> file = parser.addDefaultStringParameter("file", "s", "aasdijasoidjoai sjdoiajsd oijaosidja oijsdoaijsd oijaojovn eoin oilnsdo vöinasdv", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
+        Parameter<String> file = parser.addDefaultStringParameter("file", "s", "this is a super long description that forces the Help printout to introduce a newline", "/home/user/projects/one/two/my_project/source/main/java/com/example/myapp/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java");
         Parameter<Double> doub = parser.addOptionalDoubleParameter("double", "d", "this one is optional");
-        Parameter<Boolean> bool = parser.addMandatoryBooleanParameter("boolean", "b", "des");
-        Parameter<Integer> integer = parser.addDefaultIntegerParameter("integer", "i", "des", 5);
+        Parameter<Integer> integer = parser.addDefaultIntegerParameter("integer", "i", null, 5);
         Parameter<String[]> stringArr = parser.addStringArrayParameter("array", "a", "array of at least 2 strings", true);
 
         Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
