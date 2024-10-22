@@ -22,21 +22,24 @@ catering to diverse application needs.
 - **Suggestions for misspelled flags:** The parser will suggest the correct flag if a misspelled flag was provided.
 - **Integrated Help Function:** Automatically generates a help message displaying all parameters,
   their types, and descriptions.
+- **Multiple Arguments to one flag:** Allows multiple values to be specified for a single command-line flag, making it
+  easier to pass arrays of data.
 - **Arguments directly casted:** Accessing a parameter's argument returns it as the defined type.
 - **Lightweight:** Using the ArgsParser library is very simply and straight forward as shown in the example below.
 
 ## Example Code:
+
 ```java
 import ArgsParser.*;
 
 public class Example {
-    public static void main(String[] args) {
-        ArgsParser parser = new ArgsParser(args);
-        Parameter<String> param1 = parser.addStringParameter("parameterFlag", "pf", true);
-        ArgsParser.parse(args);
+  public static void main(String[] args) {
+    ArgsParser parser = new ArgsParser(args);
+    Parameter<String> param1 = parser.addMandatoryStringParameter("parameterFlag", "pf", "description");
+    ArgsParser.parse(args);
 
-        System.out.println(param1.getArgument());
-    }
+    System.out.println(param1.getArgument());
+  }
 }
 ```
 Using  
@@ -63,17 +66,34 @@ You can specify several fields for each parameter:
 
 - **fullFlag**: The flag name of the parameter.
 - **shortFlag**: A short version of the flag for the parameter.
-- **isMandatory**: Whether the parameter is mandatory.
-- **description**: An optional description of the parameter.
-- **defaultValue**: An optional default value (which makes the parameter optional).
-- **Type**: Type definition by calling the respective "addParameter" method.
+- **description**: A description of the parameter, insert `null` or an empty string`""` if not needed.
+- **defaultValue**: A default value that the parameter returns if no argument was provided but accessed in the program.
+
+This parser supports the **types**:
+- *String, Integer, Double, Boolean, Character*
+
+The type of a Parameter is defined with its respective method on the parser object.
+For each type there are 6 `addParameter` methods (example for String):
+- `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalStringParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
+- `addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultStringArrayParameter(String fullFlag, String shortFlag, String description, String[] defaultValue)`
+  
+(see a list of all Methods at the end of this README)
+A special type are the `addArray` methods that are introduced in Version 4.0.0 of the ArgsParser. 
+They allow handing several arguments to a single flag:
+```
+--file path/file1 path/file2 path/file3
+```
+Several of these Array Parameters can be defined without problems.
 
 ```java
     // ...
-    Parameter<String> example = parser.addStringParameter("parameterFlag", "pf", true);
-    Parameter<Integer> example2 = parser.addIntegerParameter("parameterFlag2", "pf2", false);
-    Parameter<String> example3 = parser.addStringParameter("parameterFlag3", "pf3", "This is a description for the parameter", true);
-    Parameter<Double> argWithDefault = parser.addDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+    Parameter<String> example = parser.addMandatoryStringParameter("parameterFlag", "pf", "short Description");
+    Parameter<Integer> example2 = parser.addOptionalIntegerParameter("parameterFlag2", "pf2", null);
+    Parameter<String> example3 = parser.addOptionalStringParameter("parameterFlag3", "pf3", "This is a description for the parameter");
+    Parameter<Double> argWithDefault = parser.addDefaultDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
     // ...
 ```
 
@@ -94,6 +114,8 @@ issues such as:
 - Mandatory arguments not provided (`MandatoryArgNotProvidedArgsException`)
 - Unknown flag (`UnknownFlagArgsException`)
 - Too many arguments provided (`TooManyArgsProvidedArgsException`)
+- Invalid argument types (`InvalidArgTypeArgsException`)
+- trying to set the same flag twice (`FlagAlreadyProvidedArgsException`)
 
 A `CalledForHelpNotification` can also be thrown if the user requests the help message.  
 Exit with status code 0 for help requests and 1 for errors is recommended.
@@ -163,19 +185,23 @@ Calling `--help` or `-h` without anything else on the programm will print all av
 ```
 
 ############################################### HELP ###############################################
-#               [s]=String | [i]=Integer | [c]=Character | [b]=Boolean | [d]=Double
-#                                   (!)=mandatory | (+)=optional
+#   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
+#       ('+' marks a flag that takes several arguments of the same type whitespace separated)
+#                                   (!)=mandatory | (?)=optional
 #
 #                                      Available Parameters:
 #
-###  --parameterFlag4  -pf4  [d] (+)  description
-#                            default: 5.6
+###  --double   -d  [d]  (?)  this one is optional
 #
-###  --parameterFlag2  -pf2  [i] (+)  No description available!
+###  --array    -a  [s+] (!)  array of at least 2 strings
 #
-###  --parameterFlag3  -pf3  [s] (!)  This is a description for the parameter
+###  --integer  -i  [i]  (?)  No description available!
+#                    default: 5
 #
-###  --parameterFlag   -pf   [s] (!)  No description available!
+###  --file     -s  [s]  (?)  this is a super long description that forces the Help printout to
+#                             introduce a newline
+#                    default: /home/user/projects/one/two/my_project/source/main/java/com/example/my
+#                             app/ExampleClassThatWonTDoAnythingElseThanBeeingAnExample.java
 #
 ####################################################################################################
 ```
@@ -186,11 +212,12 @@ while calling `--help` or `-h` with a specific parameter will only print the hel
 ```
 
 ############################################### HELP ###############################################
-#               [s]=String | [i]=Integer | [c]=Character | [b]=Boolean | [d]=Double
-#                                   (!)=mandatory | (+)=optional
+#   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
+#       ('+' marks a flag that takes several arguments of the same type whitespace separated)
+#                                   (!)=mandatory | (?)=optional
 #
-###  --parameterFlag4  -pf4  [d] (+)  description
-#                            default: 5.6
+###  --parameterFlag4  -pf4  [d]  (?)  description
+#                             default: 5.6
 #
 ####################################################################################################
 ```
@@ -234,31 +261,36 @@ for misspelled flags, the Parser will even do a suggestion:
 ## List of all available "addParameter" methods
 
 #### String type:
-- `addStringParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addStringParameter(String fullFlag, String shortFlag, boolean isMandatory)`
-- `addStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
-- `addStringParameter(String fullFlag, String shortFlag, String defaultValue)`
+- `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalStringParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
+- `addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultStringArrayParameter(String fullFlag, String shortFlag, String description, String[] defaultValue)`
 
 #### Integer type:
-- `addIntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addIntegerParameter(String fullFlag, String shortFlag, boolean isMandatory)`
-- `addIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue)`
-- `addIntegerParameter(String fullFlag, String shortFlag, Integer defaultValue)`
+- `addMandatoryIntegerParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalIntegerParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue)`
+- `addIntegerArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultIntegerArrayParameter(String fullFlag, String shortFlag, String description, Integer[] defaultValue)`
 
 #### Double type:
-- `addDoubleParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDoubleParameter(String fullFlag, String shortFlag, boolean isMandatory)`
-- `addDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue)`
-- `addDoubleParameter(String fullFlag, String shortFlag, Double defaultValue)`
+- `addMandatoryDoubleParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalDoubleParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue)`
+- `addDoubleArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultDoubleArrayParameter(String fullFlag, String shortFlag, String description, Double[] defaultValue)`
 
-#### Boolean type: (default values are in the first position!)
-- `addBooleanParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addBooleanParameter(String fullFlag, String shortFlag, boolean isMandatory)`
-- `addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag, String description)`
-- `addBooleanParameter(Boolean defaultValue, String fullFlag, String shortFlag)`
+#### Boolean type:
+- `addMandatoryBooleanParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalBooleanParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultBooleanParameter(String fullFlag, String shortFlag, String description, Boolean defaultValue)`
+- `addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultBooleanArrayParameter(String fullFlag, String shortFlag, String description, Boolean[] defaultValue)`
 
 #### Character type:
-- `addCharacterParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addCharacterParameter(String fullFlag, String shortFlag, boolean isMandatory)`
-- `addCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue)`
-- `addCharacterParameter(String fullFlag, String shortFlag, Character defaultValue)`
+- `addMandatoryCharacterParameter(String fullFlag, String shortFlag, String description)`
+- `addOptionalCharacterParameter(String fullFlag, String shortFlag, String description)`
+- `addDefaultCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue)`
+- `addCharacterArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
+- `addDefaultCharacterArrayParameter(String fullFlag, String shortFlag, String description, Character[] defaultValue)`
