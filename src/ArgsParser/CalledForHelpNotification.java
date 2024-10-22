@@ -20,11 +20,11 @@ public class CalledForHelpNotification extends Exception {
         put("Double", "d");
         put("Boolean", "b");
         put("Character", "c");
-        put("String[]", "s[]");
-        put("int[]", "i[]");
-        put("double[]", "d[]");
-        put("boolean[]", "b[]");
-        put("char[]", "c[]");
+        put("String[]", "s+");
+        put("int[]", "i+");
+        put("double[]", "d+");
+        put("boolean[]", "b+");
+        put("char[]", "c+");
     }};
 
     public CalledForHelpNotification(Set<Parameter<?>> parameters, int longestFlagSize, int longestShortFlag) {
@@ -43,9 +43,9 @@ public class CalledForHelpNotification extends Exception {
         int numberOfHashes = consoleWidth / 2 - spaceForHeadTitle / 2;
         String header = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
         helpMessage.append(header).append("\n");
-        helpMessage.append(centerString("<s>=String | <i>=Integer | <c>=Character | <b>=Boolean | <d>=Double")).append("\n");
-        helpMessage.append(centerString("<s[]>=StringArray | <i[]>=IntegerArray | <c[]>=CharacterArray | <b[]>=BooleanArray | <d[]>=DoubleArray")).append("\n");
-        helpMessage.append(centerString("(!)=mandatory | (+)=optional")).append("\n");
+        helpMessage.append(centerString("[s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double")).append("\n");
+        helpMessage.append(centerString(" ('+' marks a flag that takes several arguments of the same type whitespace separated)")).append("\n");
+        helpMessage.append(centerString("(!)=mandatory | (?)=optional")).append("\n");
         helpMessage.append("#").append("\n");
 
         if (parameters.size() > 1) {
@@ -81,7 +81,7 @@ public class CalledForHelpNotification extends Exception {
         String name = parameter.getFullFlag();
         String shortFlag = parameter.getShortFlag() == null ? "/" : parameter.getShortFlag();
         String description = parameter.getDescription();
-        String isMandatory = parameter.isMandatory() ? "(!)" : "(+)";
+        String isMandatory = parameter.isMandatory() ? "(!)" : "(?)";
         StringBuilder helpString = new StringBuilder("###  ");
 
         // check if a description is available:
@@ -100,7 +100,11 @@ public class CalledForHelpNotification extends Exception {
         // get type
         String type = shortFlagTypes.get(parameter.getType());
 
-        helpString.append(name).append("  ").append(shortFlag).append("  <").append(type).append("> ").append(isMandatory).append("  ");
+        helpString.append(name).append("  ").append(shortFlag).append("  [").append(type);
+        if (type.contains("+")) helpString.append("] ");
+        else helpString.append("]  ");
+        helpString.append(isMandatory).append("  ");
+
         int whiteSpace = helpString.length();
 
         // The description String gets checked if it fits inside the info box.
@@ -170,7 +174,7 @@ public class CalledForHelpNotification extends Exception {
         StringBuilder helpString = new StringBuilder();
 
         int spaceForValue;
-        int staticFreeSpace = spaceForValue = consoleWidth - whiteSpace + 1;
+        int staticFreeSpace = spaceForValue = consoleWidth - whiteSpace;
         String substring = string.substring(0, staticFreeSpace);
         helpString.append(substring);
 
