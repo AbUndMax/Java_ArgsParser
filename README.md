@@ -73,7 +73,7 @@ This parser supports the **types**:
 - *String, Integer, Double, Boolean, Character*
 
 The type of a Parameter is defined with its respective method on the parser object.
-For each type there are 6 `addParameter` methods (example for String):
+For each type there are 5 `addParameter` methods (example for String):
 - `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
 - `addOptionalStringParameter(String fullFlag, String shortFlag, String description)`
 - `addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
