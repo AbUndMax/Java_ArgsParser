@@ -236,9 +236,10 @@ public class TestArgsExceptions {
     public void testHelpAtWrongPosition() {
         String[] args = {"--file", "file.txt", "--help"};
         ArgsParser parser = new ArgsParser(args);
+
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        //TODO: make a extra ArgsException for "misplaced" --help calls"
-        parser.parse();
+
+        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, parser::parseUnchecked);
     }
 
 // FlagAlreadyProvidedArgsException

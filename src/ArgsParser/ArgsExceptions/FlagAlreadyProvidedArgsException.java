@@ -10,6 +10,6 @@ import ArgsParser.ArgsException;
  */
 public class FlagAlreadyProvidedArgsException extends ArgsException {
     public FlagAlreadyProvidedArgsException(String fullFlag, String shortFlag) {
-        super("Redundant specification of arguments to: " + fullFlag + "/" + shortFlag);
+        super("Redundant specification of arguments to: " + fullFlag + "/" + shortFlag, true);
     }
 }

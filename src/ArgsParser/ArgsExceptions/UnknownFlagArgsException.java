@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class UnknownFlagArgsException extends ArgsException {
     public UnknownFlagArgsException(String flagName, LinkedList<String> fullFlags, LinkedList<String> shortFlags) {
-        super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags));
+        super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags), true);
     }
 
     /**

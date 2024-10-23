@@ -495,13 +495,15 @@ public class ArgsParser {
 
 
     /**
-     * <ul>
-     *     <li>checks if args is Empty</li>
-     *     <li>checks if --help or -h was called on the program</li>
-     *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
-     *     <li>checks if all mandatory parameters were given in the args
-     * </ul>
-     * <p>Directly handles any ArgsException by printing the message to the console than <strong>exiting the program!</strong></p>
+     * Parses the provided input by invoking the parseUnchecked method, and
+     * handles Help calls or ArgsExceptions that may occur during the parsing process.
+     *
+     * If a CalledForHelpNotification exception is thrown, its message is
+     * printed to the standard output and the application exits with a
+     * status code of 0.
+     *
+     * If an ArgsException is thrown, its message is printed to the
+     * standard output and the application exits with a status code of 1.
      */
     public void parse() {
 
@@ -520,23 +522,26 @@ public class ArgsParser {
     }
 
     /**
-     * <ul>
-     *     <li>checks if args is Empty</li>
-     *     <li>checks if --help or -h was called on the program</li>
-     *     <li>goes through the args given to the ArgsParser and assigns each parameter its argument, making it callable via flags</li>
-     *     <li>checks if all mandatory parameters were given in the args
-     * </ul>
-     * @throws NoArgumentsProvidedArgsException if no arguments were provided in args and mandatory params were defined
-     * @throws UnknownFlagArgsException if an unknown flag was provided in args
-     * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
-     * @throws MissingArgArgsException if a flag was provided without an argument
-     * @throws MandatoryArgNotProvidedArgsException if not all mandatory parameters were given in args
-     * @throws CalledForHelpNotification if --help or -h was called
-     * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
+     * Parses command-line arguments and performs various checks to ensure
+     * correctness and validity of the provided arguments. If any issues are
+     * detected during the parsing process, specific exceptions are thrown
+     * to indicate what went wrong.
+     *
+     * @throws NoArgumentsProvidedArgsException if no command-line arguments are provided.
+     * @throws UnknownFlagArgsException if an unknown flag is encountered in the arguments.
+     * @throws TooManyArgumentsArgsException if too many arguments are provided.
+     * @throws MissingArgArgsException if an expected argument is missing.
+     * @throws MandatoryArgNotProvidedArgsException if a mandatory argument is not provided.
+     * @throws CalledForHelpNotification if the argument for help (-help or --help) is included.
+     * @throws InvalidArgTypeArgsException if an argument is of invalid type.
+     * @throws IllegalStateException if the .parse() method is called more than once.
+     * @throws FlagAlreadyProvidedArgsException if a flag is provided more than once.
+     * @throws HelpAtWrongPositionArgsException if the help argument is positioned incorrectly.
      */
     public void parseUnchecked() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
-            CalledForHelpNotification, InvalidArgTypeArgsException, IllegalStateException, FlagAlreadyProvidedArgsException {
+            CalledForHelpNotification, InvalidArgTypeArgsException, IllegalStateException,
+            FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
 
         if(parseArgsWasCalled) throw new IllegalStateException(".parse() was already called!");
 
@@ -588,15 +593,20 @@ public class ArgsParser {
     }
 
     /**
-     * goes through all entries in args and creates a Parameter instance for each found flag.
-     * @return a set of all Parameter instances created based on args
-     * @throws UnknownFlagArgsException if an unknown flag was provided in args
-     * @throws TooManyArgumentsArgsException if more than one argument was provided to a single flag
-     * @throws MissingArgArgsException if a flag was provided without an argument
-     * @throws InvalidArgTypeArgsException if the argument provided to a flag is not of the correct type
+     * Parses the command-line arguments and returns a set of parameters that were provided.
+     * The method checks for various conditions such as unknown flags, duplicate flags,
+     * missing arguments, and invalid argument types, and validates the correct placement of help flags.
+     *
+     * @return A set of {@code Parameter<?>} objects representing the parsed arguments.
+     * @throws UnknownFlagArgsException If an unrecognized flag is encountered.
+     * @throws TooManyArgumentsArgsException If a flag receives more than one argument.
+     * @throws MissingArgArgsException If a flag is missing its expected argument.
+     * @throws InvalidArgTypeArgsException If an argument type is invalid.
+     * @throws FlagAlreadyProvidedArgsException If a flag is provided more than once.
+     * @throws HelpAtWrongPositionArgsException If the help flag is not in the correct position.
      */
     private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
-            MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException {
+            MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
         Parameter<?> currentParameter = null;
@@ -615,8 +625,12 @@ public class ArgsParser {
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
+            boolean isHelpString = i > 1 && ("--help".equals(args[i]) || "-h".equals(args[i]));
 
-            if (currentPositionIsFlag && !flagExists) { // if flag is unknown
+            if (isHelpString) {
+                throw new HelpAtWrongPositionArgsException();
+
+            } else if (currentPositionIsFlag && !flagExists) { // if flag is unknown
                 throw new UnknownFlagArgsException(args[i], fullFlags, shortFlags);
 
             } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
@@ -631,7 +645,7 @@ public class ArgsParser {
             } else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
                 throw new MissingArgArgsException(args[i]);
 
-            }  else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
+            } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
 
                 boolean isArrayParam = arrayParameters.contains(args[i - 1]);
                 if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder

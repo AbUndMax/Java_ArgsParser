@@ -7,6 +7,6 @@ import ArgsParser.ArgsException;
  */
 public class MandatoryArgNotProvidedArgsException extends ArgsException {
     public MandatoryArgNotProvidedArgsException(String message) {
-        super(message);
+        super(message, true);
     }
 }

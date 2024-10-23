@@ -7,7 +7,7 @@ package ArgsParser;
  * <p>It is recommended to call {@link System#exit(int status)}  with status = 1, after outputting the message.</p>
  */
 public class ArgsException extends Exception {
-    public ArgsException(String message) {
-        super("\n<!> " + message + "\n\n> Use --help for more information.\n");
+    public ArgsException(String message, boolean moreInformation) {
+        super("\n<!> " + message + (moreInformation ? "\n\n> Use --help for more information.\n" : ""));
     }
 }

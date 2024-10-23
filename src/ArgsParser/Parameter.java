@@ -119,6 +119,7 @@ public class Parameter<T> {
     /**
      * setter method for the argument attribute, sets parsed status of this parameter instance to true
      * @param argument argument
+     * @throws InvalidArgTypeArgsException if the given Argument is not of the target type
      */
     protected void setArgument(String argument) throws InvalidArgTypeArgsException {
         try {
