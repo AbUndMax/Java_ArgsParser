@@ -7,6 +7,6 @@ import ArgsParser.ArgsException;
  */
 public class MissingArgArgsException extends ArgsException {
     public MissingArgArgsException(String flagName){
-        super("Missing argument for flag: " + flagName);
+        super("Missing argument for flag: " + flagName, true);
     }
 }

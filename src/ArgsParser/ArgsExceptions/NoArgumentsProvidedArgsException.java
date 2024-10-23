@@ -7,6 +7,6 @@ import ArgsParser.ArgsException;
  */
 public class NoArgumentsProvidedArgsException extends ArgsException {
     public NoArgumentsProvidedArgsException() {
-        super("No arguments provided");
+        super("No arguments provided", true);
     }
 }

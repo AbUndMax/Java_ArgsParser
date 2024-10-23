@@ -4,14 +4,15 @@ import ArgsParser.ArgsException;
 import ArgsParser.ArgsParser;
 import jdk.jshell.SourceCodeAnalysis;
 
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
  * Exception to be thrown if an unknown flag is provided
  */
 public class UnknownFlagArgsException extends ArgsException {
-    public UnknownFlagArgsException(String flagName, Set<String> fullFlags, Set<String> shortFlags) {
-        super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags));
+    public UnknownFlagArgsException(String flagName, LinkedList<String> fullFlags, LinkedList<String> shortFlags) {
+        super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags), true);
     }
 
     /**
@@ -21,7 +22,7 @@ public class UnknownFlagArgsException extends ArgsException {
      * @param shortFlags the short flags available
      * @return a suggestion for the user
      */
-    protected static String computeSuggestion(String userInput, Set<String> fullFlags, Set<String> shortFlags) {
+    protected static String computeSuggestion(String userInput, LinkedList<String> fullFlags, LinkedList<String> shortFlags) {
         fullFlags.add("help");
         shortFlags.add("h");
         userInput = stripFlagPrefix(userInput);
