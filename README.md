@@ -6,8 +6,9 @@
 # ArgsParser Library
 The ArgsParser Library is a comprehensive solution 
 designed to simplify the process of handling command-line arguments in Java applications.
-With its user-friendly API, developers can easily define, parse, 
-and access command-line parameters without the hassle of manual parsing. 
+With its user-friendly API, parameters can easily be defined, parsed, 
+and accessed. 
+It removes complex exception handling by providing automatic checks on common command-line input errors 
 The tool supports a wide range of parameter types including Strings, Integers, Doubles, Booleans, and Characters,
 catering to diverse application needs.
 
