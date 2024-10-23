@@ -57,6 +57,7 @@ public class ArgsParser {
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
+    private final int argsLength;
 
     /**
      * Constructor
@@ -66,6 +67,7 @@ public class ArgsParser {
     public ArgsParser(String[] args) throws IllegalArgumentException {
         if (args == null) throw new IllegalArgumentException("Args cannot be null!");
         this.args = args;
+        this.argsLength = args.length;
     }
 
     /**
@@ -548,7 +550,7 @@ public class ArgsParser {
         parseArgsWasCalled = true;
 
         checkIfAnyArgumentsProvided();
-        if (args.length > 0) {
+        if (argsLength > 0) {
             checkForHelpCall();
             Set<Parameter<?>> givenParameters = parseArguments();
             checkMandatoryArguments(givenParameters);
@@ -562,7 +564,7 @@ public class ArgsParser {
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      */
     private void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException {
-        if (args.length == 0 & !mandatoryParameters.isEmpty()) {
+        if (argsLength == 0 & !mandatoryParameters.isEmpty()) {
             throw new NoArgumentsProvidedArgsException();
         }
     }
@@ -574,8 +576,8 @@ public class ArgsParser {
      * @throws CalledForHelpNotification if --help or -h was called
      */
     private void checkForHelpCall() throws UnknownFlagArgsException, CalledForHelpNotification {
-        boolean oneArgProvided = args.length == 1;
-        boolean twoArgsProvided = args.length == 2;
+        boolean oneArgProvided = argsLength == 1;
+        boolean twoArgsProvided = argsLength == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
 
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
@@ -611,7 +613,7 @@ public class ArgsParser {
 
         Parameter<?> currentParameter = null;
         boolean longFlagUsed = false;
-        for (int i = 0; i < args.length; i++) {
+        for (int i = 0; i < argsLength; i++) {
 
             boolean currentPositionIsFlag = args[i].startsWith("-");
             if (currentPositionIsFlag) {
@@ -619,15 +621,16 @@ public class ArgsParser {
                 longFlagUsed = args[i].startsWith("--");
             }
             boolean flagExists = parameterMap.get(args[i]) != null;
-            boolean isLastEntry = i == args.length - 1;
+            boolean isLastEntry = i == argsLength - 1;
             boolean currentParameterNotNull = currentParameter != null;
             boolean argumentSet = currentParameterNotNull && currentParameter.hasArgument();
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
-            boolean isHelpString = i > 1 && ("--help".equals(args[i]) || "-h".equals(args[i]));
+            boolean isHelpCall = ("--help".equals(args[i]) || "-h".equals(args[i]));
+            boolean isHelpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && argsLength == 2));
 
-            if (isHelpString) {
+            if (isHelpCallInWrongPosition) {
                 throw new HelpAtWrongPositionArgsException();
 
             } else if (currentPositionIsFlag && !flagExists) { // if flag is unknown
@@ -651,7 +654,7 @@ public class ArgsParser {
                 if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder
                     StringBuilder arguments = new StringBuilder();
                     arguments.append(args[i]).append("==="); // every entry in the array gets seperated by ===
-                    while(i + 1 < args.length && !args[i + 1].startsWith("-")) { // loop through all arguments
+                    while(i + 1 < argsLength && !args[i + 1].startsWith("-")) { // loop through all arguments
                         arguments.append(args[++i]).append("===");
                     }
                     currentParameter.setArgument(arguments.toString());

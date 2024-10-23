@@ -232,9 +232,21 @@ public class TestArgsExceptions {
         System.out.println(exception.getMessage());
     }
 
+// HelpAtWrongPositionInArgsException
+
     @Test
     public void testHelpAtWrongPosition() {
         String[] args = {"--file", "file.txt", "--help"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
+
+        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, parser::parseUnchecked);
+    }
+
+    @Test
+    public void testHelpBeforeFlag() {
+        String[] args = {"--help", "--file"};
         ArgsParser parser = new ArgsParser(args);
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
