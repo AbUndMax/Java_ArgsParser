@@ -652,6 +652,7 @@ public class ArgsParser {
             MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
+        //check if the first argument provided is actually a flag or command
         if (argsLength > 0 && parameterMap.get(args[0]) == null && commandMap.get(args[0]) == null &&
                 !(args[0].equals("--help") || args[0].equals("-h"))) {
             throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), true);

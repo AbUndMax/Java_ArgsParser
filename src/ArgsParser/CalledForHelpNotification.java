@@ -49,7 +49,7 @@ public class CalledForHelpNotification extends Exception {
         helpMessage.append(header).append("\n");
         helpMessage.append(centerString("[s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double")).append("\n");
         helpMessage.append(centerString(" ('+' marks a flag that takes several arguments of the same type whitespace separated)")).append("\n");
-        helpMessage.append(centerString("(!)=mandatory | (?)=optional")).append("\n");
+        helpMessage.append(centerString("(!)=mandatory | (?)=optional | (/)=command")).append("\n");
         helpMessage.append("#").append("\n");
 
         if (flagsInDefinitionOrder.size() > 1) {
@@ -107,7 +107,7 @@ public class CalledForHelpNotification extends Exception {
         int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortCommandName.length();
         shortCommandName = shortCommandName + " ".repeat(shortWhiteSpaceSize);
 
-        helpString.append(fullCommandName).append("  ").append(shortCommandName).append("            ");
+        helpString.append(fullCommandName).append("  ").append(shortCommandName).append("       (/)  ");
 
         int whiteSpace = helpString.length();
 

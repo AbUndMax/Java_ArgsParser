@@ -21,7 +21,7 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
                 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                                   (!)=mandatory | (?)=optional
+                #                            (!)=mandatory | (?)=optional | (/)=command
                 #
                 ###  --parameterFlag4  -pf4  [d]  (?)  description
                 #                            default:  5.6
@@ -62,7 +62,7 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
                 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                                   (!)=mandatory | (?)=optional
+                #                            (!)=mandatory | (?)=optional | (/)=command
                 #
                 #                                      Available Parameters:
                 #
@@ -128,7 +128,7 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
                 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                                   (!)=mandatory | (?)=optional
+                #                            (!)=mandatory | (?)=optional | (/)=command
                 #
                 #                                      Available Parameters:
                 #
@@ -175,9 +175,42 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
                 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                                   (!)=mandatory | (?)=optional
+                #                            (!)=mandatory | (?)=optional | (/)=command
                 #
-                ###  command  c            this is a command
+                ###  command  c       (/)  this is a command
+                #
+                ####################################################################################################""";
+        assertEquals(expected, exception.getMessage());
+    }
+    
+    @Test
+    public void testHelpWithCommandsAndParameters() {
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser(args);
+        Command command = parser.addCommand("command", "c", "this is a command");
+        Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
+        Parameter<Integer> newParam2 = parser.addOptionalIntegerParameter("newParam2", "np2", "this is the second new parameter");
+        Command newCommand = parser.addCommand("newCommand", "nc", "this is another command");
+
+        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        String expected = """
+                
+                ############################################### HELP ###############################################
+                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
+                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                            (!)=mandatory | (?)=optional | (/)=command
+                #
+                #                                      Available Parameters:
+                #
+                ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
+                #
+                ###  --newParam2  -np2  [i]  (?)  this is the second new parameter
+                #
+                #                                       Available Commands:
+                #
+                ###  command      c          (/)  this is a command
+                #
+                ###  newCommand   nc         (/)  this is another command
                 #
                 ####################################################################################################""";
         assertEquals(expected, exception.getMessage());
@@ -201,7 +234,7 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
                 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                                   (!)=mandatory | (?)=optional
+                #                            (!)=mandatory | (?)=optional | (/)=command
                 #
                 ###  --longString  -ls  [s]  (?)  This description is so long, it will force the automatic help
                 #                                 printout to introduce a new line and still have a nice look :)
