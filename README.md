@@ -16,6 +16,7 @@ catering to diverse application needs.
 
 - **Easy Definition of Parameters:** Define parameters with flag names and shorthands, 
   mandatory/optional status, as well as optional default values and descriptions.
+- **Custom Command Support:** Define custom commands and easily check if they were provided.  
 - **Robust Parsing-Error Handling:** Catch and handle custom exceptions for missing arguments, 
   invalid types, and other common parsing errors.
 - **Automatic exception handling** Alternatively of handling parsing errors manually, you can use a parsing method that 
@@ -60,13 +61,13 @@ Instantiate an ArgsParser object, and hand over the String array `args` from the
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
     // ...
-}
 ```
 
-### 2. Define the Parameters
+### 2. Define the Parameters or Commands
 This parser supports 5 **types**:
 - *String, Integer, Double, Boolean, Character*
 
+#### addParameter methods:
 The type of a Parameter is defined with its respective method on the parser object.
 For each type there are 5 `addParameter` methods (example for String):
 - `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
@@ -77,6 +78,7 @@ For each type there are 5 `addParameter` methods (example for String):
   
 (see a list of all Methods at the end of this README)
 
+#### Available Fields for each Parameter:
 You can specify several fields for each parameter:
 
 - **fullFlag**: The flag name of the parameter.
@@ -84,6 +86,7 @@ You can specify several fields for each parameter:
 - **description**: A description of the parameter, insert `null` or an empty string`""` if not needed.
 - **defaultValue**: A default value that the parameter returns if no argument was provided but accessed in the program.
 
+#### Multiple Arguments to one flag:
 A **special type** are the `addArray` methods that are introduced in Version 4.0.0 of the ArgsParser. 
 They allow handing several arguments to a single flag:
 ```
@@ -91,14 +94,23 @@ They allow handing several arguments to a single flag:
 ```
 Several of these Array Parameters can be defined without problems.
 
+#### Commands:
+
+Another added feature in Version 4.0.0 is the "command" type.
+The parser checks if any commands were provided in the arguments, enabling the developer to activate different
+modes or functionalities based on the commands passed. 
+You simply define commands just like regular parameters, and the
+parser will recognize them when parsing the input arguments.
+
 ```java
-    // ...
+// ...
     Parameter<String> example = parser.addMandatoryStringParameter("parameterFlag", "pf", "short Description");
     Parameter<Integer> example2 = parser.addOptionalIntegerParameter("parameterFlag2", "pf2", null);
     Parameter<Double> argWithDefault = parser.addDefaultDoubleParameter("parameterFlag3", "pf3", "description", 5.6);
     Parameter<Boolean[]> booleanArrayParam = parser.addBooleanArrayParameter("boolArray", "bArr", "Array of several boolean values", false);
     Parameter<Integer[]> integerArrayParam = parser.addDefaultIntegerArrayParameter("intArray", "iArr", "Array of several integer values", new Integer[]{1, 2, 3});
-    // ...
+    Command command = parser.addCommand("commandName", "cN", "this is a description for the command");
+// ...
 ```
 
 ### 3. Parse the Arguments
@@ -150,6 +162,8 @@ or like the following example for manually handling the ArgsExceptions:
 ```
 
 ### 4. Access the Arguments
+
+#### direct access to arguments via its parameter
 Access the console arguments given by the user by calling the `getArgument()` method on the parameter variable.  
 The return type matches the type defined when adding the parameter.
 The **arguments can be used directly in your code**!
@@ -158,8 +172,18 @@ The **arguments can be used directly in your code**!
     // ...
     String providedArgument = example.getArgument();
     Double result = example2.getArgument() + argWithDefault.getArgument();
+    //...
 ```
 
+#### check provision of a command
+For the commands, a simple call of `isProvided` on the Command instance will return if the command was provided in args:
+```java
+    //...
+    if (command.isProvided()) System.out.println("command provided");
+    //...
+```
+
+#### access arguments indirectly via the ArgsParser instance they were defined on
 With version 3.0.0 the `getArgumentOf(String fullFlag)` method ia available, thus arguments provided to a specific
 parameter flag can be accessed by the parameter flugFlag name.
 But this comes with some restrictions:
@@ -174,7 +198,13 @@ But this comes with some restrictions:
     Integer getInteger = parser.getArgumentOf("parameterFlag2");
     Double getDouble = parser.getArgumentOf("parameterFlag3");
     Double result = getInteger + getDouble;
-}
+    //...
+```
+
+The same is possible with commands:
+```java
+    //...
+    if (parser.checkIfCommandIsProvided("commandName")) System.out.println("command still provided");
 ```
 
 ## Integrated --help function:
@@ -193,7 +223,7 @@ they were added** on the ArgsParser Instance:
 ############################################### HELP ###############################################
 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-#                                   (!)=mandatory | (?)=optional
+#                            (!)=mandatory | (?)=optional | (/)=command
 #
 #                                      Available Parameters:
 #
@@ -209,18 +239,20 @@ they were added** on the ArgsParser Instance:
 ###  --intArray        -iArr  [i+] (?)  Array of several integer values
 #                             default:  [1, 2, 3]
 #
+###  commandName       cN          (/)  this is a description for the command
+#
 ####################################################################################################
 ```
 
 while calling `--help` or `-h` with a specific parameter will only print the help message for that parameter:
 
-`> exampleProgramm -pf4 -h`
+`> exampleProgramm -pf3 -h`
 ```
 
 ############################################### HELP ###############################################
 #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
 #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-#                                   (!)=mandatory | (?)=optional
+#                            (!)=mandatory | (?)=optional | (/)=command
 #
 ###  --parameterFlag3  -pf3   [d]  (?)  description
 #                             default:  5.6
@@ -232,10 +264,10 @@ while calling `--help` or `-h` with a specific parameter will only print the hel
 The ArgsParser will throw an `ArgsException` if the user provides invalid arguments.
 The printouts of these exceptions look like this:
 
-`> exampleProgramm -pf4 5.6 5.6`
+`> exampleProgramm -pf3 5.6 5.6`
 ```
 
-<!> Too many arguments provided to flag: -pf4
+<!> Too many arguments provided to flag: -pf3
 
 > Use --help for more information.
 
@@ -243,10 +275,10 @@ The printouts of these exceptions look like this:
 
 or 
 
-`> exampleProgramm -pf4`
+`> exampleProgramm -pf3`
 ```
 
-<!> Missing argument for flag: -pf4
+<!> Missing argument for flag: -pf3
 
 > Use --help for more information.
 
@@ -254,11 +286,11 @@ or
 
 for misspelled flags, the Parser will even do a suggestion:
 
-`> exampleProgramm --paraeterflg4, 5.6`
+`> exampleProgramm --paraeterflg3, 5.6`
 ```
 
-<!> unknown flag: --paraeterflg4
-> did you mean: --parameterFlag4 ?
+<!> unknown flag: --paraeterflg3
+> did you mean: --parameterFlag3 ?
 
 > Use --help for more information.
 
@@ -300,3 +332,16 @@ for misspelled flags, the Parser will even do a suggestion:
 - `addDefaultCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue)`
 - `addCharacterArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
 - `addDefaultCharacterArrayParameter(String fullFlag, String shortFlag, String description, Character[] defaultValue)`
+
+#### access an Argument of ANY of these Parameters:
+- `parameter.getArgument()`
+
+#### Command type:
+- `addCommand(String fullCommandName, String shortCommandName, String description)`
+
+#### check provision of a specific command:
+- `command.isProvided()`
+
+#### indirect access of parameters / commands:
+- `getArgumentOf(String fullFlag)`
+- `checkIfCommandIsProvided(String fullCommandName)`
