@@ -52,8 +52,8 @@ public class ArgsParser {
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     private final Set<String> arrayParameters = new HashSet<>();
-    private final Set<String> fullFlags = new HashSet<>();
-    private final Set<String> shortFlags = new HashSet<>();
+    private final LinkedList<String> fullFlags = new LinkedList<>();
+    private final LinkedList<String> shortFlags = new LinkedList<>();
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
@@ -574,11 +574,11 @@ public class ArgsParser {
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
 
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
-            throw new CalledForHelpNotification(new HashSet<>(parameterMap.values()), longestFlagSize, longestShortFlag);
+            throw new CalledForHelpNotification(parameterMap, fullFlags, longestFlagSize, longestShortFlag);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
-                throw new CalledForHelpNotification(new HashSet<>(Collections.singletonList(parameterMap.get(args[0]))), longestFlagSize, longestShortFlag);
+                throw new CalledForHelpNotification(parameterMap, new LinkedList<>(Collections.singletonList(args[0])), longestFlagSize, longestShortFlag);
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input

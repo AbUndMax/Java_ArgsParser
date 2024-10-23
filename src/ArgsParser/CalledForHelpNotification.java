@@ -1,8 +1,6 @@
 package ArgsParser;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Exception used as Notification that --help was used.
@@ -21,20 +19,20 @@ public class CalledForHelpNotification extends Exception {
         put("Boolean", "b");
         put("Character", "c");
         put("String[]", "s+");
-        put("int[]", "i+");
-        put("double[]", "d+");
-        put("boolean[]", "b+");
-        put("char[]", "c+");
+        put("Integer[]", "i+");
+        put("Double[]", "d+");
+        put("Boolean[]", "b+");
+        put("Character[]", "c+");
     }};
 
-    public CalledForHelpNotification(Set<Parameter<?>> parameters, int longestFlagSize, int longestShortFlag) {
-        super(generateHelpMessage(parameters, longestFlagSize, longestShortFlag));
+    public CalledForHelpNotification(Map<String, Parameter<?>> parameters, LinkedList<String> fullFlags, int longestFlagSize, int longestShortFlag) {
+        super(generateHelpMessage(parameters, fullFlags, longestFlagSize, longestShortFlag));
     }
 
     /**
      * prints all available Parameters found in argumentsList to the console
      */
-    private static String generateHelpMessage(Set<Parameter<?>> parameters, int longestFlagSize, int longestShortFlag) {
+    private static String generateHelpMessage(Map<String, Parameter<?>> parameters, LinkedList<String> fullFlags, int longestFlagSize, int longestShortFlag) {
         StringBuilder helpMessage = new StringBuilder();
         helpMessage.append("\n");
 
@@ -48,13 +46,13 @@ public class CalledForHelpNotification extends Exception {
         helpMessage.append(centerString("(!)=mandatory | (?)=optional")).append("\n");
         helpMessage.append("#").append("\n");
 
-        if (parameters.size() > 1) {
+        if (fullFlags.size() > 1) {
             helpMessage.append(centerString("Available Parameters:")).append("\n");
             helpMessage.append("#").append("\n");
         }
 
-        for (Parameter<?> param : parameters) {
-            String helpString = parameterHelpString(param, longestFlagSize, longestShortFlag);
+        for (String flag : fullFlags) {
+            String helpString = parameterHelpString(parameters.get(flag), longestFlagSize, longestShortFlag);
             helpMessage.append(helpString).append("\n");
             helpMessage.append("#").append("\n");
         }
@@ -123,8 +121,10 @@ public class CalledForHelpNotification extends Exception {
 
         // print default value if available
         if (parameter.hasDefault()) {
-            String defaultTitle = "default: ";
-            String defaultValue = parameter.getDefaultValue().toString();
+            String defaultTitle = "default:  ";
+            String defaultValue = parameter.getDefaultValue().getClass().isArray() ?
+                    Arrays.toString((Object[]) parameter.getDefaultValue()) : // here we convert the Array to a readable String
+                    parameter.getDefaultValue().toString();
             helpString.append("\n").append("#").append(" ".repeat(whiteSpace - defaultTitle.length() - 1)).append(defaultTitle);
 
             if (whiteSpace + defaultValue.length() > consoleWidth) { // if the default is as large as the consoleWindow split default
