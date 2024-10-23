@@ -50,10 +50,11 @@ public class ArgsParser {
 
     private final String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
+    private final Map<String, Command> commandMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     private final Set<String> arrayParameters = new HashSet<>();
-    private final LinkedList<String> fullFlags = new LinkedList<>();
-    private final LinkedList<String> shortFlags = new LinkedList<>();
+    private final LinkedList<String> commandsInDefinitionOrder = new LinkedList<>();
+    private final LinkedList<String> flagsInDefinitionOrder = new LinkedList<>();
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
@@ -100,8 +101,8 @@ public class ArgsParser {
         shortFlag = makeFlag(shortFlag, true);
 
         // check if the flag names are already used
-        if (fullFlags.contains(fullFlag)) throw new IllegalArgumentException("Flag already exists: " + fullFlag);
-        if (shortFlags.contains(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
+        if (parameterMap.containsKey(fullFlag)) throw new IllegalArgumentException("Flag already exists: " + fullFlag);
+        if (parameterMap.containsKey(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
 
         // create new parameter instance
         Parameter<T> parameter = new Parameter<T>(fullFlag, shortFlag, description, type, isMandatory, this);
@@ -114,16 +115,14 @@ public class ArgsParser {
         parameterMap.put(parameter.getFullFlag(), parameter);
         parameterMap.put(parameter.getShortFlag(), parameter);
 
+        flagsInDefinitionOrder.add(fullFlag);
+
         // check for the lengths of the name
         int nameSize = parameter.getFullFlag().length();
         if (longestFlagSize < nameSize) longestFlagSize = nameSize;
 
         int shortSize = parameter.getShortFlag().length();
         if (longestShortFlag < shortSize) longestShortFlag = shortSize;
-
-        // add names to the name sets
-        fullFlags.add(fullFlag);
-        shortFlags.add(shortFlag);
 
         // add to mandatory parameters if parameter is mandatory
         if (parameter.isMandatory()) mandatoryParameters.add(parameter);
@@ -493,7 +492,38 @@ public class ArgsParser {
     }
 
 
-    //
+    // Command
+
+
+    /**
+     * Adds a new command with its full name, short name, and description to the existing command set.
+     *
+     * @param fullCommandName The full name of the command, used as the primary identifier.
+     * @param shortCommandName The abbreviated name of the command, used as a shorthand identifier.
+     * @param description A brief description of what the command does.
+     * @return The newly created and added Command object.
+     * @throws IllegalArgumentException If the fullCommandName or shortCommandName already exists in the command set.
+     */
+    public Command addCommand(String fullCommandName, String shortCommandName, String description) {
+
+        if (commandMap.containsKey(fullCommandName)) throw new IllegalArgumentException("Command name already exists: " + fullCommandName);
+        if (commandMap.containsKey(shortCommandName)) throw new IllegalArgumentException("Command name already exists: " + shortCommandName);
+
+        Command command = new Command(fullCommandName, shortCommandName, description, this);
+
+        int nameSize = fullCommandName.length();
+        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
+
+        int shortSize = shortCommandName.length();
+        if (longestShortFlag < shortSize) longestShortFlag = shortSize;
+
+        commandMap.put(fullCommandName, command);
+        commandMap.put(shortCommandName, command);
+
+        commandsInDefinitionOrder.add(fullCommandName);
+
+        return command;
+    }
 
 
     /**
@@ -579,17 +609,28 @@ public class ArgsParser {
         boolean oneArgProvided = argsLength == 1;
         boolean twoArgsProvided = argsLength == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
+        boolean firstArgumentIsCommand = commandMap.get(args[0]) != null;
 
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
-            throw new CalledForHelpNotification(parameterMap, fullFlags, longestFlagSize, longestShortFlag);
+            throw new CalledForHelpNotification(parameterMap, flagsInDefinitionOrder,
+                                                commandMap, commandsInDefinitionOrder,
+                                                longestFlagSize, longestShortFlag);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
-                throw new CalledForHelpNotification(parameterMap, new LinkedList<>(Collections.singletonList(args[0])), longestFlagSize, longestShortFlag);
+                throw new CalledForHelpNotification(parameterMap, Collections.singletonList(args[0]),
+                                                    commandMap, new LinkedList<>(),
+                                                    longestFlagSize, longestShortFlag);
 
+            } else if (firstArgumentIsCommand) { // if the first argument is a command and --help follows
+                throw new CalledForHelpNotification(parameterMap, new LinkedList<>(),
+                                                    commandMap, Collections.singletonList(args[0]),
+                                                    longestFlagSize, longestShortFlag);
+                
             } else { // if the first argument is not a parameter but --help was called,
-                // the program notifies the user of an unknown parameter input
-                throw new UnknownFlagArgsException(args[0], fullFlags, shortFlags);
+                    // the program notifies the user of an unknown parameter input
+                    throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), false);
+
             }
         }
     }
@@ -611,6 +652,11 @@ public class ArgsParser {
             MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
+        if (argsLength > 0 && parameterMap.get(args[0]) == null && commandMap.get(args[0]) == null &&
+                !(args[0].equals("--help") || args[0].equals("-h"))) {
+            throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), true);
+        }
+
         Parameter<?> currentParameter = null;
         boolean longFlagUsed = false;
         for (int i = 0; i < argsLength; i++) {
@@ -620,6 +666,7 @@ public class ArgsParser {
                 currentParameter = parameterMap.get(args[i]);
                 longFlagUsed = args[i].startsWith("--");
             }
+            boolean currentPositionIsCommand = commandMap.get(args[i]) != null;
             boolean flagExists = parameterMap.get(args[i]) != null;
             boolean isLastEntry = i == argsLength - 1;
             boolean currentParameterNotNull = currentParameter != null;
@@ -628,13 +675,13 @@ public class ArgsParser {
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
             boolean isHelpCall = ("--help".equals(args[i]) || "-h".equals(args[i]));
-            boolean isHelpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && argsLength == 2));
+            boolean helpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && argsLength == 2));
 
-            if (isHelpCallInWrongPosition) {
+            if (helpCallInWrongPosition) {
                 throw new HelpAtWrongPositionArgsException();
 
             } else if (currentPositionIsFlag && !flagExists) { // if flag is unknown
-                throw new UnknownFlagArgsException(args[i], fullFlags, shortFlags);
+                throw new UnknownFlagArgsException(args[i], parameterMap.keySet(), commandMap.keySet(), false);
 
             } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
                 throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(), currentParameter.getShortFlag());
@@ -647,6 +694,9 @@ public class ArgsParser {
 
             } else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
                 throw new MissingArgArgsException(args[i]);
+
+            } else if (currentPositionIsCommand) { // if current position is a command
+                commandMap.get(args[i]).setCommand(); // set the command to true
 
             } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
 

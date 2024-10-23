@@ -1,54 +1,61 @@
 package ArgsParser.ArgsExceptions;
 
 import ArgsParser.ArgsException;
-import ArgsParser.ArgsParser;
-import jdk.jshell.SourceCodeAnalysis;
-
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
  * Exception to be thrown if an unknown flag is provided
  */
 public class UnknownFlagArgsException extends ArgsException {
-    public UnknownFlagArgsException(String flagName, LinkedList<String> fullFlags, LinkedList<String> shortFlags) {
-        super("unknown flag: " + flagName + computeSuggestion(flagName, fullFlags, shortFlags), true);
+    public UnknownFlagArgsException(String flagName, Set<String> parameterFlags, Set<String> commandNames, boolean isFirstPosition) {
+        super("unknown flag or command: " + flagName + computeSuggestion(flagName, parameterFlags, commandNames, isFirstPosition), true);
     }
 
     /**
      * Compute a suggestion for the user based on the flag name
      * @param userInput the flag name provided by the user
-     * @param fullFlags the full flags available
-     * @param shortFlags the short flags available
+     * @param parameterFlags the full flags available
+     * @param commandNames the short flags available
      * @return a suggestion for the user
      */
-    protected static String computeSuggestion(String userInput, LinkedList<String> fullFlags, LinkedList<String> shortFlags) {
-        fullFlags.add("help");
-        shortFlags.add("h");
-        userInput = stripFlagPrefix(userInput);
+    protected static String computeSuggestion(String userInput, Set<String> parameterFlags, Set<String> commandNames, boolean isFirstPosition) {
+        String strippedInput = stripFlagPrefix(userInput);
         double highestSimilarity = 0.0;
         String suggestion = "";
 
-        for (String fullFlag : fullFlags) {
-            fullFlag = stripFlagPrefix(fullFlag);
-            double similarity = SimilarityScore(userInput, fullFlag);
+        for (String parameterFlag : parameterFlags) {
+            String strippedFlag = stripFlagPrefix(parameterFlag);
+            double similarity = SimilarityScore(strippedInput, strippedFlag);
             if (similarity > highestSimilarity) {
                 highestSimilarity = similarity;
-                suggestion = "--" + fullFlag;
+                suggestion = parameterFlag;
             }
         }
 
-        for (String shortFlag : shortFlags) {
-            shortFlag = stripFlagPrefix(shortFlag);
-            double similarity = SimilarityScore(userInput, shortFlag);
+        for (String help : new String[]{"--help", "-h"}) {
+            String strippedFlag = stripFlagPrefix(help);
+            double similarity = SimilarityScore(strippedInput, strippedFlag);
             if (similarity > highestSimilarity) {
                 highestSimilarity = similarity;
-                suggestion = "-" + shortFlag;
+                suggestion = help;
+            }
+        }
+
+        for (String commandName : commandNames) {
+            commandName = stripFlagPrefix(commandName);
+            double similarity = SimilarityScore(strippedInput, commandName);
+            if (similarity > highestSimilarity) {
+                highestSimilarity = similarity;
+                suggestion = commandName;
             }
         }
 
         if (highestSimilarity < 0.1) {
             return "";
+        } else if (isFirstPosition && !(userInput.charAt(0) == '-')) {
+            return "\n> did you mean: " + suggestion + " ?" +
+                    "\n" +
+                    "\n> flag or command expected in first position!";
         } else {
             return "\n> did you mean: " + suggestion + " ?";
         }

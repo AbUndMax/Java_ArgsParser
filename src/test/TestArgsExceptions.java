@@ -163,6 +163,27 @@ public class TestArgsExceptions {
     }
 
     @Test
+    public void testHelpWithCommand() {
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Command command = parser.addCommand("command", "c", "this is a command");
+
+        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        String expected = """
+                
+                ############################################### HELP ###############################################
+                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
+                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                                   (!)=mandatory | (?)=optional
+                #
+                ###  command  c            this is a command
+                #
+                ####################################################################################################""";
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
     public void testHelpWithNewLineInDescription() {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser(args);
@@ -309,8 +330,17 @@ public class TestArgsExceptions {
 
         Parameter<String> string = parser.addMandatoryStringParameter("file", "f", "descr");
 
-        Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, parser::parseUnchecked);
-        assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--file").getMessage(), exception.getMessage());
+        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        String expected = """
+                
+                <!> unknown flag or command: file.txt
+                > did you mean: --file ?
+                
+                > flag or command expected in first position!
+                
+                > Use --help for more information.
+                """;
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -407,7 +437,7 @@ public class TestArgsExceptions {
         Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
         assertEquals("""
                              
-                             <!> unknown flag: -w
+                             <!> unknown flag or command: -w
                              
                              > Use --help for more information.
                              """, exception.getMessage());
@@ -424,7 +454,7 @@ public class TestArgsExceptions {
         Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
         assertEquals("""
                              
-                             <!> unknown flag: -s
+                             <!> unknown flag or command: -s
                              > did you mean: --save ?
                              
                              > Use --help for more information.
@@ -442,7 +472,7 @@ public class TestArgsExceptions {
         Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
         assertEquals("""
                              
-                             <!> unknown flag: -f
+                             <!> unknown flag or command: -f
                              > did you mean: --file ?
                              
                              > Use --help for more information.
@@ -460,7 +490,7 @@ public class TestArgsExceptions {
         Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
         assertEquals("""
                              
-                             <!> unknown flag: --hp
+                             <!> unknown flag or command: --hp
                              > did you mean: --help ?
                              
                              > Use --help for more information.
@@ -478,7 +508,7 @@ public class TestArgsExceptions {
         Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
         assertEquals("""
                              
-                             <!> unknown flag: --sve
+                             <!> unknown flag or command: --sve
                              > did you mean: --save ?
                              
                              > Use --help for more information.
@@ -519,5 +549,15 @@ public class TestArgsExceptions {
         String[] args = null;
         Exception exception = assertThrows(IllegalArgumentException.class, () -> new ArgsParser(args));
         assertEquals("Args cannot be null!", exception.getMessage());
+    }
+
+    @Test
+    public void testCommand() {
+        String[] args = new String[]{"command"};
+        ArgsParser parser = new ArgsParser(args);
+        Command command = parser.addCommand("command", "c", "test command");
+        parser.parse();
+
+        assertTrue(command.isProvided());
     }
 }

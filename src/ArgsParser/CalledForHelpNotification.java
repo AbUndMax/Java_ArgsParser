@@ -25,14 +25,20 @@ public class CalledForHelpNotification extends Exception {
         put("Character[]", "c+");
     }};
 
-    public CalledForHelpNotification(Map<String, Parameter<?>> parameters, LinkedList<String> fullFlags, int longestFlagSize, int longestShortFlag) {
-        super(generateHelpMessage(parameters, fullFlags, longestFlagSize, longestShortFlag));
+    public CalledForHelpNotification(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
+                                     Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
+                                     int longestFlagSize, int longestShortFlag) {
+        super(generateHelpMessage(parameterMap, flagsInDefinitionOrder, 
+                                  commandMap, commandsInDefinitionOrder,
+                                  longestFlagSize, longestShortFlag));
     }
 
     /**
      * prints all available Parameters found in argumentsList to the console
      */
-    private static String generateHelpMessage(Map<String, Parameter<?>> parameters, LinkedList<String> fullFlags, int longestFlagSize, int longestShortFlag) {
+    private static String generateHelpMessage(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
+                                              Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
+                                              int longestFlagSize, int longestShortFlag) {
         StringBuilder helpMessage = new StringBuilder();
         helpMessage.append("\n");
 
@@ -46,13 +52,24 @@ public class CalledForHelpNotification extends Exception {
         helpMessage.append(centerString("(!)=mandatory | (?)=optional")).append("\n");
         helpMessage.append("#").append("\n");
 
-        if (fullFlags.size() > 1) {
+        if (flagsInDefinitionOrder.size() > 1) {
             helpMessage.append(centerString("Available Parameters:")).append("\n");
             helpMessage.append("#").append("\n");
         }
 
-        for (String flag : fullFlags) {
-            String helpString = parameterHelpString(parameters.get(flag), longestFlagSize, longestShortFlag);
+        for (String flag : flagsInDefinitionOrder) {
+            String helpString = parameterHelpString(parameterMap.get(flag), longestFlagSize, longestShortFlag);
+            helpMessage.append(helpString).append("\n");
+            helpMessage.append("#").append("\n");
+        }
+        
+        if (commandsInDefinitionOrder.size() > 1) {
+            helpMessage.append(centerString("Available Commands:")).append("\n");
+            helpMessage.append("#").append("\n");
+        }
+        
+        for (String command : commandsInDefinitionOrder) {
+            String helpString = commandHelpString(commandMap.get(command), longestFlagSize, longestShortFlag);
             helpMessage.append(helpString).append("\n");
             helpMessage.append("#").append("\n");
         }
@@ -69,6 +86,47 @@ public class CalledForHelpNotification extends Exception {
         int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
         return "#" + " ".repeat(freeSpace) + stringToCenter;
     }
+    
+    private static String commandHelpString(Command command, int longestFlagSize, int longestShortFlag) {
+        String fullCommandName = command.getFullCommandName();
+        String shortCommandName = command.getShortCommandName();
+        String description = command.getDescription();
+        String isMandatory = "   ";
+        StringBuilder helpString = new StringBuilder("###  ");
+
+        // check if a description is available:
+        if (description == null || description.isEmpty()) {
+            description = "No description available!";
+        } else {
+            description = description.trim();
+        }
+
+        // align the parameter names nicely
+        int nameWhiteSpaceSize = longestFlagSize - fullCommandName.length();
+        fullCommandName = fullCommandName + " ".repeat(nameWhiteSpaceSize);
+        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortCommandName.length();
+        shortCommandName = shortCommandName + " ".repeat(shortWhiteSpaceSize);
+
+        helpString.append(fullCommandName).append("  ").append(shortCommandName).append("            ");
+
+        int whiteSpace = helpString.length();
+
+        // The description String gets checked if it fits inside the info box.
+        // If not, a new line will be added and the rest of the description will be aligned.
+        String[] descriptionRows = description.split(" \\n| \\n |\\n ", -1);
+        if (descriptionRows.length == 1) {
+            helpString.append(lineBreakAtWhitespace(description, whiteSpace));
+
+        } else {
+            for (int i = 0; i < descriptionRows.length; i++) {
+                String row = descriptionRows[i];
+                helpString.append(lineBreakAtWhitespace(row, whiteSpace));
+                if (i != descriptionRows.length - 1) helpString.append("\n#").append(" ".repeat(whiteSpace - 1));
+            }
+        }
+
+        return helpString.toString();
+    }
 
     /**
      * generates the help String (fullFlag, shortFlag, description) for a single Parameter
@@ -77,7 +135,7 @@ public class CalledForHelpNotification extends Exception {
      */
     private static String parameterHelpString(Parameter<?> parameter, int longestFlagSize, int longestShortFlag) {
         String name = parameter.getFullFlag();
-        String shortFlag = parameter.getShortFlag() == null ? "/" : parameter.getShortFlag();
+        String shortFlag = parameter.getShortFlag();
         String description = parameter.getDescription();
         String isMandatory = parameter.isMandatory() ? "(!)" : "(?)";
         StringBuilder helpString = new StringBuilder("###  ");
