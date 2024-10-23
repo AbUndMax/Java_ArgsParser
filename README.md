@@ -61,7 +61,6 @@ Instantiate an ArgsParser object, and hand over the String array `args` from the
 public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
     // ...
-}
 ```
 
 ### 2. Define the Parameters or Commands
