@@ -745,9 +745,23 @@ public class ArgsParser {
      * @param <T> type of the parameter
      * @return the argument of the parameter
      * @throws ClassCastException if the argument is not of the correct type
+     * @throws IllegalArgumentException if the provided flag is not defined on this parser instance
      */
     @SuppressWarnings("unchecked")
-    public <T> T getArgumentOf(String fullFlag) throws ClassCastException {
+    public <T> T getArgumentOf(String fullFlag) throws ClassCastException, IllegalArgumentException {
+        if (parameterMap.get(fullFlag) == null) throw new IllegalArgumentException("Parameter '" + fullFlag + "' not defined");
         return (T) parameterMap.get(makeFlag(fullFlag, false)).getArgument();
+    }
+
+    /**
+     * Checks if the specified command is provided.
+     *
+     * @param fullCommandName the full name of the command to be checked
+     * @return true if the command is provided, false otherwise
+     * @throws IllegalArgumentException if the command is not defined on this parser instance
+     */
+    public boolean checkIfCommandIsProvided(String fullCommandName) {
+        if (commandMap.get(fullCommandName) == null) throw new IllegalArgumentException("Command '" + fullCommandName + "' not defined");
+        return commandMap.get(fullCommandName).isProvided();
     }
 }
