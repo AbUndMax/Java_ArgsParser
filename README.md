@@ -14,19 +14,19 @@ catering to diverse application needs.
 
 ## Key features:
 
-- **Easy Definition of Parameters:** Define parameters with flag names and shorthands, 
+- **Definition Of Parameters:** Define parameters with flag names and shorthands, 
   mandatory/optional status, as well as optional default values and descriptions.
-- **Custom Command Support:** Define custom commands and easily check if they were provided.  
+- **Definition Of Commands:** Define commands and easily check if they were provided.  
 - **Robust Parsing-Error Handling:** Catch and handle custom exceptions for missing arguments, 
   invalid types, and other common parsing errors.
-- **Automatic exception handling** Alternatively of handling parsing errors manually, you can use a parsing method that 
+- **Automatic Exception Handling** Alternatively of handling parsing errors manually, you can use a parsing method that 
   automatically handles all exceptions and exits the program with the appropriate status code.
-- **Suggestions for misspelled flags:** The parser will suggest the correct flag if a misspelled flag was provided.
+- **Suggestions For Misspelled Flags:** The parser will suggest the correct flag if a misspelled flag was provided.
 - **Integrated Help Function:** Automatically generates a help message displaying all parameters,
   their types, and descriptions.
-- **Multiple Arguments to one flag:** Allows multiple values to be specified for a single command-line flag, making it
+- **Multiple Arguments To One Flag:** Allows multiple values to be specified for a single command-line flag, making it
   easier to pass arrays of data.
-- **Arguments directly casted:** Accessing a parameter's argument returns it as the defined type.
+- **Arguments Directly Casted:** Accessing a parameter's argument returns it as the defined type.
 - **Lightweight:** Using the ArgsParser library is very simply and straight forward as shown in the example below.
 
 ## Example Code:
@@ -38,9 +38,12 @@ public class Example {
   public static void main(String[] args) {
     ArgsParser parser = new ArgsParser(args);
     Parameter<String> param1 = parser.addMandatoryStringParameter("parameterFlag", "pf", "description");
+    Command command1 = parser.addCommand("commandName", "c", "description of the command");
     ArgsParser.parse(args);
 
+    if (command1.isProvided()) {
     System.out.println(param1.getArgument());
+    }
   }
 }
 ```
@@ -205,6 +208,7 @@ The same is possible with commands:
 ```java
     //...
     if (parser.checkIfCommandIsProvided("commandName")) System.out.println("command still provided");
+}
 ```
 
 ## Integrated --help function:
