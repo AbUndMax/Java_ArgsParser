@@ -243,6 +243,8 @@ they were added** on the ArgsParser Instance:
 ###  --intArray        -iArr  [i+] (?)  Array of several integer values
 #                             default:  [1, 2, 3]
 #
+#                                       Available Commands:
+#
 ###  commandName       cN          (/)  this is a description for the command
 #
 ####################################################################################################

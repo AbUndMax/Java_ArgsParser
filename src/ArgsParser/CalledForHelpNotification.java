@@ -52,7 +52,11 @@ public class CalledForHelpNotification extends Exception {
         helpMessage.append(centerString("(!)=mandatory | (?)=optional | (/)=command")).append("\n");
         helpMessage.append("#").append("\n");
 
-        if (flagsInDefinitionOrder.size() > 1) {
+        boolean parametersAvailable = !flagsInDefinitionOrder.isEmpty();
+        boolean commandsAvailable = !commandsInDefinitionOrder.isEmpty();
+        boolean printEverything = flagsInDefinitionOrder.size() + commandsInDefinitionOrder.size() > 1;
+
+        if (printEverything && parametersAvailable) {
             helpMessage.append(centerString("Available Parameters:")).append("\n");
             helpMessage.append("#").append("\n");
         }
@@ -63,7 +67,7 @@ public class CalledForHelpNotification extends Exception {
             helpMessage.append("#").append("\n");
         }
         
-        if (commandsInDefinitionOrder.size() > 1) {
+        if (printEverything && commandsAvailable) {
             helpMessage.append(centerString("Available Commands:")).append("\n");
             helpMessage.append("#").append("\n");
         }

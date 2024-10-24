@@ -217,6 +217,33 @@ public class TestArgsExceptions {
     }
 
     @Test
+    public void testOneCommandAndOneParameter() {
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser(args);
+        Command command = parser.addCommand("command", "c", "this is a command");
+        Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
+
+        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        String expected = """
+                
+                ############################################### HELP ###############################################
+                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
+                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                            (!)=mandatory | (?)=optional | (/)=command
+                #
+                #                                      Available Parameters:
+                #
+                ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
+                #
+                #                                       Available Commands:
+                #
+                ###  command      c          (/)  this is a command
+                #
+                ####################################################################################################""";
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
     public void testHelpWithNewLineInDescription() {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser(args);
