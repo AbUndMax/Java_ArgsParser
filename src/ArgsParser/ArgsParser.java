@@ -32,16 +32,22 @@ import java.util.*;
  *         <li>{@link ArgsParser#addStringArrayParameter(String, String, String, boolean)}</li>
  *     </ul>
  *     Each of this adder methods take several arguments:
-       <ul>
+ <ul>
  *         <li>Parameters have a full flag name</li>
  *         <li>Parameters have a short version flags</li>
  *         <li>Parameters can have a description (hand "" or null if not needed)</li>
  *         <li>addDefaultParameters take a default argument</li>
  *         <li>addArrayParameters can be specified mandatory or optional</li>
  *     </ul>
+ *     There are also Commands available to be defined which are just checked if they are provided or not:
+ *     <ul>
+ *         <li>{@link ArgsParser#addCommand(String, String, String)}</li>
+ *     </ul>
+ *
  *     <li>After all parameters are added, the {@link ArgsParser#parse()} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
- *          which will return the parsed argument of that parameter as the specified type </li>
+ *          which will return the parsed argument of that parameter as the specified type or for commands by using the
+ *          {@link Command#isProvided()} at the respective command instance to check rather the command was provided or not</li>
  * </ol>
  * available at: <a href="https://github.com/AbUndMax/Java_ArgsParser">GitHub</a>
  * @author Niklas Max G. 2024
@@ -80,29 +86,40 @@ public class ArgsParser {
     }
 
     /**
-     * creates a new Parameter instance and sets it accordingly with the given fields.
-     * Adds given parameter to argumentList, sets longestFlagSize and adds mandatory parameters to the mandatoryList
-     * @param fullFlag name of the parameter
-     * @param shortFlag short name of the parameter
-     * @param description description of the parameter
-     * @param type type of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
-     * @param defaultValue default value of the parameter
-     * @return the created Parameter instance
-     * @param <T> type of the parameter
+     * Creates a new Parameter object with the given attributes and adds it to the parameter map.
+     *
+     * @param fullFlag The full version of the flag (e.g., --example).
+     * @param shortFlag The short version of the flag (e.g., -e).
+     * @param description A brief description of what the parameter represents.
+     * @param type The data type of the parameter's value.
+     * @param isMandatory Indicates if the parameter is mandatory.
+     * @param defaultValue The default value for the parameter, hand null for no default.
+     * @return The newly created Parameter object.
+     * @throws IllegalArgumentException If the flag names are already used or reserved (--help/-h).
      */
     private <T> Parameter<T> createParameter(String fullFlag,
                                              String shortFlag,
                                              String description,
                                              Class<T> type,
                                              boolean isMandatory,
-                                             T defaultValue) {
+                                             T defaultValue) throws IllegalArgumentException {
         fullFlag = makeFlag(fullFlag, false);
         shortFlag = makeFlag(shortFlag, true);
 
-        // check if the flag names are already used
-        if (parameterMap.containsKey(fullFlag)) throw new IllegalArgumentException("Flag already exists: " + fullFlag);
-        if (parameterMap.containsKey(shortFlag)) throw new IllegalArgumentException("Flag already exists: " + shortFlag);
+        // check if the flag names are already used / empty or reserved
+        if (fullFlag.isEmpty() || shortFlag.isEmpty()) {
+            throw new IllegalArgumentException("No empty strings allowed for flags!");
+        }
+        if (parameterMap.containsKey(fullFlag)) {
+            throw new IllegalArgumentException("Flag already exists: " + fullFlag);
+        }
+        if (parameterMap.containsKey(shortFlag)) {
+            throw new IllegalArgumentException("Flag already exists: " + shortFlag);
+        }
+        if (fullFlag.equals("--help") || fullFlag.equals("--h") ||
+                shortFlag.equals("-h") || shortFlag.equals("-help")) {
+            throw new IllegalArgumentException("--help/-h is reserved!");
+        }
 
         // create new parameter instance
         Parameter<T> parameter = new Parameter<T>(fullFlag, shortFlag, description, type, isMandatory, this);
@@ -161,8 +178,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type String
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<String> addMandatoryStringParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<String> addMandatoryStringParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, String.class, true, null);
     }
 
@@ -173,8 +192,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type String
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<String> addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue) {
+    public Parameter<String> addDefaultStringParameter(String fullFlag, String shortFlag,
+                                                       String description, String defaultValue)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, String.class, false, defaultValue);
     }
 
@@ -184,8 +206,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameterhand empty string "" or null if not needed
      * @return the created Parameter instance of type String
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<String> addOptionalStringParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<String> addOptionalStringParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, String.class, false, null);
     }
 
@@ -197,8 +221,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type String[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<String[]> addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<String[]> addStringArrayParameter(String fullFlag, String shortFlag,
+                                                       String description, boolean isMandatory)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, String[].class, isMandatory, null);
@@ -212,8 +239,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type String[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<String[]> addDefaultStringArrayParameter(String fullFlag, String shortFlag, String description, String[] defaultValue) {
+    public Parameter<String[]> addDefaultStringArrayParameter(String fullFlag, String shortFlag,
+                                                              String description, String[] defaultValue)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, String[].class, false, defaultValue);
@@ -229,8 +259,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Integer
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Integer> addMandatoryIntegerParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Integer> addMandatoryIntegerParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Integer.class, true, null);
     }
 
@@ -241,8 +273,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Integer
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Integer> addDefaultIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue) {
+    public Parameter<Integer> addDefaultIntegerParameter(String fullFlag, String shortFlag,
+                                                         String description, Integer defaultValue)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Integer.class, false, defaultValue);
     }
 
@@ -252,8 +287,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Integer
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Integer> addOptionalIntegerParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Integer> addOptionalIntegerParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Integer.class, false, null);
     }
 
@@ -265,8 +302,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type int[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Integer[]> addIntegerArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<Integer[]> addIntegerArrayParameter(String fullFlag, String shortFlag,
+                                                         String description, boolean isMandatory)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Integer[].class, isMandatory, null);
@@ -280,8 +320,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type int[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Integer[]> addDefaultIntegerArrayParameter(String fullFlag, String shortFlag, String description, Integer[] defaultValue) {
+    public Parameter<Integer[]> addDefaultIntegerArrayParameter(String fullFlag, String shortFlag,
+                                                                String description, Integer[] defaultValue)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Integer[].class, false, defaultValue);
@@ -297,8 +340,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Double
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Double> addMandatoryDoubleParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Double> addMandatoryDoubleParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Double.class, true, null);
     }
 
@@ -309,8 +354,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Double
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Double> addDefaultDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue) {
+    public Parameter<Double> addDefaultDoubleParameter(String fullFlag, String shortFlag,
+                                                       String description, Double defaultValue)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Double.class, false, defaultValue);
     }
 
@@ -320,8 +368,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Double
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Double> addOptionalDoubleParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Double> addOptionalDoubleParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Double.class, false, null);
     }
 
@@ -333,8 +383,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type double[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Double[]> addDoubleArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<Double[]> addDoubleArrayParameter(String fullFlag, String shortFlag,
+                                                       String description, boolean isMandatory)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Double[].class, isMandatory, null);
@@ -348,8 +401,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type double[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Double[]> addDefaultDoubleArrayParameter(String fullFlag, String shortFlag, String description, Double[] defaultValue) {
+    public Parameter<Double[]> addDefaultDoubleArrayParameter(String fullFlag, String shortFlag,
+                                                              String description, Double[] defaultValue)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Double[].class, false, defaultValue);
@@ -365,8 +421,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Boolean
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Boolean> addMandatoryBooleanParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Boolean> addMandatoryBooleanParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Boolean.class, true, null);
     }
 
@@ -377,8 +435,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Boolean
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Boolean> addDefaultBooleanParameter(String fullFlag, String shortFlag, String description, Boolean defaultValue) {
+    public Parameter<Boolean> addDefaultBooleanParameter(String fullFlag, String shortFlag,
+                                                         String description, Boolean defaultValue)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Boolean.class, false, defaultValue);
     }
 
@@ -388,8 +449,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Boolean
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Boolean> addOptionalBooleanParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Boolean> addOptionalBooleanParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Boolean.class, false, null);
     }
 
@@ -401,8 +464,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type boolean[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<Boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag,
+                                                         String description, boolean isMandatory)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Boolean[].class, isMandatory, null);
@@ -416,8 +482,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type boolean[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Boolean[]> addDefaultBooleanArrayParameter(String fullFlag, String shortFlag, String description, Boolean[] defaultValue) {
+    public Parameter<Boolean[]> addDefaultBooleanArrayParameter(String fullFlag, String shortFlag,
+                                                                String description, Boolean[] defaultValue)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Boolean[].class, false, defaultValue);
@@ -433,8 +502,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Character
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Character> addMandatoryCharacterParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Character> addMandatoryCharacterParameter(String fullFlag, String shortFlag,
+                                                               String description) throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Character.class, true, null);
     }
 
@@ -445,8 +516,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type Character
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Character> addDefaultCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue) {
+    public Parameter<Character> addDefaultCharacterParameter(String fullFlag, String shortFlag,
+                                                             String description, Character defaultValue)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Character.class, false, defaultValue);
     }
 
@@ -456,8 +530,10 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @return the created Parameter instance of type Character
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Character> addOptionalCharacterParameter(String fullFlag, String shortFlag, String description) {
+    public Parameter<Character> addOptionalCharacterParameter(String fullFlag, String shortFlag, String description)
+            throws IllegalArgumentException {
         return createParameter(fullFlag, shortFlag, description, Character.class, false, null);
     }
 
@@ -469,8 +545,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
      * @return the created Parameter instance of type char[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Character[]> addCharacterArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    public Parameter<Character[]> addCharacterArrayParameter(String fullFlag, String shortFlag,
+                                                             String description, boolean isMandatory)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Character[].class, isMandatory, null);
@@ -484,8 +563,11 @@ public class ArgsParser {
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
      * @return the created Parameter instance of type char[]
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
-    public Parameter<Character[]> addDefaultCharacterArrayParameter(String fullFlag, String shortFlag, String description, Character[] defaultValue) {
+    public Parameter<Character[]> addDefaultCharacterArrayParameter(String fullFlag, String shortFlag,
+                                                                    String description, Character[] defaultValue)
+            throws IllegalArgumentException {
         arrayParameters.add(makeFlag(fullFlag, false));
         arrayParameters.add(makeFlag(shortFlag, true));
         return createParameter(fullFlag, shortFlag, description, Character[].class, false, defaultValue);
@@ -502,12 +584,23 @@ public class ArgsParser {
      * @param shortCommandName The abbreviated name of the command, used as a shorthand identifier.
      * @param description A brief description of what the command does.
      * @return The newly created and added Command object.
-     * @throws IllegalArgumentException If the fullCommandName or shortCommandName already exists in the command set.
+     * @throws IllegalArgumentException If the fullCommandName or shortCommandName are already defined, empty, or reserved (--help/-h)
      */
     public Command addCommand(String fullCommandName, String shortCommandName, String description) {
 
-        if (commandMap.containsKey(fullCommandName)) throw new IllegalArgumentException("Command name already exists: " + fullCommandName);
-        if (commandMap.containsKey(shortCommandName)) throw new IllegalArgumentException("Command name already exists: " + shortCommandName);
+        if (fullCommandName.isEmpty() || shortCommandName.isEmpty()) {
+            throw new IllegalArgumentException("No empty strings allowed for flags!");
+        }
+        if (commandMap.containsKey(fullCommandName)) {
+            throw new IllegalArgumentException("Command name already exists: " + fullCommandName);
+        }
+        if (commandMap.containsKey(shortCommandName)) {
+            throw new IllegalArgumentException("Command name already exists: " + shortCommandName);
+        }
+        if (fullCommandName.equals("--help") || fullCommandName.equals("-h") ||
+                shortCommandName.equals("--help") || shortCommandName.equals("-h")) {
+            throw new IllegalArgumentException("--help/-h is reserved!");
+        }
 
         Command command = new Command(fullCommandName, shortCommandName, description, this);
 
@@ -540,7 +633,7 @@ public class ArgsParser {
     public void parse() {
 
         try {
-        parseUnchecked();
+            parseUnchecked();
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -626,10 +719,10 @@ public class ArgsParser {
                 throw new CalledForHelpNotification(parameterMap, new LinkedList<>(),
                                                     commandMap, Collections.singletonList(args[0]),
                                                     longestFlagSize, longestShortFlag);
-                
+
             } else { // if the first argument is not a parameter but --help was called,
-                    // the program notifies the user of an unknown parameter input
-                    throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), false);
+                // the program notifies the user of an unknown parameter input
+                throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), false);
 
             }
         }
@@ -649,7 +742,9 @@ public class ArgsParser {
      * @throws HelpAtWrongPositionArgsException If the help flag is not in the correct position.
      */
     private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
-            MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
+            MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException,
+            HelpAtWrongPositionArgsException {
+
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
         //check if the first argument provided is actually a flag or command
@@ -685,10 +780,13 @@ public class ArgsParser {
                 throw new UnknownFlagArgsException(args[i], parameterMap.keySet(), commandMap.keySet(), false);
 
             } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
-                throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(), currentParameter.getShortFlag());
+                throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(),
+                                                           currentParameter.getShortFlag());
 
             } else if (argumentSet && !currentPositionIsFlag && !currentPositionIsCommand) { // if two arguments are provided to a single flag
-                throw new TooManyArgumentsArgsException(longFlagUsed ? currentParameter.getFullFlag() : currentParameter.getShortFlag());
+                throw new TooManyArgumentsArgsException(longFlagUsed ?
+                                                                currentParameter.getFullFlag() :
+                                                                currentParameter.getShortFlag());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
                 throw new MissingArgArgsException(args[i - 1]);
@@ -711,7 +809,7 @@ public class ArgsParser {
                     currentParameter.setArgument(arguments.toString());
 
                 } else {
-                currentParameter.setArgument(args[i]);
+                    currentParameter.setArgument(args[i]);
 
                 }
                 givenParameters.add(currentParameter); // add parameter to the given Parameter Set
@@ -749,7 +847,9 @@ public class ArgsParser {
      */
     @SuppressWarnings("unchecked")
     public <T> T getArgumentOf(String fullFlag) throws ClassCastException, IllegalArgumentException {
-        if (parameterMap.get(fullFlag) == null) throw new IllegalArgumentException("Parameter '" + fullFlag + "' not defined");
+        if (parameterMap.get(fullFlag) == null) {
+            throw new IllegalArgumentException("Parameter '" + fullFlag + "' not defined");
+        }
         return (T) parameterMap.get(makeFlag(fullFlag, false)).getArgument();
     }
 
@@ -761,7 +861,9 @@ public class ArgsParser {
      * @throws IllegalArgumentException if the command is not defined on this parser instance
      */
     public boolean checkIfCommandIsProvided(String fullCommandName) {
-        if (commandMap.get(fullCommandName) == null) throw new IllegalArgumentException("Command '" + fullCommandName + "' not defined");
+        if (commandMap.get(fullCommandName) == null) {
+            throw new IllegalArgumentException("Command '" + fullCommandName + "' not defined");
+        }
         return commandMap.get(fullCommandName).isProvided();
     }
 }

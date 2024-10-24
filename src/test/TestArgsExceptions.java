@@ -39,7 +39,7 @@ public class TestArgsExceptions {
         Parameter<String> mandatoryString = parser.addMandatoryStringParameter("mandatory_string", "ms", "mandatory string description");
         Parameter<String> optionalString = parser.addOptionalStringParameter("optional_string", "os", "optional string description");
         Parameter<String> defaultString = parser.addDefaultStringParameter("default_string", "ds", "default string description", "default");
-        
+
         Parameter<Double> mandatoryDouble = parser.addMandatoryDoubleParameter("mandatory_double", "md", "mandatory double description");
         Parameter<Double> optionalDouble = parser.addOptionalDoubleParameter("optional_double", "d", "this one is optional");
         Parameter<Double> defaultDouble = parser.addDefaultDoubleParameter("default_double", "dd", "default double description", 7.89);
@@ -55,7 +55,7 @@ public class TestArgsExceptions {
         Parameter<Boolean> mandatoryBoolean = parser.addMandatoryBooleanParameter("mandatory_boolean", "mb", "mandatory boolean description");
         Parameter<Boolean> optionalBoolean = parser.addOptionalBooleanParameter("optional_boolean", "ob", "optional boolean description");
         Parameter<Boolean> defaultBoolean = parser.addDefaultBooleanParameter("default_boolean", "db", "default boolean description", true);
-        
+
         Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
         String expected = """
                 
@@ -112,7 +112,7 @@ public class TestArgsExceptions {
         ArgsParser parser = new ArgsParser(args);
 
         Parameter<String[]> stringArray = parser.addStringArrayParameter("stringArrayParam", "hap", "descr", true);
-        Parameter<String[]> defaultStringArray = parser.addDefaultStringArrayParameter("stringArray", "h", "descr", new String[]{"string1", "string2", "string3"});
+        Parameter<String[]> defaultStringArray = parser.addDefaultStringArrayParameter("stringArray", "sAr", "descr", new String[]{"string1", "string2", "string3"});
         Parameter<Double[]> doubleArray = parser.addDoubleArrayParameter("doubleArrayParam", "dap", "description", false);
         Parameter<Double[]> defaultDoubleArray = parser.addDefaultDoubleArrayParameter("doubleArray", "da", "description", new Double[]{1.1, 2.2, 3.3});
         Parameter<Integer[]> integerArray = parser.addIntegerArrayParameter("integerArrayParam", "iap", "description", true);
@@ -134,7 +134,7 @@ public class TestArgsExceptions {
                 #
                 ###  --stringArrayParam     -hap  [s+] (!)  descr
                 #
-                ###  --stringArray          -h    [s+] (?)  descr
+                ###  --stringArray          -sAr  [s+] (?)  descr
                 #                                 default:  [string1, string2, string3]
                 #
                 ###  --doubleArrayParam     -dap  [d+] (?)  description
@@ -182,7 +182,7 @@ public class TestArgsExceptions {
                 ####################################################################################################""";
         assertEquals(expected, exception.getMessage());
     }
-    
+
     @Test
     public void testHelpWithCommandsAndParameters() {
         String[] args = {"--help"};
@@ -357,26 +357,6 @@ public class TestArgsExceptions {
     }
 
     @Test
-    public void testNoFlags() {
-        String[] args = {"file.txt"};
-        ArgsParser parser = new ArgsParser(args);
-
-        Parameter<String> string = parser.addMandatoryStringParameter("file", "f", "descr");
-
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
-        String expected = """
-                
-                <!> unknown flag or command: file.txt
-                > did you mean: --file ?
-                
-                > flag or command expected in first position!
-                
-                > Use --help for more information.
-                """;
-        assertEquals(expected, exception.getMessage());
-    }
-
-    @Test
     public void testMultipleMandatoryArgumentsMissing() {
         String[] args = {"--load", "file.txt"};
         ArgsParser parser = new ArgsParser(args);
@@ -548,6 +528,26 @@ public class TestArgsExceptions {
                              """, exception.getMessage());
     }
 
+    @Test
+    public void testNoFlags() {
+        String[] args = {"file.txt"};
+        ArgsParser parser = new ArgsParser(args);
+
+        Parameter<String> string = parser.addMandatoryStringParameter("file", "f", "descr");
+
+        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        String expected = """
+                
+                <!> unknown flag or command: file.txt
+                > did you mean: --file ?
+                
+                > flag or command expected in first position!
+                
+                > Use --help for more information.
+                """;
+        assertEquals(expected, exception.getMessage());
+    }
+
 // Runtime Exceptions
 
     @Test
@@ -585,12 +585,21 @@ public class TestArgsExceptions {
     }
 
     @Test
-    public void testCommand() {
-        String[] args = new String[]{"command"};
+    public void testTryToUseHelpAsFlagName() {
+        String[] args = {"--help"};
         ArgsParser parser = new ArgsParser(args);
-        Command command = parser.addCommand("command", "c", "test command");
-        parser.parse();
 
-        assertTrue(command.isProvided());
+        assertThrows(IllegalArgumentException.class, () -> {
+            parser.addMandatoryStringParameter("help", "f", "");
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            parser.addMandatoryStringParameter("hlp", "h", "");
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            parser.addCommand("--help", "f", "");
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            parser.addCommand("hlp", "-h", "");
+        });
     }
 }
