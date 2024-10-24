@@ -375,6 +375,30 @@ public class TestAddParameterMethods {
     }
 
 
+
+// Commands
+
+    @Test
+    public void testCommand() {
+        String[] args = {"command"};
+        ArgsParser parser = new ArgsParser(args);
+        Command command = parser.addCommand("command", "c", "");
+        parser.parse();
+
+        assertTrue(command.isProvided());
+    }
+
+    @Test
+    public void testIndirectCommandCheck() {
+        String[] args = {"command"};
+        ArgsParser parser = new ArgsParser(args);
+        Command command = parser.addCommand("command", "c", "");
+        parser.parse();
+        
+        assertTrue(parser.checkIfCommandIsProvided("command"));
+    }
+
+
     // Mixing addParameter Methods
 
 
@@ -506,4 +530,35 @@ public class TestAddParameterMethods {
         assertEquals('x', (Character) parser.getArgumentOf("--Character"));
         assertArrayEquals(new Character[]{'a', 'z'}, (Character[]) parser.getArgumentOf("--CharacterArray"));
     }
+
+    @Test
+    public void testCombinationsOfCommandsAndFlags() {
+        String[] args = new String[]{
+                "c3",
+                "-s", "stringInput",
+                "-sArr", "arr1", "arr2",
+                "-i", "42",
+                "command1",
+                "-iArr", "1", "2",
+                "command2"
+        };
+        ArgsParser parser = new ArgsParser(args);
+        Parameter<String> stringPar = parser.addMandatoryStringParameter("String", "s", "desc");
+        Parameter<String[]> stringArrPar = parser.addStringArrayParameter("StringArray", "sArr", "", false);
+        Parameter<Integer> intPar = parser.addMandatoryIntegerParameter("Int", "i", "desc");
+        Parameter<Integer[]> intArrPar = parser.addIntegerArrayParameter("IntArray", "iArr", "", false);
+        Command command1 = parser.addCommand("command1", "c1", null);
+        Command command2 = parser.addCommand("command2", "c2", null);
+        Command command3 = parser.addCommand("command3", "c3", null);
+        parser.parse();
+
+        assertEquals("stringInput", parser.getArgumentOf("--String"));
+        assertArrayEquals(new String[]{"arr1", "arr2"}, stringArrPar.getArgument());
+        assertEquals(42, intPar.getArgument());
+        assertArrayEquals(new Integer[]{1, 2}, (Integer[]) intArrPar.getArgument());
+        assertTrue(command1.isProvided());
+        assertTrue(command2.isProvided());
+        assertTrue(command3.isProvided());
+    }
+
 }

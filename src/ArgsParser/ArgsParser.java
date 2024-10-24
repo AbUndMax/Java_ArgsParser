@@ -687,7 +687,7 @@ public class ArgsParser {
             } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
                 throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(), currentParameter.getShortFlag());
 
-            } else if (argumentSet && !currentPositionIsFlag) { // if two arguments are provided to a single flag
+            } else if (argumentSet && !currentPositionIsFlag && !currentPositionIsCommand) { // if two arguments are provided to a single flag
                 throw new TooManyArgumentsArgsException(longFlagUsed ? currentParameter.getFullFlag() : currentParameter.getShortFlag());
 
             } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
@@ -705,7 +705,7 @@ public class ArgsParser {
                 if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder
                     StringBuilder arguments = new StringBuilder();
                     arguments.append(args[i]).append("==="); // every entry in the array gets seperated by ===
-                    while(i + 1 < argsLength && !args[i + 1].startsWith("-")) { // loop through all arguments
+                    while(i + 1 < argsLength && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
                         arguments.append(args[++i]).append("===");
                     }
                     currentParameter.setArgument(arguments.toString());
