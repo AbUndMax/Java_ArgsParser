@@ -534,6 +534,7 @@ public class TestAddParameterMethods {
     @Test
     public void testCombinationsOfCommandsAndFlags() {
         String[] args = new String[]{
+                "c3",
                 "-s", "stringInput",
                 "-sArr", "arr1", "arr2",
                 "-i", "42",
@@ -548,6 +549,7 @@ public class TestAddParameterMethods {
         Parameter<Integer[]> intArrPar = parser.addIntegerArrayParameter("IntArray", "iArr", "", false);
         Command command1 = parser.addCommand("command1", "c1", null);
         Command command2 = parser.addCommand("command2", "c2", null);
+        Command command3 = parser.addCommand("command3", "c3", null);
         parser.parse();
 
         assertEquals("stringInput", parser.getArgumentOf("--String"));
@@ -556,6 +558,7 @@ public class TestAddParameterMethods {
         assertArrayEquals(new Integer[]{1, 2}, (Integer[]) intArrPar.getArgument());
         assertTrue(command1.isProvided());
         assertTrue(command2.isProvided());
+        assertTrue(command3.isProvided());
     }
 
 }
