@@ -5,6 +5,7 @@ out/
 *.iml
 /.idea/
 /bin/
+/src/test/ReadmeExampleCode.java
 
 ### Eclipse ###
 .apt_generated
