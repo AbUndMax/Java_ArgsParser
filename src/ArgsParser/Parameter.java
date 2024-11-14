@@ -27,6 +27,7 @@ public class Parameter<T> {
     private boolean hasDefault = false;
     private T argument = null;
     private boolean hasArgument = false;
+    private boolean isProvided = false;
 
     /**
      * Constructor for the Parameter class with type definition
@@ -101,8 +102,31 @@ public class Parameter<T> {
         return this.defaultValue;
     }
 
-    protected boolean hasArgument() {
+    /**
+     * Checks if the parameter has an (actual) Argument that is not null!.
+     *
+     * @return true if the parameter has an argument, false otherwise
+     */
+    public boolean hasArgument() {
         return hasArgument;
+    }
+
+    /**
+     * Marks the parameter as provided.
+     * This method sets the internal flag indicating
+     * that this parameter has been supplied with a value.
+     */
+    protected void setProvided() {
+        isProvided = true;
+    }
+
+    /**
+     * Checks if the parameter was provided with a value.
+     *
+     * @return true if the parameter was provided, false otherwise
+     */
+    public boolean isProvided() {
+        return isProvided;
     }
 
     /**
