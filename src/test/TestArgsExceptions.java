@@ -630,4 +630,21 @@ public class TestArgsExceptions {
             parser.addCommand("hlp", "-h", "");
         });
     }
+
+    @Test
+    public void testToggle() {
+        String[] args = {"comm", "comm2"};
+        ArgsParser parser = new ArgsParser();
+        Command comd = parser.addCommand("command", "comm", "command1");
+        Command comd2 = parser.addCommand("command2", "comm2", "command2");
+        parser.toggle(comd, comd2);
+
+        Exception exception = assertThrows(ToggleArgsException.class, () -> parser.parseUnchecked(args));
+        String expected = """
+                
+                <!> The following commands cannot be combined:\s
+                [command / comm]
+                [command2 / comm2]""";
+        assertEquals(expected, exception.getMessage());
+    }
 }

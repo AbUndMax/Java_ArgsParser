@@ -9,6 +9,7 @@ For a quick overview, visit https://creativecommons.org/licenses/by-nc/4.0/
 
 import ArgsParser.ArgsExceptions.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Class, to parse arguments given in the command line, the tool checks for several conditions:
@@ -58,6 +59,7 @@ public class ArgsParser {
     private final Map<String, Command> commandMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
     private final Set<String> arrayParameters = new HashSet<>();
+    private final LinkedList<Command[]> toggleList = new LinkedList<>();
     private final LinkedList<String> commandsInDefinitionOrder = new LinkedList<>();
     private final LinkedList<String> flagsInDefinitionOrder = new LinkedList<>();
     protected boolean parseArgsWasCalled = false;
@@ -612,6 +614,19 @@ public class ArgsParser {
         return command;
     }
 
+    /**
+     * When parse is called, each toggle gets checked so that only ONE Command
+     * inside the toggle was provided.
+     * This means that this method prevents the combination of given commands!
+     * @param commands commands that cannot be combined
+     */
+    public void toggle(Command... commands) {
+        toggleList.add(commands);
+    }
+
+
+    // parsing functions
+
 
     /**
      * Parses the provided input by invoking the parseUnchecked method, and
@@ -662,7 +677,8 @@ public class ArgsParser {
     public void parseUnchecked(String[] args) throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
             CalledForHelpNotification, InvalidArgTypeArgsException, IllegalStateException,
-            FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException, IllegalArgumentException {
+            FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException,
+            IllegalArgumentException, ToggleArgsException {
 
         if (args == null) throw new IllegalArgumentException("Args cannot be null!");
         if(parseArgsWasCalled) throw new IllegalStateException(".parse() was already called!");
@@ -674,6 +690,7 @@ public class ArgsParser {
             checkForHelpCall(args);
             Set<Parameter<?>> givenParameters = parseArguments(args);
             checkMandatoryArguments(givenParameters);
+            checkToggles();
         }
     }
 
@@ -833,6 +850,22 @@ public class ArgsParser {
             throw new MandatoryArgNotProvidedArgsException(errorMessage.toString());
         }
     }
+
+    private void checkToggles() throws ToggleArgsException{
+        for (Command[] toggle : toggleList) {
+
+            // if more than two commands in one toggle are provided, a ToggleArgsException is thrown
+            int numberOfProvidedCommands = 0;
+            for (Command command : toggle) {
+                if (command.isProvided()) numberOfProvidedCommands++;
+                if (numberOfProvidedCommands > 1) throw new ToggleArgsException(toggle);
+            }
+        }
+    }
+
+
+    // external getters
+
 
     /**
      * getter method for the argument of a specific parameter

@@ -1,5 +1,7 @@
 import ArgsParser.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import ArgsParser.ArgsExceptions.ToggleArgsException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -561,4 +563,15 @@ public class TestAddParameterMethods {
         assertTrue(command3.isProvided());
     }
 
+    @Test
+    public void testToggle() {
+        String[] args = {"comm2"};
+        ArgsParser parser = new ArgsParser();
+        Command comd = parser.addCommand("command", "comm", "command1");
+        Command comd2 = parser.addCommand("command2", "comm2", "command2");
+        parser.toggle(comd, comd2);
+        parser.parse(args);
+
+        assertTrue(comd2.isProvided());
+    }
 }
