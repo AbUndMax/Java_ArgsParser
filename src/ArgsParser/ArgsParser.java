@@ -44,7 +44,7 @@ import java.util.*;
  *         <li>{@link ArgsParser#addCommand(String, String, String)}</li>
  *     </ul>
  *
- *     <li>After all parameters are added, the {@link ArgsParser#parse()} method has to be called! (this is mandatory!)</li>
+ *     <li>After all parameters are added, the {@link ArgsParser#parse(String[] args)} method has to be called! (this is mandatory!)</li>
  *     <li>Then the arguments can be accessed by using {@link Parameter#getArgument()} on the specific Parameter variable
  *          which will return the parsed argument of that parameter as the specified type or for commands by using the
  *          {@link Command#isProvided()} at the respective command instance to check rather the command was provided or not</li>
@@ -54,7 +54,6 @@ import java.util.*;
  */
 public class ArgsParser {
 
-    private final String[] args;
     private final Map<String, Parameter<?>> parameterMap = new HashMap<>();
     private final Map<String, Command> commandMap = new HashMap<>();
     private final Set<Parameter<?>> mandatoryParameters = new HashSet<>();
@@ -64,17 +63,12 @@ public class ArgsParser {
     protected boolean parseArgsWasCalled = false;
     private int longestFlagSize = 0;
     private int longestShortFlag = 0;
-    private final int argsLength;
 
     /**
      * Constructor
-     * @param args arguments given to the program
      * @throws IllegalArgumentException if args is null
      */
-    public ArgsParser(String[] args) throws IllegalArgumentException {
-        if (args == null) throw new IllegalArgumentException("Args cannot be null!");
-        this.args = args;
-        this.argsLength = args.length;
+    public ArgsParser() throws IllegalArgumentException {
     }
 
     /**
@@ -629,11 +623,12 @@ public class ArgsParser {
      *
      * If an ArgsException is thrown, its message is printed to the
      * standard output and the application exits with a status code of 1.
+     * @throws IllegalArgumentException if args is null
      */
-    public void parse() {
+    public void parse(String[] args) throws IllegalArgumentException {
 
         try {
-            parseUnchecked();
+            parseUnchecked(args);
 
         } catch (CalledForHelpNotification help) {
             System.out.println(help.getMessage());
@@ -662,20 +657,22 @@ public class ArgsParser {
      * @throws IllegalStateException if the .parse() method is called more than once.
      * @throws FlagAlreadyProvidedArgsException if a flag is provided more than once.
      * @throws HelpAtWrongPositionArgsException if the help argument is positioned incorrectly.
+     * @throws IllegalArgumentException if args is null
      */
-    public void parseUnchecked() throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
+    public void parseUnchecked(String[] args) throws NoArgumentsProvidedArgsException, UnknownFlagArgsException,
             TooManyArgumentsArgsException, MissingArgArgsException, MandatoryArgNotProvidedArgsException,
             CalledForHelpNotification, InvalidArgTypeArgsException, IllegalStateException,
-            FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException {
+            FlagAlreadyProvidedArgsException, HelpAtWrongPositionArgsException, IllegalArgumentException {
 
+        if (args == null) throw new IllegalArgumentException("Args cannot be null!");
         if(parseArgsWasCalled) throw new IllegalStateException(".parse() was already called!");
 
         parseArgsWasCalled = true;
 
-        checkIfAnyArgumentsProvided();
-        if (argsLength > 0) {
-            checkForHelpCall();
-            Set<Parameter<?>> givenParameters = parseArguments();
+        checkIfAnyArgumentsProvided(args);
+        if (args.length > 0) {
+            checkForHelpCall(args);
+            Set<Parameter<?>> givenParameters = parseArguments(args);
             checkMandatoryArguments(givenParameters);
         }
     }
@@ -686,8 +683,8 @@ public class ArgsParser {
      * to run without any arguments as long as no mandatory parameters were defined on this ArgsParser.
      * @throws NoArgumentsProvidedArgsException if no arguments were provided in args
      */
-    private void checkIfAnyArgumentsProvided() throws NoArgumentsProvidedArgsException {
-        if (argsLength == 0 & !mandatoryParameters.isEmpty()) {
+    private void checkIfAnyArgumentsProvided(String[] args) throws NoArgumentsProvidedArgsException {
+        if (args.length == 0 & !mandatoryParameters.isEmpty()) {
             throw new NoArgumentsProvidedArgsException();
         }
     }
@@ -698,9 +695,9 @@ public class ArgsParser {
      * @throws UnknownFlagArgsException if an unknown flag was provided in args
      * @throws CalledForHelpNotification if --help or -h was called
      */
-    private void checkForHelpCall() throws UnknownFlagArgsException, CalledForHelpNotification {
-        boolean oneArgProvided = argsLength == 1;
-        boolean twoArgsProvided = argsLength == 2;
+    private void checkForHelpCall(String[] args) throws UnknownFlagArgsException, CalledForHelpNotification {
+        boolean oneArgProvided = args.length == 1;
+        boolean twoArgsProvided = args.length == 2;
         boolean firstArgumentIsParameter = parameterMap.get(args[0]) != null;
         boolean firstArgumentIsCommand = commandMap.get(args[0]) != null;
 
@@ -741,21 +738,21 @@ public class ArgsParser {
      * @throws FlagAlreadyProvidedArgsException If a flag is provided more than once.
      * @throws HelpAtWrongPositionArgsException If the help flag is not in the correct position.
      */
-    private Set<Parameter<?>> parseArguments() throws UnknownFlagArgsException, TooManyArgumentsArgsException,
+    private Set<Parameter<?>> parseArguments(String[] args) throws UnknownFlagArgsException, TooManyArgumentsArgsException,
             MissingArgArgsException, InvalidArgTypeArgsException, FlagAlreadyProvidedArgsException,
             HelpAtWrongPositionArgsException {
 
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
         //check if the first argument provided is actually a flag or command
-        if (argsLength > 0 && parameterMap.get(args[0]) == null && commandMap.get(args[0]) == null &&
+        if (args.length > 0 && parameterMap.get(args[0]) == null && commandMap.get(args[0]) == null &&
                 !(args[0].equals("--help") || args[0].equals("-h"))) {
             throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), true);
         }
 
         Parameter<?> currentParameter = null;
         boolean longFlagUsed = false;
-        for (int i = 0; i < argsLength; i++) {
+        for (int i = 0; i < args.length; i++) {
 
             boolean currentPositionIsFlag = args[i].startsWith("-");
             if (currentPositionIsFlag) {
@@ -764,14 +761,14 @@ public class ArgsParser {
             }
             boolean currentPositionIsCommand = commandMap.get(args[i]) != null;
             boolean flagExists = parameterMap.get(args[i]) != null;
-            boolean isLastEntry = i == argsLength - 1;
+            boolean isLastEntry = i == args.length - 1;
             boolean currentParameterNotNull = currentParameter != null;
             boolean argumentSet = currentParameterNotNull && currentParameter.hasArgument();
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
             boolean isHelpCall = ("--help".equals(args[i]) || "-h".equals(args[i]));
-            boolean helpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && argsLength == 2));
+            boolean helpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && args.length == 2));
 
             if (helpCallInWrongPosition) {
                 throw new HelpAtWrongPositionArgsException();
@@ -803,7 +800,7 @@ public class ArgsParser {
                 if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder
                     StringBuilder arguments = new StringBuilder();
                     arguments.append(args[i]).append("==="); // every entry in the array gets seperated by ===
-                    while(i + 1 < argsLength && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
+                    while(i + 1 < args.length && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
                         arguments.append(args[++i]).append("===");
                     }
                     currentParameter.setArgument(arguments.toString());
