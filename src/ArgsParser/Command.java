@@ -67,4 +67,13 @@ public class Command {
         return status;
     }
 
+    /**
+     * Creates a String identifying this Command instance with full and short name version
+     * @return a String identifying this Command instance with full and short name version
+     */
+    @Override
+    public String toString() {
+        return "[" + fullCommandName + " / " + shortCommandName + "]";
+    }
+
 }
