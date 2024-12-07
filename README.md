@@ -36,7 +36,7 @@ import ArgsParser.*;
 
 public class Example {
   public static void main(String[] args) {
-    ArgsParser parser = new ArgsParser(args);
+    ArgsParser parser = new ArgsParser();
     Parameter<String> param1 = parser.addMandatoryStringParameter("parameterFlag", "pf", "description");
     Command command1 = parser.addCommand("commandName", "c", "description of the command");
     ArgsParser.parse(args);
@@ -115,6 +115,25 @@ parser will recognize them when parsing the input arguments.
     Command command = parser.addCommand("commandName", "cN", "this is a description for the command");
 // ...
 ```
+
+#### Toggles:
+
+ArgsParser provides the method .toggle(Command...) which takes several Command instances as arguments. This method 
+restricts 
+the usage of the provided Commands to only one of them!
+
+For example:
+
+```Java
+ArgsParser parser = new ArgsParser();
+Command cmd1 = parser.addCommand("commName1", "cmdN1", "Description of command1");
+Command cmd2 = parser.addCommand("commName2", "cmdN2", "Description of command2");
+Command cmd3 = parser.addCommand("commName3", "cmdN3", "Description of command3");
+parser.toggle(cmd1, cmd2);
+```
+
+with this only cmd1 or cmd2 are allowed to be present in args. If both commands would be present, .parseUnchecked() 
+will throw ToggleArgsException or .parse() will end the program and print which commands cannot be combined!
 
 ### 3. Parse the Arguments
 Call the `parser.parse()` or `parser.parseUnchecked()` method, after adding all 
@@ -351,6 +370,9 @@ for misspelled flags, the Parser will even do a suggestion:
 #### check provision of a specific Parameter or if it has a value
 - `parameter.isProvided()`
 - `parameter.hasArgument()`
+
+#### restriction of command usage:
+- `parser.toggle(Command...)`
 
 #### indirect access of parameters / commands:
 - `getArgumentOf(String fullFlag)`
