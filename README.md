@@ -348,6 +348,10 @@ for misspelled flags, the Parser will even do a suggestion:
 #### check provision of a specific command:
 - `command.isProvided()`
 
+#### check provision of a specific Parameter or if it has a value
+- `parameter.isProvided()`
+- `parameter.hasArgument()`
+
 #### indirect access of parameters / commands:
 - `getArgumentOf(String fullFlag)`
 - `checkIfCommandIsProvided(String fullCommandName)`

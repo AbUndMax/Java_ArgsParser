@@ -800,7 +800,7 @@ public class ArgsParser {
             } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
 
                 boolean isArrayParam = arrayParameters.contains(args[i - 1]);
-                if (isArrayParam) { // we "collect" all following arguments after an array parameter in a StringBuilder
+                if (isArrayParam) { // "collect" all following arguments after an array parameter in a StringBuilder
                     StringBuilder arguments = new StringBuilder();
                     arguments.append(args[i]).append("==="); // every entry in the array gets seperated by ===
                     while(i + 1 < argsLength && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
@@ -812,6 +812,7 @@ public class ArgsParser {
                     currentParameter.setArgument(args[i]);
 
                 }
+                currentParameter.setProvided();
                 givenParameters.add(currentParameter); // add parameter to the given Parameter Set
             }
         }
