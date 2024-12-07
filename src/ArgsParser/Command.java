@@ -60,7 +60,7 @@ public class Command {
      * Checks if the command has been provided after the arguments were parsed.
      *
      * @return true if the command is provided, false otherwise.
-     * @throws IllegalArgumentException if the {@link ArgsParser#parse()} method was not called before checking the command.
+     * @throws IllegalArgumentException if the {@link ArgsParser#parse(String[] args)} method was not called before checking the command.
      */
     public boolean isProvided() throws IllegalArgumentException {
         if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parse() was not called before trying to check the command!");

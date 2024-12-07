@@ -11,11 +11,11 @@ public class TestArgsExceptions {
     @Test
     public void testHelpForSingleFlag() {
         String[] args = {"-pf4", "--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<Double> doub = parser.addDefaultDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -34,7 +34,7 @@ public class TestArgsExceptions {
     @Test
     public void testHelpWithEachParameter() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> mandatoryString = parser.addMandatoryStringParameter("mandatory_string", "ms", "mandatory string description");
         Parameter<String> optionalString = parser.addOptionalStringParameter("optional_string", "os", "optional string description");
@@ -56,7 +56,7 @@ public class TestArgsExceptions {
         Parameter<Boolean> optionalBoolean = parser.addOptionalBooleanParameter("optional_boolean", "ob", "optional boolean description");
         Parameter<Boolean> defaultBoolean = parser.addDefaultBooleanParameter("default_boolean", "db", "default boolean description", true);
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -109,7 +109,7 @@ public class TestArgsExceptions {
     @Test
     public void testHelpWithArrayParameters() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String[]> stringArray = parser.addStringArrayParameter("stringArrayParam", "hap", "descr", true);
         Parameter<String[]> defaultStringArray = parser.addDefaultStringArrayParameter("stringArray", "sAr", "descr", new String[]{"string1", "string2", "string3"});
@@ -122,7 +122,7 @@ public class TestArgsExceptions {
         Parameter<Character[]> characterArray = parser.addCharacterArrayParameter("characterArrayParam", "cap", "description", true);
         Parameter<Character[]> defaultCharacterArray = parser.addDefaultCharacterArrayParameter("characterArray", "ca", "description", new Character[]{'a', 'b', 'c'});
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -165,11 +165,11 @@ public class TestArgsExceptions {
     @Test
     public void testHelpWithCommand() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Command command = parser.addCommand("command", "c", "this is a command");
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -186,13 +186,13 @@ public class TestArgsExceptions {
     @Test
     public void testHelpWithCommandsAndParameters() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
         Command command = parser.addCommand("command", "c", "this is a command");
         Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
         Parameter<Integer> newParam2 = parser.addOptionalIntegerParameter("newParam2", "np2", "this is the second new parameter");
         Command newCommand = parser.addCommand("newCommand", "nc", "this is another command");
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -219,11 +219,11 @@ public class TestArgsExceptions {
     @Test
     public void testOneCommandAndOneParameter() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
         Command command = parser.addCommand("command", "c", "this is a command");
         Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -246,7 +246,7 @@ public class TestArgsExceptions {
     @Test
     public void testHelpWithNewLineInDescription() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> longString = parser.addDefaultStringParameter("longString", "ls",
                                                                         "This description is so long, it will " +
@@ -255,7 +255,7 @@ public class TestArgsExceptions {
                                                                         "this/path/is/so/long/it/is/actually/longer/than/any" +
                                                                                 "/existing/path/that/I/have/on/my/PC/Do/You/Know/The/Word" +
                                                                                 "Oberwesedampfschifffahrtsgesellschaftskapitän");
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -277,7 +277,7 @@ public class TestArgsExceptions {
     @Test
     public void testNoDescriptionAvailable() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> strParam = parser.addMandatoryStringParameter("string", "s", "");
         Parameter<Integer> intParam = parser.addOptionalIntegerParameter("integer", "i", null);
@@ -286,7 +286,7 @@ public class TestArgsExceptions {
         Parameter<Double> doubleParam = parser.addMandatoryDoubleParameter("double", "d", null);
         Parameter<String[]> strArrParam = parser.addStringArrayParameter("stringArray", "sArr", null, false);
 
-        Exception exception = assertThrows(CalledForHelpNotification.class, parser::parseUnchecked);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
@@ -318,21 +318,21 @@ public class TestArgsExceptions {
     @Test
     public void testHelpAtWrongPosition() {
         String[] args = {"--file", "file.txt", "--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
 
-        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, () -> parser.parseUnchecked(args));
     }
 
     @Test
     public void testHelpBeforeFlag() {
         String[] args = {"--help", "--file"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
 
-        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, () -> parser.parseUnchecked(args));
     }
 
 // FlagAlreadyProvidedArgsException
@@ -340,12 +340,12 @@ public class TestArgsExceptions {
     @Test
     public void testSameFlagProvidedTwice() {
         String[] args = {"--file", "file.txt", "-f", "file2.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> file2 = parser.addMandatoryStringParameter("file2", "f2", "descr");
 
-        Exception exception = assertThrows(FlagAlreadyProvidedArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(FlagAlreadyProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> Redundant specification of arguments to: --file/-f
@@ -359,12 +359,12 @@ public class TestArgsExceptions {
     @Test
     public void testGetArgumentAsDoubleWithWrongInput() {
         String[] args = {"--file", "file.txt", "--double", "5.5.5"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<Double> doub = parser.addMandatoryDoubleParameter("double", "d", "descr");
 
-        Exception exception = assertThrows(InvalidArgTypeArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(InvalidArgTypeArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new InvalidArgTypeArgsException("--double", "Double", "Unsupported type!").getMessage(), exception.getMessage());
     }
 
@@ -373,26 +373,26 @@ public class TestArgsExceptions {
     @Test
     public void testMandatoryArgMissing() {
         String[] args = {"--file", "file.txt", "--optional", "optional.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
         Parameter<String> optional = parser.addMandatoryStringParameter("optional", "o", "descr");
 
-        Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(), exception.getMessage());
     }
 
     @Test
     public void testMultipleMandatoryArgumentsMissing() {
         String[] args = {"--load", "file.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> load = parser.addMandatoryStringParameter("load", "l", "descr");
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
 
-        Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(), exception.getMessage());
     }
 
@@ -401,24 +401,24 @@ public class TestArgsExceptions {
     @Test
     public void testMissingArgument() {
         String[] args = {"--file", "--save", "save.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "m", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
 
-        Exception exception = assertThrows(MissingArgArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(MissingArgArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MissingArgArgsException("--file").getMessage(), exception.getMessage());
     }
 
     @Test
     public void testMissingLastArgument() {
         String[] args = {"--file", "file.txt", "--save"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", "descr");
 
-        Exception exception = assertThrows(MissingArgArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(MissingArgArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MissingArgArgsException("--save").getMessage(), exception.getMessage());
     }
 
@@ -427,11 +427,11 @@ public class TestArgsExceptions {
     @Test
     public void testNoArgumentsProvidedWithMandatoryParams() {
         String[] args = {};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> mandatoryParam = parser.addMandatoryStringParameter("optional", "o", null);
 
-        Exception exception = assertThrows(NoArgumentsProvidedArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(NoArgumentsProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> No arguments provided
@@ -443,11 +443,11 @@ public class TestArgsExceptions {
     @Test
     public void testNoArgumentsProvidedWithOnlyOptionalParams() { // just checks if the programs still runs if only optionals are defined
         String[] args = {};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> stringParam = parser.addOptionalStringParameter("optional", "o", null);
 
-        assertDoesNotThrow(parser::parseUnchecked);
+        assertDoesNotThrow(() -> parser.parseUnchecked(args));
     }
 
 // TooManyArgumentsArgsException
@@ -455,12 +455,12 @@ public class TestArgsExceptions {
     @Test
     public void testTooManyArguments() {
         String[] args = {"--file", "file.txt", "--save", "save.txt", "extra"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
 
-        Exception exception = assertThrows(TooManyArgumentsArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(TooManyArgumentsArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), exception.getMessage());
     }
 
@@ -469,12 +469,12 @@ public class TestArgsExceptions {
     @Test
     public void testUnknownFlag() {
         String[] args = {"-w", "file.txt", "-s", "save.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> unknown flag or command: -w
@@ -486,12 +486,12 @@ public class TestArgsExceptions {
     @Test
     public void testUnknownFlagWithMultipleFlagsAndWrongInput() {
         String[] args = {"-f", "file.txt", "--save", "save.txt", "-s"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("save", "w", "descr");
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> unknown flag or command: -s
@@ -504,12 +504,12 @@ public class TestArgsExceptions {
     @Test
     public void testMissingShorts() {
         String[] args = {"-f", "/to/file", "--save", "save.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("--file", "m", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> unknown flag or command: -f
@@ -522,12 +522,12 @@ public class TestArgsExceptions {
     @Test
     public void testMisspelledHelp() {
         String[] args = {"--hp"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> unknown flag or command: --hp
@@ -540,12 +540,12 @@ public class TestArgsExceptions {
     @Test
     public void testSuggestionForFullFlag() {
         String[] args = {"-f", "/to/file", "--sve", "save.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
         Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
                              
                              <!> unknown flag or command: --sve
@@ -558,11 +558,11 @@ public class TestArgsExceptions {
     @Test
     public void testNoFlags() {
         String[] args = {"file.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         Parameter<String> string = parser.addMandatoryStringParameter("file", "f", "descr");
 
-        Exception exception = assertThrows(UnknownFlagArgsException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 <!> unknown flag or command: file.txt
@@ -580,7 +580,7 @@ public class TestArgsExceptions {
     @Test
     public void testDefinitionOfSameFlagTwice() {
         String[] args = {"--file", "file.txt", "--file2", "file2.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         parser.addMandatoryStringParameter("file", "f", "descr");
 
@@ -595,26 +595,27 @@ public class TestArgsExceptions {
     @Test
     public void testDoubleParseCall() {
         String[] args = {"--file", "file.txt", "--file2", "file2.txt"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
         Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
         Parameter<String> file2 = parser.addMandatoryStringParameter("file2", "f2", "descr");
-        parser.parse();
+        parser.parse(args);
 
-        Exception exception = assertThrows(IllegalStateException.class, parser::parseUnchecked);
+        Exception exception = assertThrows(IllegalStateException.class, () -> parser.parseUnchecked(args));
         assertEquals(new IllegalStateException(".parse() was already called!").getMessage(), exception.getMessage());
     }
 
     @Test
     public void testArgsIsNull() {
         String[] args = null;
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> new ArgsParser(args));
+        ArgsParser parser = new ArgsParser();
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> parser.parseUnchecked(null));
         assertEquals("Args cannot be null!", exception.getMessage());
     }
 
     @Test
     public void testTryToUseHelpAsFlagName() {
         String[] args = {"--help"};
-        ArgsParser parser = new ArgsParser(args);
+        ArgsParser parser = new ArgsParser();
 
         assertThrows(IllegalArgumentException.class, () -> {
             parser.addMandatoryStringParameter("help", "f", "");
