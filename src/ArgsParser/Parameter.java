@@ -10,6 +10,7 @@ For a quick overview, visit https://creativecommons.org/licenses/by-nc/4.0/
 import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
 
 import java.lang.reflect.Array;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
@@ -197,7 +198,8 @@ public class Parameter<T> {
         DOUBLE_ARRAY(Double[].class, Double::parseDouble),
         DOUBLE(Double.class, Double::parseDouble),
         CHARACTER_ARRAY(Character[].class, s -> s.charAt(0)),
-        CHARACTER(Character.class, s -> s.charAt(0));
+        CHARACTER(Character.class, s -> s.charAt(0)),
+        PATH(Path.class, Path::of);
 
         private final Class<?> typeClass;
         private final Function<String, ?> mapper;

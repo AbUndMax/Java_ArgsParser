@@ -8,6 +8,8 @@ For a quick overview, visit https://creativecommons.org/licenses/by-nc/4.0/
  */
 
 import ArgsParser.ArgsExceptions.*;
+
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,13 +169,12 @@ public class ArgsParser {
 
     // String Parameter constructors
 
-
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type String
+     * @return the created Parameter instance of type {@link String}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<String> addMandatoryStringParameter(String fullFlag, String shortFlag, String description)
@@ -187,7 +188,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type String
+     * @return the created Parameter instance of type {@link String}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<String> addDefaultStringParameter(String fullFlag, String shortFlag,
@@ -201,7 +202,7 @@ public class ArgsParser {
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameterhand empty string "" or null if not needed
-     * @return the created Parameter instance of type String
+     * @return the created Parameter instance of type {@link String}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<String> addOptionalStringParameter(String fullFlag, String shortFlag, String description)
@@ -216,7 +217,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance of type String[]
+     * @return the created Parameter instance of type {@link String[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<String[]> addStringArrayParameter(String fullFlag, String shortFlag,
@@ -234,7 +235,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type String[]
+     * @return the created Parameter instance of type {@link String[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<String[]> addDefaultStringArrayParameter(String fullFlag, String shortFlag,
@@ -248,13 +249,12 @@ public class ArgsParser {
 
     // Integer Parameter constructors
 
-
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Integer
+     * @return the created Parameter instance of type {@link Integer[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Integer> addMandatoryIntegerParameter(String fullFlag, String shortFlag, String description)
@@ -268,7 +268,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type Integer
+     * @return the created Parameter instance of type {@link Integer[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Integer> addDefaultIntegerParameter(String fullFlag, String shortFlag,
@@ -282,7 +282,7 @@ public class ArgsParser {
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Integer
+     * @return the created Parameter instance of type {@link Integer[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Integer> addOptionalIntegerParameter(String fullFlag, String shortFlag, String description)
@@ -297,7 +297,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance of type int[]
+     * @return the created Parameter instance of type {@link Integer[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Integer[]> addIntegerArrayParameter(String fullFlag, String shortFlag,
@@ -315,7 +315,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type int[]
+     * @return the created Parameter instance of type {@link Integer[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Integer[]> addDefaultIntegerArrayParameter(String fullFlag, String shortFlag,
@@ -329,13 +329,12 @@ public class ArgsParser {
 
     // Double Parameter constructors
 
-
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Double
+     * @return the created Parameter instance of type {@link Double}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Double> addMandatoryDoubleParameter(String fullFlag, String shortFlag, String description)
@@ -349,7 +348,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type Double
+     * @return the created Parameter instance of type {@link Double}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Double> addDefaultDoubleParameter(String fullFlag, String shortFlag,
@@ -363,7 +362,7 @@ public class ArgsParser {
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Double
+     * @return the created Parameter instance of type {@link Double}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Double> addOptionalDoubleParameter(String fullFlag, String shortFlag, String description)
@@ -378,7 +377,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance of type double[]
+     * @return the created Parameter instance of type {@link Double[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Double[]> addDoubleArrayParameter(String fullFlag, String shortFlag,
@@ -396,7 +395,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type double[]
+     * @return the created Parameter instance of type {@link Double[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Double[]> addDefaultDoubleArrayParameter(String fullFlag, String shortFlag,
@@ -410,13 +409,12 @@ public class ArgsParser {
 
     // Boolean Parameter constructors
 
-
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Boolean
+     * @return the created Parameter instance of type {@link Boolean}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Boolean> addMandatoryBooleanParameter(String fullFlag, String shortFlag, String description)
@@ -430,7 +428,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type Boolean
+     * @return the created Parameter instance of type {@link Boolean}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Boolean> addDefaultBooleanParameter(String fullFlag, String shortFlag,
@@ -444,7 +442,7 @@ public class ArgsParser {
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Boolean
+     * @return the created Parameter instance of type {@link Boolean}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Boolean> addOptionalBooleanParameter(String fullFlag, String shortFlag, String description)
@@ -459,7 +457,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance of type boolean[]
+     * @return the created Parameter instance of type {@link Boolean[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Boolean[]> addBooleanArrayParameter(String fullFlag, String shortFlag,
@@ -477,7 +475,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type boolean[]
+     * @return the created Parameter instance of type {@link Boolean[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Boolean[]> addDefaultBooleanArrayParameter(String fullFlag, String shortFlag,
@@ -491,13 +489,12 @@ public class ArgsParser {
 
     // Character Parameter constructors
 
-
     /**
      * Adds a new parameter that will be checked in args and assigned to the Parameter instance
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Character
+     * @return the created Parameter instance of type {@link Character}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Character> addMandatoryCharacterParameter(String fullFlag, String shortFlag,
@@ -511,7 +508,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type Character
+     * @return the created Parameter instance of type {@link Character}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Character> addDefaultCharacterParameter(String fullFlag, String shortFlag,
@@ -525,7 +522,7 @@ public class ArgsParser {
      * @param fullFlag name of the parameter (-- will automatically be added)
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
-     * @return the created Parameter instance of type Character
+     * @return the created Parameter instance of type {@link Character}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Character> addOptionalCharacterParameter(String fullFlag, String shortFlag, String description)
@@ -540,7 +537,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param isMandatory true if parameter is mandatory, false if optional
-     * @return the created Parameter instance of type char[]
+     * @return the created Parameter instance of type {@link Character[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Character[]> addCharacterArrayParameter(String fullFlag, String shortFlag,
@@ -558,7 +555,7 @@ public class ArgsParser {
      * @param shortFlag short version of the parameter (- will automatically be added)
      * @param description description of the parameter, hand empty string "" or null if not needed
      * @param defaultValue default value of the parameter
-     * @return the created Parameter instance of type char[]
+     * @return the created Parameter instance of type {@link Character[]}
      * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
      */
     public Parameter<Character[]> addDefaultCharacterArrayParameter(String fullFlag, String shortFlag,
@@ -570,8 +567,47 @@ public class ArgsParser {
     }
 
 
-    // Command
+    // Path Parameter
 
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter, hand empty string "" or null if not needed
+     * @return the created Parameter instance of type {@link Path}
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
+     */
+    public Parameter<Path> addMandatoryPathParameter(String fullFlag, String shortFlag, String description) {
+        return createParameter(fullFlag, shortFlag, description, Path.class, true, null);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter, hand empty string "" or null if not needed
+     * @param defaultValue a default path object
+     * @return the created Parameter instance of type {@link Path}
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
+     */
+    public Parameter<Path> addDefaultPathParameter(String fullFlag, String shortFlag, String description, Path defaultValue) {
+        return createParameter(fullFlag, shortFlag, description, Path.class, false, defaultValue);
+    }
+
+    /**
+     * Adds a new parameter that will be checked in args and assigned to the Parameter instance
+     * @param fullFlag name of the parameter (-- will automatically be added)
+     * @param shortFlag short version of the parameter (- will automatically be added)
+     * @param description description of the parameter, hand empty string "" or null if not needed
+     * @return the created Parameter instance of type {@link Path}
+     * @throws IllegalArgumentException if the flag names are already defined, empty, or reserved (--help/-h)
+     */
+    public Parameter<Path> addOptionalPathParameter(String fullFlag, String shortFlag, String description) {
+        return createParameter(fullFlag, shortFlag, description, Path.class, false, null);
+    }
+
+
+    // Command
 
     /**
      * Adds a new command with its full name, short name, and description to the existing command set.
@@ -579,7 +615,7 @@ public class ArgsParser {
      * @param fullCommandName The full name of the command, used as the primary identifier.
      * @param shortCommandName The abbreviated name of the command, used as a shorthand identifier.
      * @param description A brief description of what the command does.
-     * @return The newly created and added Command object.
+     * @return The newly created and added {@link Command} object.
      * @throws IllegalArgumentException If the fullCommandName or shortCommandName are already defined, empty, or reserved (--help/-h)
      */
     public Command addCommand(String fullCommandName, String shortCommandName, String description) {
