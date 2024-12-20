@@ -1,6 +1,6 @@
-[![GitHub](https://img.shields.io/badge/GitHub-Java__ArgsParser-blue?logo=github)](https://github.com/AbUndMax/Java_ArgsParser)
+[![GitHub](https://img.shields.io/badge/GitHub-Java__ArgsParser-a7752f?logo=github)](https://github.com/AbUndMax/Java_ArgsParser)
+[![Java](https://img.shields.io/badge/Java-11+-a7752f)](https://openjdk.org/projects/jdk/11/)
 [![License](https://img.shields.io/badge/License-CC_BY--NC_4.0-blue)](https://github.com/AbUndMax/Java_ArgsParser/blob/main/LICENSE.md)
-[![Java](https://img.shields.io/badge/Java-11+-b07219)](https://openjdk.org/projects/jdk/11/)
 [![Badge](https://img.shields.io/github/v/release/AbUndMax/Java_ArgsParser?color=brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/latest)
 
 # ArgsParser Library

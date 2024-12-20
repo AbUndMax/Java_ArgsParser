@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import ArgsParser.ArgsExceptions.ToggleArgsException;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestAddParameterMethods {
@@ -374,6 +376,37 @@ public class TestAddParameterMethods {
         parser.parse(args);
 
         assertArrayEquals(new Character[]{'a', 'b', 'c'}, defaultCharacterArray.getArgument());
+    }
+
+
+
+// Path parameters
+
+    @Test
+    public void testAddMandatoryPathParameter() {
+        String[] args = {"--Path", "/Users/user/Source/Code"};
+        ArgsParser parser = new ArgsParser();
+        Parameter<Path> path = parser.addMandatoryPathParameter("Path", "pathA", "desc");
+        parser.parse(args);
+        assertEquals("/Users/user/Source/Code", path.getArgument().toString());
+    }
+
+    @Test
+    public void testAddDefaultPathParameterWithoutArgument() {
+        String[] args = new String[0];
+        ArgsParser parser = new ArgsParser();
+        Parameter<Path> path = parser.addDefaultPathParameter("Path", "pathA", "desc", Path.of("home/"));
+        parser.parse(args);
+        assertEquals(Path.of("home/"), path.getArgument());
+    }
+
+    @Test
+    public void testAddOptionalPathParameter() {
+        String[] args = {"--Path", "/Users/user/Source/Code"};
+        ArgsParser parser = new ArgsParser();
+        Parameter<Path> path = parser.addOptionalPathParameter("Path", "pathA", "desc");
+        parser.parse(args);
+        assertEquals("/Users/user/Source/Code", path.getArgument().toString());
     }
 
 
