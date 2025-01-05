@@ -84,7 +84,28 @@ public class ArgsParser {
     }
 
     /**
-     * Creates a new Parameter object with the given attributes and adds it to the parameter map.
+     * Creates a new {@link Parameter} object with the specified attributes, validates the flags, and registers it in the
+     * parameter map. This method centralizes the logic for creating, configuring, and registering parameters of various types.
+     *
+     * <p>
+     * Each parameter can be identified by both a full flag (e.g., <code>--example</code>) and a short flag (e.g., <code>-e</code>).
+     * The method ensures that the flags are correctly formatted, unique, and not reserved.
+     * </p>
+     *
+     * <h2>Behavior:</h2>
+     * <ul>
+     *     <li>Validates that the full and short flags are not empty, already used, or reserved (e.g., <code>--help</code>).</li>
+     *     <li>Configures the {@link Parameter} with the provided attributes (e.g., description, type, default value).</li>
+     *     <li>Tracks parameter metadata such as mandatory parameters and maximum flag lengths for help display.</li>
+     *     <li>Registers the parameter in the internal flag maps and ensures it is uniquely identified.</li>
+     * </ul>
+     *
+     * <h2>Flag Validation Rules:</h2>
+     * <ul>
+     *     <li>Full flag (e.g., <code>--example</code>) and short flag (e.g., <code>-e</code>) must be unique.</li>
+     *     <li>Flags must not be empty or null.</li>
+     *     <li>Reserved flags like <code>--help</code> and <code>-h</code> cannot be reused.</li>
+     * </ul>
      *
      * @param fullFlag The full version of the flag (e.g., --example).
      * @param shortFlag The short version of the flag (e.g., -e).
@@ -146,24 +167,32 @@ public class ArgsParser {
     }
 
     /**
-     * Creates a flag from the given fullFlag, if the fullFlag is already in the correct format, it will be returned as is.
-     * If not, it will add a leading or -- to the fullFlag
-     * @param fullFlag name of the flag
-     * @param isShortName true if the flag is a short flag
-     * @return flag in the correct format (e.g. --fullFlag or -f)
+     * Formats a flag string to ensure it conforms to the required syntax for command-line arguments.
+     * <p>
+     * This method removes any leading dashes (`-`) from the input flag and appends the appropriate prefix:
+     * <ul>
+     *     <li>For full flags (e.g., `--example`), it ensures two leading dashes (`--`).</li>
+     *     <li>For short flags (e.g., `-e`), it ensures one leading dash (`-`).</li>
+     * </ul>
+     * <p>
+     * If the input flag is already correctly formatted, it will be returned unchanged.
+     * </p>
+     *
+     * <h3>Examples:</h3>
+     * <pre>
+     * makeFlag("example", false)  → "--example"
+     * makeFlag("--example", false) → "--example"
+     * makeFlag("e", true) → "-e"
+     * makeFlag("-e", true) → "-e"
+     * </pre>
+     *
+     * @param flag of a Parameter
+     * @param isShortName true if the flag is a shortFlag (false if fullFlag)
+     * @return flag in the correct format (e.g. --flag or -f)
      */
-    private String makeFlag(String fullFlag, boolean isShortName) {
-        int i = 0;
-        while (fullFlag.charAt(i) == '-') {
-            i++;
-        }
-
-        if (i == 2 && !isShortName) return fullFlag;
-        else if (i == 1 && isShortName) return fullFlag;
-        else {
-            String newFlag = isShortName ? "-" : "--";
-            return newFlag + fullFlag.substring(i);
-        }
+    private String makeFlag(String flag, boolean isShortName) {
+        flag = flag.replaceFirst("^-+", "");
+        return isShortName ? "-" + flag : "--" + flag;
     }
 
 
