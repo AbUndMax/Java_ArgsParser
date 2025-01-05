@@ -90,12 +90,12 @@ public class CalledForHelpNotification extends Exception {
         int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
         return "#" + " ".repeat(freeSpace) + stringToCenter;
     }
-    
+
+    //TODO abstract commandHelpString and ParameterHelpString
     private static String commandHelpString(Command command, int longestFlagSize, int longestShortFlag) {
         String fullCommandName = command.getFullCommandName();
         String shortCommandName = command.getShortCommandName();
         String description = command.getDescription();
-        String isMandatory = "   ";
         StringBuilder helpString = new StringBuilder("###  ");
 
         // check if a description is available:

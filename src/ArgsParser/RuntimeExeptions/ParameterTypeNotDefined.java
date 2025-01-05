@@ -1,5 +1,6 @@
 package ArgsParser.RuntimeExeptions;
 
+//TODO still needed?
 /**
  * Exception thrown when the type of a parameter is not defined but a non-String type argument is tried to access.
  */
