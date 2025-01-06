@@ -43,12 +43,10 @@ public class Example {
     ArgsParser parser = new ArgsParser();
     // define a String mandatory parameter
     StrParameter param1 = parser.addParameter(
-            new StrParameter("parameterFlag", "pf", "description", true)
-    );
+            new StrParameter("parameterFlag", "pf", "description", true));
     // define a command
     Command command1 = parser.addCommand(
-            new Command("commandName", "c", "description of the command")
-    );
+            new Command("commandName", "c", "description of the command"));
     
     ArgsParser.parse(args);
 
@@ -163,11 +161,15 @@ the usage of the provided Commands to only one of them!
 For example:
 
 ```Java
-ArgsParser parser = new ArgsParser();
-Command cmd1 = parser.addCommand("commName1", "cmdN1", "Description of command1");
-Command cmd2 = parser.addCommand("commName2", "cmdN2", "Description of command2");
-Command cmd3 = parser.addCommand("commName3", "cmdN3", "Description of command3");
-parser.toggle(cmd1, cmd2);
+    // ...
+    Command cmd1 = parser.addCommand(
+        new Command("commName1", "cmdN1", "Description of command1"));
+    Command cmd2 = parser.addCommand(
+        new Command("commName2", "cmdN2", "Description of command2"));
+    Command cmd3 = parser.addCommand(
+        new Command("commName3", "cmdN3", "Description of command3"));
+    parser.toggle(cmd1, cmd2);
+    // ...
 ```
 
 with this only cmd1 or cmd2 are allowed to be present in args. If both commands would be present, .parseUnchecked() 
@@ -426,3 +428,54 @@ protected Integer castArgument(String argument) throws InvalidArgTypeArgsExcepti
 #### indirect access of parameters / commands:
 - `getArgumentOf(String fullFlag)`
 - `checkIfCommandIsProvided(String fullCommandName)`
+
+## Full Code Example:
+```java
+public static void main(String[] args) {
+    // initialize ArgsParser instance
+    ArgsParser parser = new ArgsParser(args);
+    
+    // declare Parameters on the parser instance
+    StrParameter example = parser.addParameter(
+          new StrParameter("parameterFlag", "pf", "short Description", true));
+    IntParameter example2 = parser.addParameter(
+          new IntParameter("parameterFlag2", "pf2", null, false));
+    DblParameter argWithDefault = parser.addParameter(
+          new DblParameter(5.6, "parameterFlag3", "pf3", "description"));
+    BolArrParameter booleanArrayParam = parser.addParameter(
+          new BolArrParameter(new Boolean[]{true, false, false}, "boolArray", "bArr", "Array of several boolean values"));
+    IntArrParameter integerArrayParam = parser.addParameter(
+            new IntArrParameter(new Integer[]{1, 2, 3}, "intArray", "iArr", "Array of several integer values"));
+    Command command = parser.addCommand(
+          new Command("commandName", "cN", "this is a description for the command"));
+
+    // declare Commands on the parser instance
+    Command cmd1 = parser.addCommand(
+          new Command("commName1", "cmdN1", "Description of command1"));
+    Command cmd2 = parser.addCommand(
+          new Command("commName2", "cmdN2", "Description of command2"));
+    Command cmd3 = parser.addCommand(
+          new Command("commName3", "cmdN3", "Description of command3"));
+    parser.toggle(cmd1, cmd2);
+
+    // parser the command-line arguments
+    parser.parse();
+
+    // example for direct access of command-line arguments via their parameters
+    String providedArgument = example.getArgument();
+    Double result = example2.getArgument() + argWithDefault.getArgument();
+
+    // example for checking a command
+    if (command.isProvided()) System.out.println("command provided");
+    
+    // example for indirect command-line argument access
+    String providedArgument = parser.getArgumentOf("parameterFlag");
+    Integer getInteger = parser.getArgumentOf("parameterFlag2");
+    Double getDouble = parser.getArgumentOf("parameterFlag3");
+    Double result = getInteger + getDouble;
+
+    // example for indirect command check
+    if (parser.checkIfCommandIsProvided("commandName")) System.out.println("command still provided");
+}
+
+```
