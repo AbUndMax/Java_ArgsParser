@@ -4,6 +4,12 @@ import ArgsParser.Parameter;
 
 import java.util.Arrays;
 
+/**
+ * Represents a parameter that holds an array of strings.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link String}-array.
+ * It provides constructors for defining the parameter with flags, descriptions, mandatory status, and default values.
+ */
 public class StrArrParameter extends Parameter<String[]> {
 
     /**

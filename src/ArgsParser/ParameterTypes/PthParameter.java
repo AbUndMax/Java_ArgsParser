@@ -6,12 +6,24 @@ import ArgsParser.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Represents a parameter that holds a file system path.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Path}.
+ * It provides constructors for defining the parameter with flags, descriptions,
+ * mandatory status, default values, and the option to check if the path exists.
+ *
+ * <p>
+ * The {@code pathCheck} field determines whether the existence of the specified path
+ * should be validated during parsing.
+ * </p>
+ */
 public class PthParameter extends Parameter<Path> {
 
     private final boolean pathCheck;
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Path} instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -44,7 +56,7 @@ public class PthParameter extends Parameter<Path> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Path} instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

@@ -2,9 +2,20 @@ package ArgsParser.ParameterTypes;
 
 import ArgsParser.Parameter;
 
+/**
+ * Represents a parameter that holds a character value.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Character}.
+ * It provides constructors for defining the parameter with full and short flags, descriptions,
+ * mandatory status, and default values.
+ *
+ * <p>
+ * The {@code castArgument} method is overridden to parse string arguments into {@link Character} values.
+ * </p>
+ */
 public class ChrParameter extends Parameter<Character> {
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Character} instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -35,7 +46,7 @@ public class ChrParameter extends Parameter<Character> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Character} instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

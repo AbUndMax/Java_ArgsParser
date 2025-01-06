@@ -4,9 +4,21 @@ import ArgsParser.Parameter;
 
 import java.util.Arrays;
 
+/**
+ * Represents a parameter that holds an array of characters.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Character}-array.
+ * It provides constructors for defining the parameter with full and short flags, descriptions,
+ * mandatory status, and default values.
+ *
+ * <p>
+ * The {@code castArgument} method is overridden to parse string arguments into {@link Character} values
+ * and add them to the existing array of characters.
+ * </p>
+ */
 public class ChrArrParameter extends Parameter<Character[]> {
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Character}-array instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -37,7 +49,7 @@ public class ChrArrParameter extends Parameter<Character[]> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Character}-array instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

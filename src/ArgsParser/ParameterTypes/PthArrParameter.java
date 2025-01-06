@@ -7,12 +7,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
+/**
+ * Represents a parameter that holds an array of file system paths.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Path}-array.
+ * It provides constructors for defining the parameter with flags, descriptions, mandatory status,
+ * default values, and the option to validate the existence of each path.
+ *
+ * <p>
+ * The {@code pathCheck} field determines whether the existence of the specified paths
+ * should be validated during parsing.
+ * </p>
+ */
 public class PthArrParameter extends Parameter<Path[]> {
 
     private final boolean pathCheck;
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Path}-array instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -44,7 +56,7 @@ public class PthArrParameter extends Parameter<Path[]> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Path}-array instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

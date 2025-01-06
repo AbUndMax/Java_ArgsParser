@@ -2,10 +2,17 @@ package ArgsParser.ParameterTypes;
 
 import ArgsParser.Parameter;
 
+/**
+ * Represents a string parameter for argument parsing.
+ *
+ * This class extends {@link Parameter} to handle parameters of type {@link String}.
+ * It provides constructors to define the parameter with flags, descriptions, mandatory status,
+ * and default values.
+ */
 public class StrParameter extends Parameter<String> {
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link String} instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -36,7 +43,7 @@ public class StrParameter extends Parameter<String> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link String} instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

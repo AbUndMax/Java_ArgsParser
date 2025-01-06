@@ -4,9 +4,21 @@ import ArgsParser.Parameter;
 
 import java.util.Arrays;
 
+/**
+ * Represents a parameter that holds an array of boolean values.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Boolean[]}.
+ * It provides constructors for defining the parameter with flags, descriptions,
+ * mandatory status, and default values.
+ *
+ * <p>
+ * The {@code castArgument} method is overridden to parse string arguments into {@link Boolean} values
+ * and add them to the existing array of booleans.
+ * </p>
+ */
 public class BolArrParameter extends Parameter<Boolean[]> {
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Boolean}-array instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -37,7 +49,7 @@ public class BolArrParameter extends Parameter<Boolean[]> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Boolean}-array instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

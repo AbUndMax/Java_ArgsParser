@@ -2,9 +2,17 @@ package ArgsParser.ParameterTypes;
 
 import ArgsParser.Parameter;
 
+/**
+ * Represents a parameter that holds an integer value.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Integer}.
+ * It provides constructors for defining the parameter with flags, descriptions, mandatory status,
+ * and default values. Additionally, it overrides the {@code castArgument} method to parse
+ * string arguments into integers.
+ */
 public class IntParameter extends Parameter<Integer> {
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Integer} instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -35,7 +43,7 @@ public class IntParameter extends Parameter<Integer> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Integer} instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>

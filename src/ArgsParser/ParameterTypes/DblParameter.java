@@ -2,9 +2,20 @@ package ArgsParser.ParameterTypes;
 
 import ArgsParser.Parameter;
 
+/**
+ * Represents a parameter that holds a double-precision floating-point value.
+ *
+ * This class extends {@link Parameter} to manage parameters of type {@link Double}.
+ * It provides constructors for defining the parameter with flags, descriptions, mandatory status,
+ * and default values.
+ *
+ * <p>
+ * The {@code castArgument} method is overridden to parse string arguments into {@link Double} values.
+ * </p>
+ */
 public class DblParameter extends Parameter<Double> {
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * Constructs a new {@link Parameter} of type {@link Double} instance with the specified flags, description, and mandatory status.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
@@ -35,7 +46,7 @@ public class DblParameter extends Parameter<Double> {
     }
 
     /**
-     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * Constructs a new {@link Parameter} of type {@link Double} instance with the specified flags, description, and a default value.
      * <p>
      * The constructor validates and formats the provided flag names.
      * </p>
