@@ -14,12 +14,16 @@ public class CalledForHelpNotification extends Exception {
     private static final int consoleWidth = 100;
     private static final Map<String, String> shortFlagTypes = new HashMap<>(){{
         put("String", "s");
+        put("Path", "p");
         put("Integer", "i");
+        put("Float", "f");
         put("Double", "d");
         put("Boolean", "b");
         put("Character", "c");
         put("String[]", "s+");
+        put("Path[]", "p+");
         put("Integer[]", "i+");
+        put("Float[]", "f+");
         put("Double[]", "d+");
         put("Boolean[]", "b+");
         put("Character[]", "c+");

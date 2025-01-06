@@ -6,6 +6,6 @@ import java.nio.file.Path;
 
 public class NotExistingPathArgsException extends ArgsException {
     public NotExistingPathArgsException(Path path) {
-        super(path + " Does not exist!", false);
+        super(path + " does not exist!\n\tInvalid path!", false);
     }
 }

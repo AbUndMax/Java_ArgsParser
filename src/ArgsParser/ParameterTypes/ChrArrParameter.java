@@ -57,13 +57,13 @@ public class ChrArrParameter extends Parameter<Character[]> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    public ChrArrParameter(String fullFlag, String shortFlag, String description, Character[] defaultValue) {
+    public ChrArrParameter(Character[] defaultValue, String fullFlag, String shortFlag, String description) {
         super(defaultValue, fullFlag, shortFlag, description, Character[].class);
     }
 
@@ -75,7 +75,7 @@ public class ChrArrParameter extends Parameter<Character[]> {
      */
     @Override
     protected Character[] castArgument(String argument) {
-        Character[] array = super.getArgument();
+        Character[] array = super.readArgument();
         array = array == null ? new Character[1] : Arrays.copyOf(array, array.length + 1);
         array[array.length - 1] = argument.charAt(0);
         return array;

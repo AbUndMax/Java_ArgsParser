@@ -57,13 +57,13 @@ public class IntArrParameter extends Parameter<Integer[]> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    public IntArrParameter(String fullFlag, String shortFlag, String description, Integer[] defaultValue) {
+    public IntArrParameter(Integer[] defaultValue, String fullFlag, String shortFlag, String description) {
         super(defaultValue, fullFlag, shortFlag, description, Integer[].class);
     }
 
@@ -75,7 +75,7 @@ public class IntArrParameter extends Parameter<Integer[]> {
      */
     @Override
     protected Integer[] castArgument(String argument) {
-        Integer[] array = super.getArgument();
+        Integer[] array = super.readArgument();
         array = array == null ? new Integer[1] : Arrays.copyOf(array, array.length + 1);
         array[array.length - 1] = Integer.parseInt(argument);
         return array;

@@ -64,13 +64,13 @@ public class PthArrParameter extends Parameter<Path[]> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    public PthArrParameter(String fullFlag, String shortFlag, String description, Path[] defaultValue, boolean pathCheck) {
+    public PthArrParameter(Path[] defaultValue, String fullFlag, String shortFlag, String description, boolean pathCheck) {
         super(defaultValue, fullFlag, shortFlag, description, Path[].class);
         this.pathCheck = pathCheck;
     }
@@ -84,7 +84,7 @@ public class PthArrParameter extends Parameter<Path[]> {
      */
     @Override
     protected Path[] castArgument(String argument) throws NotExistingPathArgsException {
-        Path[] array = super.getArgument();
+        Path[] array = super.readArgument();
         array = array == null ? new Path[1] : Arrays.copyOf(array, array.length + 1);
         Path pathToAdd = Path.of(argument);
         if (pathCheck && !Files.exists(pathToAdd)) throw new NotExistingPathArgsException(pathToAdd);

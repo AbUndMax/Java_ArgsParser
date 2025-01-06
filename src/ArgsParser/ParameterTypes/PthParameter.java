@@ -64,17 +64,32 @@ public class PthParameter extends Parameter<Path> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    public PthParameter(String fullFlag, String shortFlag, String description, Path defaultValue, boolean pathCheck) {
+    public PthParameter(Path defaultValue, String fullFlag, String shortFlag, String description, boolean pathCheck) {
         super(defaultValue, fullFlag, shortFlag, description, Path.class);
         this.pathCheck = pathCheck;
     }
 
+    /**
+     * Checks if the path specified by the current argument exists in the file system.
+     * <p>
+     * This method retrieves the argument value associated with this parameter,
+     * interprets it as a file system path, and verifies whether it exists.
+     * </p>
+     *
+     * <h3>Behavior:</h3>
+     * <ul>
+     *     <li>Returns {@code true} if the path exists, otherwise {@code false}.</li>
+     *     <li>If the argument is invalid or null, this method may throw a {@link NullPointerException}.</li>
+     * </ul>
+     *
+     * @return {@code true} if the path exists, otherwise {@code false}.
+     */
     public boolean pathExists() {
         return Files.exists(super.getArgument());
     }

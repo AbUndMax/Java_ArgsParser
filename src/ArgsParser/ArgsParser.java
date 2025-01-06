@@ -474,12 +474,10 @@ public class ArgsParser {
 
                 boolean isArrayParam = arrayParameters.contains(args[i - 1]);
                 if (isArrayParam) { // "collect" all following arguments after an array parameter in a StringBuilder
-                    StringBuilder arguments = new StringBuilder();
-                    arguments.append(arg).append("==="); // every entry in the array gets seperated by ===
+                    currentParameter.setArgument(args[i]);
                     while(i + 1 < args.length && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
-                        arguments.append(args[++i]).append("===");
+                        currentParameter.setArgument(args[++i]);
                     }
-                    currentParameter.setArgument(arguments.toString());
 
                 } else {
                     currentParameter.setArgument(arg);

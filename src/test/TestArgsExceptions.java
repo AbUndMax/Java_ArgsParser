@@ -1,6 +1,10 @@
 import ArgsParser.*;
 import ArgsParser.ArgsExceptions.*;
+import ArgsParser.ParameterTypes.*;
 import org.junit.jupiter.api.Test;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,7 +17,7 @@ public class TestArgsExceptions {
         String[] args = {"-pf4", "--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<Double> doub = parser.addDefaultDoubleParameter("parameterFlag4", "pf4", "description", 5.6);
+        DblParameter doub = parser.addParameter(new DblParameter(5.6, "parameterFlag4", "pf4", "description"));
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -36,25 +40,175 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> mandatoryString = parser.addMandatoryStringParameter("mandatory_string", "ms", "mandatory string description");
-        Parameter<String> optionalString = parser.addOptionalStringParameter("optional_string", "os", "optional string description");
-        Parameter<String> defaultString = parser.addDefaultStringParameter("default_string", "ds", "default string description", "default");
+        // -------------------------------------------------------------------
+        // STRING
+        // -------------------------------------------------------------------
 
-        Parameter<Double> mandatoryDouble = parser.addMandatoryDoubleParameter("mandatory_double", "md", "mandatory double description");
-        Parameter<Double> optionalDouble = parser.addOptionalDoubleParameter("optional_double", "d", "this one is optional");
-        Parameter<Double> defaultDouble = parser.addDefaultDoubleParameter("default_double", "dd", "default double description", 7.89);
+        // Mandatory string
+        StrParameter mandatoryString = parser.addParameter(
+                new StrParameter("mandatory_string", "ms", "mandatory string description", true)
+        );
+        // Optional string
+        StrParameter optionalString = parser.addParameter(
+                new StrParameter("optional_string", "os", "optional string description", false)
+        );
+        // Default string
+        StrParameter defaultString = parser.addParameter(
+                new StrParameter("default", "default_string", "ds", "default string description")
+        );
 
-        Parameter<Integer> mandatoryInteger = parser.addMandatoryIntegerParameter("mandatory_integer", "mi", "mandatory integer description");
-        Parameter<Integer> optionalInteger = parser.addOptionalIntegerParameter("optional_integer", "oi", "optional integer description");
-        Parameter<Integer> defaultInteger = parser.addDefaultIntegerParameter("default_integer", "i", null, 5);
 
-        Parameter<Character> mandatoryChar = parser.addMandatoryCharacterParameter("mandatory_character", "mc", "mandatory character description");
-        Parameter<Character> optionalChar = parser.addOptionalCharacterParameter("optional_character", "oc", "optional character description");
-        Parameter<Character> defaultChar = parser.addDefaultCharacterParameter("default_character", "dc", "default character description", 'a');
+        // -------------------------------------------------------------------
+        // DOUBLE
+        // -------------------------------------------------------------------
 
-        Parameter<Boolean> mandatoryBoolean = parser.addMandatoryBooleanParameter("mandatory_boolean", "mb", "mandatory boolean description");
-        Parameter<Boolean> optionalBoolean = parser.addOptionalBooleanParameter("optional_boolean", "ob", "optional boolean description");
-        Parameter<Boolean> defaultBoolean = parser.addDefaultBooleanParameter("default_boolean", "db", "default boolean description", true);
+        // Mandatory double
+        DblParameter mandatoryDouble = parser.addParameter(
+                new DblParameter("mandatory_double", "md", "mandatory double description", true)
+        );
+        // Optional double
+        DblParameter optionalDouble = parser.addParameter(
+                new DblParameter("optional_double", "d", "this one is optional", false)
+        );
+        // Default double
+        DblParameter defaultDouble = parser.addParameter(
+                new DblParameter(7.89, "default_double", "dd", "default double description")
+        );
+
+
+        // -------------------------------------------------------------------
+        // INTEGER
+        // -------------------------------------------------------------------
+
+        // Mandatory integer
+        IntParameter mandatoryInteger = parser.addParameter(
+                new IntParameter("mandatory_integer", "mi", "mandatory integer description", true)
+        );
+        // Optional integer
+        IntParameter optionalInteger = parser.addParameter(
+                new IntParameter("optional_integer", "oi", "optional integer description", false)
+        );
+        // Default integer
+        IntParameter defaultInteger = parser.addParameter(
+                new IntParameter(5, "default_integer", "i", "No description available!")
+        );
+
+
+        // -------------------------------------------------------------------
+        // CHARACTER
+        // -------------------------------------------------------------------
+
+        // Mandatory character
+        ChrParameter mandatoryChar = parser.addParameter(
+                new ChrParameter("mandatory_character", "mc", "mandatory character description", true)
+        );
+        // Optional character
+        ChrParameter optionalChar = parser.addParameter(
+                new ChrParameter("optional_character", "oc", "optional character description", false)
+        );
+        // Default character
+        ChrParameter defaultChar = parser.addParameter(
+                new ChrParameter('a', "default_character", "dc", "default character description")
+        );
+
+
+        // -------------------------------------------------------------------
+        // BOOLEAN
+        // -------------------------------------------------------------------
+
+        // Mandatory boolean
+        BolParameter mandatoryBoolean = parser.addParameter(
+                new BolParameter("mandatory_boolean", "mb", "mandatory boolean description", true)
+        );
+        // Optional boolean
+        BolParameter optionalBoolean = parser.addParameter(
+                new BolParameter("optional_boolean", "ob", "optional boolean description", false)
+        );
+        // Default boolean
+        BolParameter defaultBoolean = parser.addParameter(
+                new BolParameter(true, "default_boolean", "db", "default boolean description")
+        );
+
+
+        // -------------------------------------------------------------------
+        // FLOAT (NEW)
+        // -------------------------------------------------------------------
+
+        // Mandatory float
+        FltParameter mandatoryFloat = parser.addParameter(
+                new FltParameter("mandatory_float", "mf", "mandatory float description", true)
+        );
+        // Optional float
+        FltParameter optionalFloat = parser.addParameter(
+                new FltParameter("optional_float", "of", "optional float description", false)
+        );
+        // Default float
+        FltParameter defaultFloat = parser.addParameter(
+                new FltParameter(3.14f, "default_float", "df", "default float description")
+        );
+
+
+        // -------------------------------------------------------------------
+        // PATH (NEW)
+        // -------------------------------------------------------------------
+
+        // Mandatory path
+        PthParameter mandatoryPath = parser.addParameter(
+                new PthParameter("mandatory_path", "mp", "mandatory path description", true, false)
+        );
+        // Optional path
+        PthParameter optionalPath = parser.addParameter(
+                new PthParameter("optional_path", "op", "optional path description", false, false)
+        );
+        // Default path
+        PthParameter defaultPath = parser.addParameter(
+                new PthParameter(Path.of("/some/default/path"), "default_path", "dp", "default path description", false)
+        );
+
+
+        // -------------------------------------------------------------------
+        // STRING ARRAY (example from original code, optional)
+        // -------------------------------------------------------------------
+
+        StrArrParameter strArrParam = parser.addParameter(
+                new StrArrParameter("stringArray", "sArr", "description for string array", false)
+        );
+
+
+        // -------------------------------------------------------------------
+        // FLOAT ARRAY (NEW)
+        // -------------------------------------------------------------------
+
+        FltArrParameter mandatoryFloatArray = parser.addParameter(
+                new FltArrParameter("mandatory_float_array", "mfa", "mandatory float array description", true)
+        );
+        FltArrParameter optionalFloatArray = parser.addParameter(
+                new FltArrParameter("optional_float_array", "ofa", "optional float array description", false)
+        );
+        FltArrParameter defaultFloatArray = parser.addParameter(
+                new FltArrParameter(new Float[]{1.1f, 2.2f}, "default_float_array", "dfa", "default float array description")
+        );
+
+
+        // -------------------------------------------------------------------
+        // PATH ARRAY (NEW)
+        // -------------------------------------------------------------------
+
+        PthArrParameter mandatoryPathArray = parser.addParameter(
+                new PthArrParameter("mandatory_path_array", "mpa", "mandatory path array description", true, false)
+        );
+        PthArrParameter optionalPathArray = parser.addParameter(
+                new PthArrParameter("optional_path_array", "opa", "optional path array description", false, false)
+        );
+        PthArrParameter defaultPathArray = parser.addParameter(
+                new PthArrParameter(
+                        new Path[]{Path.of("/path/one"), Path.of("/path/two")},
+                        "default_path_array",
+                        "dpa",
+                        "default path array description",
+                        false
+                )
+        );
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -66,40 +220,70 @@ public class TestArgsExceptions {
                 #
                 #                                      Available Parameters:
                 #
-                ###  --mandatory_string     -ms  [s]  (!)  mandatory string description
+                ###  --mandatory_string       -ms    [s]  (!)  mandatory string description
                 #
-                ###  --optional_string      -os  [s]  (?)  optional string description
+                ###  --optional_string        -os    [s]  (?)  optional string description
                 #
-                ###  --default_string       -ds  [s]  (?)  default string description
-                #                                default:  default
+                ###  --default_string         -ds    [s]  (?)  default string description
+                #                                    default:  default
                 #
-                ###  --mandatory_double     -md  [d]  (!)  mandatory double description
+                ###  --mandatory_double       -md    [d]  (!)  mandatory double description
                 #
-                ###  --optional_double      -d   [d]  (?)  this one is optional
+                ###  --optional_double        -d     [d]  (?)  this one is optional
                 #
-                ###  --default_double       -dd  [d]  (?)  default double description
-                #                                default:  7.89
+                ###  --default_double         -dd    [d]  (?)  default double description
+                #                                    default:  7.89
                 #
-                ###  --mandatory_integer    -mi  [i]  (!)  mandatory integer description
+                ###  --mandatory_integer      -mi    [i]  (!)  mandatory integer description
                 #
-                ###  --optional_integer     -oi  [i]  (?)  optional integer description
+                ###  --optional_integer       -oi    [i]  (?)  optional integer description
                 #
-                ###  --default_integer      -i   [i]  (?)  No description available!
-                #                                default:  5
+                ###  --default_integer        -i     [i]  (?)  No description available!
+                #                                    default:  5
                 #
-                ###  --mandatory_character  -mc  [c]  (!)  mandatory character description
+                ###  --mandatory_character    -mc    [c]  (!)  mandatory character description
                 #
-                ###  --optional_character   -oc  [c]  (?)  optional character description
+                ###  --optional_character     -oc    [c]  (?)  optional character description
                 #
-                ###  --default_character    -dc  [c]  (?)  default character description
-                #                                default:  a
+                ###  --default_character      -dc    [c]  (?)  default character description
+                #                                    default:  a
                 #
-                ###  --mandatory_boolean    -mb  [b]  (!)  mandatory boolean description
+                ###  --mandatory_boolean      -mb    [b]  (!)  mandatory boolean description
                 #
-                ###  --optional_boolean     -ob  [b]  (?)  optional boolean description
+                ###  --optional_boolean       -ob    [b]  (?)  optional boolean description
                 #
-                ###  --default_boolean      -db  [b]  (?)  default boolean description
-                #                                default:  true
+                ###  --default_boolean        -db    [b]  (?)  default boolean description
+                #                                    default:  true
+                #
+                ###  --mandatory_float        -mf    [f]  (!)  mandatory float description
+                #
+                ###  --optional_float         -of    [f]  (?)  optional float description
+                #
+                ###  --default_float          -df    [f]  (?)  default float description
+                #                                    default:  3.14
+                #
+                ###  --mandatory_path         -mp    [p]  (!)  mandatory path description
+                #
+                ###  --optional_path          -op    [p]  (?)  optional path description
+                #
+                ###  --default_path           -dp    [p]  (?)  default path description
+                #                                    default:  /some/default/path
+                #
+                ###  --stringArray            -sArr  [s+] (?)  description for string array
+                #
+                ###  --mandatory_float_array  -mfa   [f+] (!)  mandatory float array description
+                #
+                ###  --optional_float_array   -ofa   [f+] (?)  optional float array description
+                #
+                ###  --default_float_array    -dfa   [f+] (?)  default float array description
+                #                                    default:  [1.1, 2.2]
+                #
+                ###  --mandatory_path_array   -mpa   [p+] (!)  mandatory path array description
+                #
+                ###  --optional_path_array    -opa   [p+] (?)  optional path array description
+                #
+                ###  --default_path_array     -dpa   [p+] (?)  default path array description
+                #                                    default:  [/path/one, /path/two]
                 #
                 ####################################################################################################""";
         assertEquals(expected, exception.getMessage());
@@ -111,17 +295,51 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String[]> stringArray = parser.addStringArrayParameter("stringArrayParam", "hap", "descr", true);
-        Parameter<String[]> defaultStringArray = parser.addDefaultStringArrayParameter("stringArray", "sAr", "descr", new String[]{"string1", "string2", "string3"});
-        Parameter<Double[]> doubleArray = parser.addDoubleArrayParameter("doubleArrayParam", "dap", "description", false);
-        Parameter<Double[]> defaultDoubleArray = parser.addDefaultDoubleArrayParameter("doubleArray", "da", "description", new Double[]{1.1, 2.2, 3.3});
-        Parameter<Integer[]> integerArray = parser.addIntegerArrayParameter("integerArrayParam", "iap", "description", true);
-        Parameter<Integer[]> defaultIntegerArray = parser.addDefaultIntegerArrayParameter("integerArray", "ia", "description", new Integer[]{1, 2, 3});
-        Parameter<Boolean[]> booleanArray = parser.addBooleanArrayParameter("booleanArrayParam", "bap", "description", false);
-        Parameter<Boolean[]> defaultBooleanArray = parser.addDefaultBooleanArrayParameter("booleanArray", "ba", "description", new Boolean[]{true, false, true});
-        Parameter<Character[]> characterArray = parser.addCharacterArrayParameter("characterArrayParam", "cap", "description", true);
-        Parameter<Character[]> defaultCharacterArray = parser.addDefaultCharacterArrayParameter("characterArray", "ca", "description", new Character[]{'a', 'b', 'c'});
-
+        // String Array (mandatory)
+        StrArrParameter stringArray = parser.addParameter(
+                new StrArrParameter("stringArrayParam", "hap", "descr", true)
+        );
+        // String Array with default
+        StrArrParameter defaultStringArray = parser.addParameter(
+                new StrArrParameter(new String[]{"string1", "string2", "string3"},
+                                    "stringArray", "sAr", "descr")
+        );
+        // Double Array (optional)
+        DblArrParameter doubleArray = parser.addParameter(
+                new DblArrParameter("doubleArrayParam", "dap", "description", false)
+        );
+        // Double Array with default
+        DblArrParameter defaultDoubleArray = parser.addParameter(
+                new DblArrParameter(new Double[]{1.1, 2.2, 3.3},
+                                    "doubleArray", "da", "description")
+        );
+        // Integer Array (mandatory)
+        IntArrParameter integerArray = parser.addParameter(
+                new IntArrParameter("integerArrayParam", "iap", "description", true)
+        );
+        // Integer Array with default
+        IntArrParameter defaultIntegerArray = parser.addParameter(
+                new IntArrParameter(new Integer[]{1, 2, 3},
+                                    "integerArray", "ia", "description")
+        );
+        // Boolean Array (optional)
+        BolArrParameter booleanArray = parser.addParameter(
+                new BolArrParameter("booleanArrayParam", "bap", "description", false)
+        );
+        // Boolean Array with default
+        BolArrParameter defaultBooleanArray = parser.addParameter(
+                new BolArrParameter(new Boolean[]{true, false, true},
+                                    "booleanArray", "ba", "description")
+        );
+        // Character Array (mandatory)
+        ChrArrParameter characterArray = parser.addParameter(
+                new ChrArrParameter("characterArrayParam", "cap", "description", true)
+        );
+        // Character Array with default
+        ChrArrParameter defaultCharacterArray = parser.addParameter(
+                new ChrArrParameter(new Character[]{'a', 'b', 'c'},
+                                    "characterArray", "ca", "description")
+        );
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
@@ -167,7 +385,7 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
 
-        Command command = parser.addCommand("command", "c", "this is a command");
+        Command command = parser.addCommand(new Command("command", "c", "this is a command"));
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -187,10 +405,10 @@ public class TestArgsExceptions {
     public void testHelpWithCommandsAndParameters() {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
-        Command command = parser.addCommand("command", "c", "this is a command");
-        Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
-        Parameter<Integer> newParam2 = parser.addOptionalIntegerParameter("newParam2", "np2", "this is the second new parameter");
-        Command newCommand = parser.addCommand("newCommand", "nc", "this is another command");
+        Command command = parser.addCommand(new Command("command", "c", "this is a command"));
+        StrParameter newParam1 = parser.addParameter(new StrParameter("newParam1", "np1", "this is the first new parameter", true));
+        IntParameter newParam2 = parser.addParameter(new IntParameter("newParam2", "np2", "this is the second new parameter", false));
+        Command newCommand = parser.addCommand(new Command("newCommand", "nc", "this is another command"));
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -220,8 +438,8 @@ public class TestArgsExceptions {
     public void testOneCommandAndOneParameter() {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
-        Command command = parser.addCommand("command", "c", "this is a command");
-        Parameter<String> newParam1 = parser.addMandatoryStringParameter("newParam1", "np1", "this is the first new parameter");
+        Command command = parser.addCommand(new Command("command", "c", "this is a command"));
+        StrParameter newParam1 = parser.addParameter(new StrParameter("newParam1", "np1", "this is the first new parameter", true));
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -248,13 +466,13 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> longString = parser.addDefaultStringParameter("longString", "ls",
-                                                                        "This description is so long, it will " +
-                                                                                "force the automatic help printout to " +
-                                                                                "introduce a new line and still have a nice look :)",
-                                                                        "this/path/is/so/long/it/is/actually/longer/than/any" +
-                                                                                "/existing/path/that/I/have/on/my/PC/Do/You/Know/The/Word" +
-                                                                                "Oberwesedampfschifffahrtsgesellschaftskapitän");
+        StrParameter longString = parser.addParameter(new StrParameter("this/path/is/so/long/it/is/actually/longer/than/any" +
+                                                                               "/existing/path/that/I/have/on/my/PC/Do/You/Know/The/Word" +
+                                                                               "Oberwesedampfschifffahrtsgesellschaftskapitän",
+                                                                       "longString", "ls",
+                                                                       "This description is so long, it will " +
+                                                                               "force the automatic help printout to " +
+                                                                               "introduce a new line and still have a nice look :)"));
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
@@ -279,12 +497,30 @@ public class TestArgsExceptions {
         String[] args = {"--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> strParam = parser.addMandatoryStringParameter("string", "s", "");
-        Parameter<Integer> intParam = parser.addOptionalIntegerParameter("integer", "i", null);
-        Parameter<Character> charParam = parser.addDefaultCharacterParameter("char", "c", null, 'c');
-        Parameter<Boolean> booleanParam = parser.addOptionalBooleanParameter("boolean", "b", "");
-        Parameter<Double> doubleParam = parser.addMandatoryDoubleParameter("double", "d", null);
-        Parameter<String[]> strArrParam = parser.addStringArrayParameter("stringArray", "sArr", null, false);
+        // String (mandatory)
+        StrParameter strParam = parser.addParameter(
+                new StrParameter("string", "s", "", true)
+        );
+        // Integer (optional)
+        IntParameter intParam = parser.addParameter(
+                new IntParameter("integer", "i", null, false)
+        );
+        // Character (with default value)
+        ChrParameter charParam = parser.addParameter(
+                new ChrParameter('c', "char", "c", null)
+        );
+        // Boolean (optional)
+        BolParameter booleanParam = parser.addParameter(
+                new BolParameter("boolean", "b", "", false)
+        );
+        // Double (mandatory)
+        DblParameter doubleParam = parser.addParameter(
+                new DblParameter("double", "d", null, true)
+        );
+        // String array (optional)
+        StrArrParameter strArrParam = parser.addParameter(
+                new StrArrParameter("stringArray", "sArr", null, false)
+        );
 
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -320,7 +556,7 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--help"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
 
         Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, () -> parser.parseUnchecked(args));
     }
@@ -330,7 +566,7 @@ public class TestArgsExceptions {
         String[] args = {"--help", "--file"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
 
         Exception exception = assertThrows(HelpAtWrongPositionArgsException.class, () -> parser.parseUnchecked(args));
     }
@@ -342,8 +578,8 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "-f", "file2.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> file2 = parser.addMandatoryStringParameter("file2", "f2", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter file2 = parser.addParameter(new StrParameter("file2", "f2", "descr", true));
 
         Exception exception = assertThrows(FlagAlreadyProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -361,11 +597,11 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--double", "5.5.5"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<Double> doub = parser.addMandatoryDoubleParameter("double", "d", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        DblParameter doub = parser.addParameter(new DblParameter("double", "d", "descr", true));
 
         Exception exception = assertThrows(InvalidArgTypeArgsException.class, () -> parser.parseUnchecked(args));
-        assertEquals(new InvalidArgTypeArgsException("--double", "Double", "Unsupported type!").getMessage(), exception.getMessage());
+        assertEquals(new InvalidArgTypeArgsException("--double", "Double", "Provided argument does not match the parameter type!").getMessage(), exception.getMessage());
     }
 
 // MandatoryArgNotProvidedArgsException
@@ -375,12 +611,14 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--optional", "optional.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
-        Parameter<String> optional = parser.addMandatoryStringParameter("optional", "o", "descr");
+        // Using the new StrParameter for mandatory parameters
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
+        StrParameter optional = parser.addParameter(new StrParameter("optional", "o", "descr", true));
 
         Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, () -> parser.parseUnchecked(args));
-        assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(), exception.getMessage());
+        assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save").getMessage(),
+                     exception.getMessage());
     }
 
     @Test
@@ -388,12 +626,16 @@ public class TestArgsExceptions {
         String[] args = {"--load", "file.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> load = parser.addMandatoryStringParameter("load", "l", "descr");
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
+        // Again, switching to StrParameter with isMandatory = true
+        StrParameter load = parser.addParameter(new StrParameter("load", "l", "descr", true));
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
 
         Exception exception = assertThrows(MandatoryArgNotProvidedArgsException.class, () -> parser.parseUnchecked(args));
-        assertEquals(new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(), exception.getMessage());
+        assertEquals(
+                new MandatoryArgNotProvidedArgsException("Mandatory parameters are missing:\n--save\n--file").getMessage(),
+                exception.getMessage()
+        );
     }
 
 // MissingArgArgsException
@@ -403,8 +645,8 @@ public class TestArgsExceptions {
         String[] args = {"--file", "--save", "save.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "m", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "m", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
 
         Exception exception = assertThrows(MissingArgArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MissingArgArgsException("--file").getMessage(), exception.getMessage());
@@ -415,8 +657,8 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--save"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
 
         Exception exception = assertThrows(MissingArgArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new MissingArgArgsException("--save").getMessage(), exception.getMessage());
@@ -429,7 +671,7 @@ public class TestArgsExceptions {
         String[] args = {};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> mandatoryParam = parser.addMandatoryStringParameter("optional", "o", null);
+        StrParameter mandatoryParam = parser.addParameter(new StrParameter("optional", "o", null, true));
 
         Exception exception = assertThrows(NoArgumentsProvidedArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -445,7 +687,7 @@ public class TestArgsExceptions {
         String[] args = {};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> stringParam = parser.addOptionalStringParameter("optional", "o", null);
+        StrParameter stringParam = parser.addParameter(new StrParameter("optional", "o", null, false));
 
         assertDoesNotThrow(() -> parser.parseUnchecked(args));
     }
@@ -457,8 +699,8 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--save", "save.txt", "extra"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
 
         Exception exception = assertThrows(TooManyArgumentsArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals(new TooManyArgumentsArgsException("--save").getMessage(), exception.getMessage());
@@ -471,8 +713,8 @@ public class TestArgsExceptions {
         String[] args = {"-w", "file.txt", "-s", "save.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "s", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "s", "descr", true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -488,8 +730,8 @@ public class TestArgsExceptions {
         String[] args = {"-f", "file.txt", "--save", "save.txt", "-s"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("save", "w", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("save", "w", "descr", true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -506,8 +748,8 @@ public class TestArgsExceptions {
         String[] args = {"-f", "/to/file", "--save", "save.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("--file", "m", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
+        StrParameter file = parser.addParameter(new StrParameter("--file", "m", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("--save", "s", null, true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -524,8 +766,8 @@ public class TestArgsExceptions {
         String[] args = {"--hp"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
+        StrParameter file = parser.addParameter(new StrParameter("--file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("--save", "s", null, true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -542,8 +784,8 @@ public class TestArgsExceptions {
         String[] args = {"-f", "/to/file", "--sve", "save.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> file = parser.addMandatoryStringParameter("--file", "f", "descr");
-        Parameter<String> save = parser.addMandatoryStringParameter("--save", "s", null);
+        StrParameter file = parser.addParameter(new StrParameter("--file", "f", "descr", true));
+        StrParameter save = parser.addParameter(new StrParameter("--save", "s", null, true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         assertEquals("""
@@ -560,7 +802,7 @@ public class TestArgsExceptions {
         String[] args = {"file.txt"};
         ArgsParser parser = new ArgsParser();
 
-        Parameter<String> string = parser.addMandatoryStringParameter("file", "f", "descr");
+        StrParameter string = parser.addParameter(new StrParameter("file", "f", "descr", true));
 
         Exception exception = assertThrows(UnknownFlagArgsException.class, () -> parser.parseUnchecked(args));
         String expected = """
@@ -582,11 +824,11 @@ public class TestArgsExceptions {
         String[] args = {"--file", "file.txt", "--file2", "file2.txt"};
         ArgsParser parser = new ArgsParser();
 
-        parser.addMandatoryStringParameter("file", "f", "descr");
+        parser.addParameter(new StrParameter("file", "f", "descr", true));
 
         // Hier wird erwartet, dass beim Hinzufügen eines Parameters mit demselben Namen eine IllegalArgumentException geworfen wird
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                parser.addMandatoryStringParameter("file", "f2", "descr")
+                parser.addParameter(new StrParameter("file", "f2", "descr", true))
         );
 
         assertEquals("Flag already exists: --file", exception.getMessage());
@@ -596,8 +838,8 @@ public class TestArgsExceptions {
     public void testDoubleParseCall() {
         String[] args = {"--file", "file.txt", "--file2", "file2.txt"};
         ArgsParser parser = new ArgsParser();
-        Parameter<String> file = parser.addMandatoryStringParameter("file", "f", "descr");
-        Parameter<String> file2 = parser.addMandatoryStringParameter("file2", "f2", "descr");
+        StrParameter file = parser.addParameter(new StrParameter("file", "f", "descr", true));
+        StrParameter file2 = parser.addParameter(new StrParameter("file2", "f2", "descr", true));
         parser.parse(args);
 
         Exception exception = assertThrows(IllegalStateException.class, () -> parser.parseUnchecked(args));
@@ -618,16 +860,16 @@ public class TestArgsExceptions {
         ArgsParser parser = new ArgsParser();
 
         assertThrows(IllegalArgumentException.class, () -> {
-            parser.addMandatoryStringParameter("help", "f", "");
+            parser.addParameter(new StrParameter("help", "f", "", true));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            parser.addMandatoryStringParameter("hlp", "h", "");
+            parser.addParameter(new StrParameter("hlp", "h", "", true));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            parser.addCommand("--help", "f", "");
+            parser.addCommand(new Command("--help", "f", ""));
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            parser.addCommand("hlp", "-h", "");
+            parser.addCommand(new Command("hlp", "-h", ""));
         });
     }
 
@@ -635,8 +877,8 @@ public class TestArgsExceptions {
     public void testToggle() {
         String[] args = {"comm", "comm2"};
         ArgsParser parser = new ArgsParser();
-        Command comd = parser.addCommand("command", "comm", "command1");
-        Command comd2 = parser.addCommand("command2", "comm2", "command2");
+        Command comd = parser.addCommand(new Command("command", "comm", "command1"));
+        Command comd2 = parser.addCommand(new Command("command2", "comm2", "command2"));
         parser.toggle(comd, comd2);
 
         Exception exception = assertThrows(ToggleArgsException.class, () -> parser.parseUnchecked(args));
@@ -645,6 +887,19 @@ public class TestArgsExceptions {
                 <!> The following commands cannot be combined:\s
                 [command / comm]
                 [command2 / comm2]""";
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    public void testNotExistingPathArgsException() {
+        String[] args = {"--path", "/home/ExampleUser"};
+        ArgsParser parser = new ArgsParser();
+        PthParameter pathParam = parser.addParameter(new PthParameter("path", "p", "path example", true, true));
+        Exception exception = assertThrows(NotExistingPathArgsException.class, () -> parser.parseUnchecked(args));
+        String expected = """
+                
+                <!> /home/ExampleUser does not exist!
+                	Invalid path!""";
         assertEquals(expected, exception.getMessage());
     }
 }

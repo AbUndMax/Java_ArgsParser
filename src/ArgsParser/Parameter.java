@@ -102,11 +102,11 @@ public abstract class Parameter<T> {
     }
 
     /**
-     * Sets the type of this parameter
-     * @param type type T of this parameter
+     * returns the argument as is
+     * @return argument or null if no argument is set
      */
-    protected void setType(Class<T> type) {
-        this.type = type;
+    protected T readArgument() {
+        return argument;
     }
 
     /**
@@ -224,9 +224,9 @@ public abstract class Parameter<T> {
         try {
             this.argument = castArgument(argument);
         } catch (NumberFormatException nfe) {
-            throw new InvalidArgTypeArgsException(fullFlag, type.getSimpleName(), "Provided argument does not match the parameters type!");
-        } catch (NotExistingPathArgsException nepae) {
-            throw nepae;
+            throw new InvalidArgTypeArgsException(fullFlag, type.getSimpleName(), "Provided argument does not match the parameter type!");
+        } catch (NotExistingPathArgsException argsExcep) {
+            throw argsExcep;
         } catch (Exception e) {
             throw new InvalidArgTypeArgsException(fullFlag, type.getSimpleName(), e.getMessage());
         }

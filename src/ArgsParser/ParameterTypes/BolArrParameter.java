@@ -57,13 +57,13 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    public BolArrParameter(String fullFlag, String shortFlag, String description, Boolean[] defaultValue) {
+    public BolArrParameter(Boolean[] defaultValue, String fullFlag, String shortFlag, String description) {
         super(defaultValue, fullFlag, shortFlag, description, Boolean[].class);
     }
 
@@ -75,7 +75,7 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      */
     @Override
     protected Boolean[] castArgument(String argument) {
-        Boolean[] array = super.getArgument();
+        Boolean[] array = super.readArgument();
         array = array == null ? new Boolean[1] : Arrays.copyOf(array, array.length + 1);
         array[array.length - 1] = Boolean.parseBoolean(argument);
         return array;
