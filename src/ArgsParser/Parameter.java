@@ -282,12 +282,12 @@ public abstract class Parameter<T> {
     }
 
     /**
-     * Checks if the parameter has an (actual) Argument that is not null!.
+     * Checks if the parameter has an Argument or default value that is not null!.
      *
-     * @return true if the parameter has an argument, false otherwise
+     * @return true if the parameter has an argument or default value, false otherwise
      */
     public boolean hasArgument() {
-        return argument != null;
+        return argument != null || defaultValue != null;
     }
 
     /**
@@ -310,15 +310,16 @@ public abstract class Parameter<T> {
 
     /**
      * getter method for the argument attribute
-     * @return argument as String
+     * @return argument if this parameter got a command-line argument, return default value if a default was specified
+     * and no command-line argument provided, return null if no default value specified and no command-line argument provided
      * @throws IllegalStateException if {@link ArgsParser#parse(String[] args)} was not called before trying to access this argument
      * or if this Parameter was not added to any {@link ArgsParser}!
      */
     public T getArgument() throws IllegalStateException {
         if (argsParser == null) throw new IllegalStateException("Parameter: " + this + " is not assigned to any parser instance!");
         if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parse() was not called before trying to access the argument!");
-        if (hasArgument()) return argument;
-        else if (hasDefault()) return defaultValue;
+        if (argument != null) return argument;
+        else if (defaultValue != null) return defaultValue;
         else return null;
     }
 

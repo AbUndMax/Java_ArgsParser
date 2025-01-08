@@ -439,7 +439,7 @@ public class ArgsParser {
             boolean flagExists = parameterMap.get(arg) != null;
             boolean isLastEntry = i == args.length - 1;
             boolean currentParameterNotNull = currentParameter != null;
-            boolean argumentSet = currentParameterNotNull && currentParameter.hasArgument();
+            boolean argumentSet = currentParameterNotNull && currentParameter.readArgument() != null;
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);

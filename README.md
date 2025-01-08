@@ -28,9 +28,10 @@ catering to diverse application needs.
   easier to pass arrays of data.
 - **Arguments Directly Casted:** Accessing a parameter's argument returns it as the defined type.
 - **Lightweight:** Using the ArgsParser library is very simply and straight forward as shown in the example below.
-- **Build in Parameter Types** ArgsParser provides usage ready Parameters for all base classes like *String*, *Double*,
-  *Path* and more
-- **Adaptable** Create your own Parameter classes as needed!
+- **Build-in Parameter Types:** ArgsParser provides usage ready Parameters for all commonly used types like *String*, 
+  *Double*, *Path* and more
+- **Extensible:** Extend the library with custom parameter classes tailored to your application’s needs.
+
 
 ## Example Code:
 
