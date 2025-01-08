@@ -8,43 +8,221 @@ For a quick overview, visit https://creativecommons.org/licenses/by-nc/4.0/
  */
 
 import ArgsParser.ArgsExceptions.InvalidArgTypeArgsException;
+import ArgsParser.ArgsExceptions.NotExistingPathArgsException;
 
-import java.lang.reflect.Array;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Objects;
 
 /**
- * Parameter class with fields for each attribute of the Parameter including the argument.
+ * Abstract base class for defining command-line parameters.
+ *
+ * <p>
+ * The {@code Parameter<T>} class serves as a foundation for creating specific types of command-line parameters
+ * within the {@link ArgsParser} framework. To create a functional parameter, developers must extend this class
+ * and implement the abstract {@code castArgument} method to handle the conversion of string inputs to the desired type.
+ * </p>
+ *
+ * <h2>Extending Parameter&lt;T&gt;</h2>
+ *
+ * <p>
+ * To create a custom parameter, follow these steps:
+ * </p>
+ *
+ * <ol>
+ *     <li>
+ *         <strong>Define the Parameter Type:</strong>
+ *         Determine the type {@code T} that the parameter will handle (e.g., {@link Integer}, {@link String}, etc.).
+ *     </li>
+ *     <li>
+ *         <strong>Create the Subclass:</strong>
+ *         Extend the {@code Parameter<T>} class, specifying the appropriate type.
+ *         <pre>{@code
+ * public class IntegerParameter extends Parameter<Integer> {
+ *     // Implementation details
+ * }
+ * }</pre>
+ *     </li>
+ *     <li>
+ *         <strong>Implement Constructors:</strong>
+ *         Provide constructors that call the superclass constructors, passing necessary parameters such as flags, description,
+ *         mandatory status, and default values if applicable.
+ *         <pre>{@code
+ * public IntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+ *     super(fullFlag, shortFlag, description, isMandatory, Integer.class);
+ * }
+ *
+ * public IntegerParameter(Integer defaultValue, String fullFlag, String shortFlag, String description) {
+ *     super(defaultValue, fullFlag, shortFlag, description, Integer.class);
+ * }
+ * }</pre>
+ *     </li>
+ *     <li>
+ *         <strong>Override castArgument:</strong>
+ *         Implement the {@code castArgument} method to convert the input string to the desired type {@code T}.
+ *         Handle any necessary validation and exception throwing within this method.
+ *         <pre>{@code
+ * @Override
+ * protected Integer castArgument(String argument) throws InvalidArgTypeArgsException {
+ *     try {
+ *         return Integer.parseInt(argument);
+ *     } catch (NumberFormatException e) {
+ *         throw new InvalidArgTypeArgsException(getFullFlag(), "Integer", "Invalid integer value: " + argument);
+ *     }
+ * }
+ * }</pre>
+ *     </li>
+ * </ol>
+ *
+ * <h2>Key Components</h2>
+ *
+ * <ul>
+ *     <li><strong>Flags:</strong> Define both full (e.g., {@code --verbose}) and short (e.g., {@code -v}) flags to identify the parameter in command-line arguments.</li>
+ *     <li><strong>Description:</strong> Provide a clear description of what the parameter represents, aiding users in understanding its purpose.</li>
+ *     <li><strong>Mandatory Status:</strong> Indicate whether the parameter is required for the application to run.</li>
+ *     <li><strong>Default Values:</strong> Optionally set a default value that will be used if the parameter is not explicitly provided.</li>
+ * </ul>
+ *
+ * <h2>Exception Handling</h2>
+ *
+ * <p>
+ * When implementing {@code castArgument}, ensure that any invalid input is properly handled by throwing relevant exceptions,
+ * such as {@link InvalidArgTypeArgsException} or custom exceptions as needed.
+ * </p>
+ *
+ * <h2>Example Implementation</h2>
+ *
+ * <pre>{@code
+ * public class StringParameter extends Parameter<Integer> {
+ *
+ *     public StringParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+ *         super(fullFlag, shortFlag, description, isMandatory, String.class);
+ *     }
+ *
+ *     public StringParameter(Integer defaultValue, String fullFlag, String shortFlag, String description) {
+ *         super(defaultValue, fullFlag, shortFlag, description, String.class);
+ *     }
+ *
+ *     @Override
+ *     protected String castArgument(String argument) {
+ *         if (argument == null || argument.isEmpty()) {
+ *             throw new InvalidArgTypeArgsException(getFullFlag(), "String", "Argument cannot be null or empty.");
+ *         }
+ *         return Integer.parseInt(argument);
+ *     }
+ * }
+ * }</pre>
+ *
+ * <h2>Integration with ArgsParser</h2>
+ *
+ * <p>
+ * After creating a subclass, register the parameter with an instance of {@link ArgsParser}. Ensure that flags are unique
+ * and adhere to the validation rules defined in {@link Parameter}.
+ * </p>
+ *
+ * @param <T> The type of the parameter value (e.g., {@link Integer}, {@link String}, {@link Boolean}).
+ * @see ArgsParser
+ * @see InvalidArgTypeArgsException
+ * @see NotExistingPathArgsException
  */
-public class Parameter<T> {
-    private final ArgsParser argsParser;
+public abstract class Parameter<T> {
     private final String fullFlag;
     private final String shortFlag;
     private final String description;
     private final boolean isMandatory;
-    private final Class<T> type;
-    private T defaultValue = null;
-    private boolean hasDefault = false;
     private T argument = null;
-    private boolean hasArgument = false;
+    private T defaultValue = null;
+    private ArgsParser argsParser;
+    private Class<T> type;
     private boolean isProvided = false;
 
     /**
-     * Constructor for the Parameter class with type definition
-     * @param fullFlag name of the parameter
-     * @param shortFlag short name of the parameter
-     * @param description description of the parameter
-     * @param type type of the parameter
-     * @param isMandatory true if the parameter is mandatory, false otherwise
+     * Constructs a new {@link Parameter} instance with the specified flags, description, and mandatory status.
+     * <p>
+     * The constructor validates and formats the provided flag names.
+     * </p>
+     *
+     * <h2>Behavior:</h2>
+     * <ul>
+     *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
+     *     <li>Stores the description and mandatory status of the parameter.</li>
+     *     <li>Initializes internal fields for argument management and default values.</li>
+     * </ul>
+     *
+     * <h2>Flag Validation Rules:</h2>
+     * <ul>
+     *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
+     *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
+     *     <li><b>Reserved Flags:</b> The flags `--help` and `-h` cannot be used.</li>
+     *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
+     * </ul>
+     *
+     * @param fullFlag    The full version of the flag (e.g., `--example`).
+     * @param shortFlag   The short version of the flag (e.g., `-e`).
+     * @param description A brief description of what the parameter represents.
+     * @param isMandatory Indicates if this parameter is mandatory.
+     * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
      */
-    protected Parameter(String fullFlag, String shortFlag, String description, Class<T> type, boolean isMandatory, ArgsParser argsParser) {
-        this.fullFlag = fullFlag;
-        this.shortFlag = shortFlag;
+    protected Parameter(String fullFlag, String shortFlag, String description, boolean isMandatory, Class<T> type) {
+        this.fullFlag = ArgsParser.makeFlag(fullFlag, false);
+        this.shortFlag = ArgsParser.makeFlag(shortFlag, true);
         this.description = description;
         this.isMandatory = isMandatory;
         this.type = type;
+    }
+
+    /**
+     * Constructs a new {@link Parameter} instance with the specified flags, description, and a default value.
+     * <p>
+     * The constructor validates and formats the provided flag names.
+     * </p>
+     *
+     * <h2>Behavior:</h2>
+     * <ul>
+     *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
+     *     <li>Stores the description and mandatory status of the parameter.</li>
+     *     <li>Initializes internal fields for argument management and default values.</li>
+     * </ul>
+     *
+     * <h2>Flag Validation Rules:</h2>
+     * <ul>
+     *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
+     *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
+     *     <li><b>Reserved Flags:</b> The flags `--help` and `-h` cannot be used.</li>
+     *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
+     * </ul>
+     *
+     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
+     * @param fullFlag     The full version of the flag (e.g., `--example`).
+     * @param shortFlag    The short version of the flag (e.g., `-e`).
+     * @param description  A brief description of what the parameter represents.
+     * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
+     */
+    protected Parameter(T defaultValue, String fullFlag, String shortFlag, String description, Class<T> type) {
+        this(fullFlag, shortFlag, description, false, type);
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * add the ArgsParser instance on which this Parameter was added.
+     * @param argsParser parser instance on which this parameter was added.
+     */
+    protected void setParser(ArgsParser argsParser) {
         this.argsParser = argsParser;
+    }
+
+    /**
+     * returns the argument as is
+     * @return argument or null if no argument is set
+     */
+    protected T readArgument() {
+        return argument;
+    }
+
+    /**
+     * Checks if the parameter type represents an array.
+     * @return true if the parameter type is an array, false otherwise.
+     */
+    protected boolean isArray() {
+        return type.isArray();
     }
 
     /**
@@ -92,7 +270,7 @@ public class Parameter<T> {
      * @return true if this Parameter was created with a default value, false otherwise
      */
     protected boolean hasDefault() {
-        return hasDefault;
+        return defaultValue != null;
     }
 
     /**
@@ -104,12 +282,12 @@ public class Parameter<T> {
     }
 
     /**
-     * Checks if the parameter has an (actual) Argument that is not null!.
+     * Checks if the parameter has an Argument or default value that is not null!.
      *
-     * @return true if the parameter has an argument, false otherwise
+     * @return true if the parameter has an argument or default value, false otherwise
      */
     public boolean hasArgument() {
-        return hasArgument;
+        return argument != null || defaultValue != null;
     }
 
     /**
@@ -132,43 +310,44 @@ public class Parameter<T> {
 
     /**
      * getter method for the argument attribute
-     * @return argument as String
+     * @return argument if this parameter got a command-line argument, return default value if a default was specified
+     * and no command-line argument provided, return null if no default value specified and no command-line argument provided
      * @throws IllegalStateException if {@link ArgsParser#parse(String[] args)} was not called before trying to access this argument
+     * or if this Parameter was not added to any {@link ArgsParser}!
      */
     public T getArgument() throws IllegalStateException {
+        if (argsParser == null) throw new IllegalStateException("Parameter: " + this + " is not assigned to any parser instance!");
         if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parse() was not called before trying to access the argument!");
-        if (!hasArgument && !hasDefault) return null;
-        return argument;
+        if (argument != null) return argument;
+        else if (defaultValue != null) return defaultValue;
+        else return null;
     }
 
     /**
      * setter method for the argument attribute, sets parsed status of this parameter instance to true
      * @param argument argument
      * @throws InvalidArgTypeArgsException if the given Argument is not of the target type
+     * @throws NotExistingPathArgsException if a PthParameter with pathCheck was handed a non-existing path
      */
-    protected void setArgument(String argument) throws InvalidArgTypeArgsException {
+    protected void setArgument(String argument) throws InvalidArgTypeArgsException, NotExistingPathArgsException {
         try {
-            ArgumentConverter argumentConverter = ArgumentConverter.fromClass(type);
-            this.argument = type.cast(argumentConverter.convert(argument));
-            this.hasArgument = true;
-        } catch (IllegalArgumentException e) {
-            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), "Unsupported type!");
+            this.argument = castArgument(argument);
+        } catch (NumberFormatException nfe) {
+            throw new InvalidArgTypeArgsException(fullFlag, type.getSimpleName(), "Provided argument does not match the parameter type!");
+        } catch (NotExistingPathArgsException argsExcep) {
+            throw argsExcep;
         } catch (Exception e) {
-            throw new InvalidArgTypeArgsException(this.fullFlag, type.getSimpleName(), e.getMessage());
+            throw new InvalidArgTypeArgsException(fullFlag, type.getSimpleName(), e.getMessage());
         }
     }
 
     /**
-     * Sets the default value for the argument and assigns it to the corresponding type-specific field.
-     * The value is also converted to a string and stored in the 'argument' field.
-     *
-     * @param defaultValue the default value to be set, which can be of type Integer, Double, Character, or Boolean
-     * @throws IllegalArgumentException if the type of defaultValue is unsupported
+     * Casts the argument to type T
+     * @param argument to be cast
+     * @return the argument as type T
+     * @throws NotExistingPathArgsException if a PthParameter with pathCheck was handed a non-existing path
      */
-    protected void setDefault(T defaultValue) {
-        this.defaultValue = this.argument = defaultValue;
-        hasDefault = true;
-    }
+    protected abstract T castArgument(String argument) throws NotExistingPathArgsException;
 
     @Override
     public boolean equals(Object o) {
@@ -183,73 +362,9 @@ public class Parameter<T> {
         return Objects.hash(fullFlag);
     }
 
-    /**
-     * The ArgumentConverter enum provides a mapping between argument types and their
-     * corresponding conversion logic. It supports both array and non-array types for
-     * several common data types such as Integer, String, Boolean, Double, and Character.
-     */
-    private enum ArgumentConverter {
-        INTEGER_ARRAY(Integer[].class, Integer::parseInt),
-        INTEGER(Integer.class, Integer::parseInt),
-        STRING_ARRAY(String[].class, Function.identity()),
-        STRING(String.class, Function.identity()),
-        BOOLEAN_ARRAY(Boolean[].class, Boolean::parseBoolean),
-        BOOLEAN(Boolean.class, Boolean::parseBoolean),
-        DOUBLE_ARRAY(Double[].class, Double::parseDouble),
-        DOUBLE(Double.class, Double::parseDouble),
-        CHARACTER_ARRAY(Character[].class, s -> s.charAt(0)),
-        CHARACTER(Character.class, s -> s.charAt(0)),
-        PATH(Path.class, Path::of);
-
-        private final Class<?> typeClass;
-        private final Function<String, ?> mapper;
-
-        /**
-         * Constructs an ArgumentConverter with the specified type class and mapping function.
-         *
-         * @param typeClass the class type this ArgumentConverter will handle. Can be an array class or a single class.
-         * @param mapper a function that converts a String argument to an instance of the specified class type.
-         */
-        ArgumentConverter(Class<?> typeClass, Function<String, ?> mapper) {
-            this.typeClass = typeClass;
-            this.mapper = mapper;
-        }
-
-        /**
-         * Converts the provided argument string into an Object of the appropriate type,
-         * handling both array and non-array types.
-         *
-         * @param argument the argument string to be converted
-         * @return the converted object, either as a single instance or an array
-         */
-        private Object convert(String argument) {
-            if (typeClass.isArray()) {
-                String[] parts = argument.split("===");
-                Object array = Array.newInstance(typeClass.getComponentType(), parts.length);
-                for (int i = 0; i < parts.length; i++) {
-                    Array.set(array, i, mapper.apply(parts[i]));
-                }
-                return array;
-            } else {
-                return mapper.apply(argument);
-            }
-        }
-
-        /**
-         * Returns an ArgumentConverter that matches the provided class type.
-         *
-         * @param cls the class type to match against the available ArgumentConverters
-         * @return the ArgumentConverter corresponding to the provided class type
-         * @throws IllegalArgumentException if the provided class type is not supported
-         */
-        private static ArgumentConverter fromClass(Class<?> cls) {
-            for (ArgumentConverter argumentConverter : values()) {
-                if (argumentConverter.typeClass.equals(cls)) {
-                    return argumentConverter;
-                }
-            }
-            throw new IllegalArgumentException("Unsupported type: " + cls.getSimpleName());
-        }
+    @Override
+    public String toString() {
+        return "[" + fullFlag + " / " + shortFlag + "]";
     }
 
 }

@@ -28,21 +28,31 @@ catering to diverse application needs.
   easier to pass arrays of data.
 - **Arguments Directly Casted:** Accessing a parameter's argument returns it as the defined type.
 - **Lightweight:** Using the ArgsParser library is very simply and straight forward as shown in the example below.
+- **Build-in Parameter Types:** ArgsParser provides usage ready Parameters for all commonly used types like *String*, 
+  *Double*, *Path* and more
+- **Extensible:** Extend the library with custom parameter classes tailored to your application’s needs.
+
 
 ## Example Code:
 
 ```java
 import ArgsParser.*;
+import ArgsParser.ParameterTypes.StrParameter;
 
 public class Example {
   public static void main(String[] args) {
     ArgsParser parser = new ArgsParser();
-    Parameter<String> param1 = parser.addMandatoryStringParameter("parameterFlag", "pf", "description");
-    Command command1 = parser.addCommand("commandName", "c", "description of the command");
+    // define a String mandatory parameter
+    StrParameter param1 = parser.addParameter(
+            new StrParameter("parameterFlag", "pf", "description", true));
+    // define a command
+    Command command1 = parser.addCommand(
+            new Command("commandName", "c", "description of the command"));
+    
     ArgsParser.parse(args);
 
     if (command1.isProvided()) {
-    System.out.println(param1.getArgument());
+      System.out.println(param1.getArgument());
     }
   }
 }
@@ -67,35 +77,73 @@ public static void main(String[] args) {
 ```
 
 ### 2. Define the Parameters or Commands
-This parser supports 5 **types**:
-- *String, Integer, Double, Boolean, Character*
 
-#### addParameter methods:
-The type of a Parameter is defined with its respective method on the parser object.
-For each type there are 5 `addParameter` methods (example for String):
-- `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalStringParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
-- `addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultStringArrayParameter(String fullFlag, String shortFlag, String description, String[] defaultValue)`
-  
-(see a list of all Methods at the end of this README)
+#### addParameter method:
+The addParameter method is called on an ArgsParser instance
+and allows you to add different types of parameters to your parser using specific parameter classes.
+Those parameters added to the parser will be checked for several conditions (see "Parse the Arguments").
 
-#### Available Fields for each Parameter:
+#### Example:
+```java
+    // ...
+    StrParameter example = parser.addParameter(
+        new StrParameter("parameterFlag", "pf", "short Description", true));
+    IntParameter example2 = parser.addParameter(
+        new IntParameter("parameterFlag2", "pf2", null, false));
+    DblParameter argWithDefault = parser.addParameter(
+        new DblParameter(5.6, "parameterFlag3", "pf3", "description"));
+    BolArrParameter booleanArrayParam = parser.addParameter(
+        new BolArrParameter(new Boolean[]{true, false, false}, "boolArray", "bArr", "Array of several boolean values"));
+    IntArrParameter integerArrayParam = parser.addParameter(
+        new IntArrParameter(new Integer[]{1, 2, 3}, "intArray", "iArr", "Array of several integer values"));
+    Command command = parser.addCommand(
+        new Command("commandName", "cN", "this is a description for the command"));
+    // ...
+```
+
+#### Build-in Parameter types:
+Build-in ready to use classes are:
+- `StrParameter` / `StrArrParameter` for String arguments.
+- `IntParameter` / `IntArrParameter` for Integer arguments.
+- `DblParameter` / `DblArrParameter` for Double arguments.
+- `BolParameter` / `BolArrParameter` for Boolean arguments.
+- `ChrParameter` / `ChrArrParameter` for Character arguments.
+- `FltParameter` / `FltArrParameter` for Float arguments.
+- `PthParameter` / `PthArrParameter` for Path arguments.
+
+For each Parameter type, two constructors exist:
+`xxxParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`  
+or  
+`xxxParameter(xxx defaultValue, String fullFlag, String shortFlag, String description)`  
+
+#### Fields explained:
 You can specify several fields for each parameter:
 
 - **fullFlag**: The flag name of the parameter.
 - **shortFlag**: A short version of the flag for the parameter.
 - **description**: A description of the parameter, insert `null` or an empty string`""` if not needed.
 - **defaultValue**: A default value that the parameter returns if no argument was provided but accessed in the program.
+- **isMandatory**: Determines whether the flag must be provided in the arguments. If set to true and the flag is missing, an ArgsException will be thrown.
+
+#### The PthParameter
+The Parameter handling Paths provides has one additional field in each of the two constructors:  
+`pathCheck`.
+If this is set true, the parser will check if the provided path does exist, if not it will raise an ArgsException!
+
+#### Add your own Parameters of a desired Type:
+By creating a class extending Parameter<T> allows you to use your own Parameters with this ArgsParser!
+(see "Create your own Parameters")
 
 #### Multiple Arguments to one flag:
-A **special type** are the `addArray` methods that are introduced in Version 4.0.0 of the ArgsParser. 
+A **special type** of Parameters are the `xxxArrParameter` classes.
 They allow handing several arguments to a single flag:
 ```
 --file path/file1 path/file2 path/file3
 ```
-Several of these Array Parameters can be defined without problems.
+Several of these Array Parameters can be defined without problems:
+```
+--file path/file1 path/file2 path/file3 --Integers 1 2 3
+```
 
 #### Commands:
 
@@ -104,17 +152,6 @@ The parser checks if any commands were provided in the arguments, enabling the d
 modes or functionalities based on the commands passed. 
 You simply define commands just like regular parameters, and the
 parser will recognize them when parsing the input arguments.
-
-```java
-// ...
-    Parameter<String> example = parser.addMandatoryStringParameter("parameterFlag", "pf", "short Description");
-    Parameter<Integer> example2 = parser.addOptionalIntegerParameter("parameterFlag2", "pf2", null);
-    Parameter<Double> argWithDefault = parser.addDefaultDoubleParameter("parameterFlag3", "pf3", "description", 5.6);
-    Parameter<Boolean[]> booleanArrayParam = parser.addBooleanArrayParameter("boolArray", "bArr", "Array of several boolean values", false);
-    Parameter<Integer[]> integerArrayParam = parser.addDefaultIntegerArrayParameter("intArray", "iArr", "Array of several integer values", new Integer[]{1, 2, 3});
-    Command command = parser.addCommand("commandName", "cN", "this is a description for the command");
-// ...
-```
 
 #### Toggles:
 
@@ -125,11 +162,15 @@ the usage of the provided Commands to only one of them!
 For example:
 
 ```Java
-ArgsParser parser = new ArgsParser();
-Command cmd1 = parser.addCommand("commName1", "cmdN1", "Description of command1");
-Command cmd2 = parser.addCommand("commName2", "cmdN2", "Description of command2");
-Command cmd3 = parser.addCommand("commName3", "cmdN3", "Description of command3");
-parser.toggle(cmd1, cmd2);
+    // ...
+    Command cmd1 = parser.addCommand(
+        new Command("commName1", "cmdN1", "Description of command1"));
+    Command cmd2 = parser.addCommand(
+        new Command("commName2", "cmdN2", "Description of command2"));
+    Command cmd3 = parser.addCommand(
+        new Command("commName3", "cmdN3", "Description of command3"));
+    parser.toggle(cmd1, cmd2);
+    // ...
 ```
 
 with this only cmd1 or cmd2 are allowed to be present in args. If both commands would be present, .parseUnchecked() 
@@ -153,8 +194,10 @@ issues such as:
 - Unknown flag (`UnknownFlagArgsException`)
 - Too many arguments provided (`TooManyArgsProvidedArgsException`)
 - Invalid argument types (`InvalidArgTypeArgsException`)
-- trying to set the same flag twice (`FlagAlreadyProvidedArgsException`)
-- calling help at the wrong position (`HelpAtWrongPositionArgsException `)
+- Trying to set the same flag twice (`FlagAlreadyProvidedArgsException`)
+- Calling help at the wrong position (`HelpAtWrongPositionArgsException `)
+- Providing a not existing path to a PthParameter with pathCheck enabled (`NotExistingPathArgsException`)
+- Providing two commands that are part of a toggle (`ToggleArgsException`)
 
 A `CalledForHelpNotification` can also be thrown if the user requests the help message.  
 Exit with status code 0 for help requests and 1 for errors is recommended.
@@ -197,7 +240,7 @@ The **arguments can be used directly in your code**!
     //...
 ```
 
-#### check provision of a command
+#### check provision of a command or Parameter
 For the commands, a simple call of `isProvided` on the Command instance will return if the command was provided in args:
 ```java
     //...
@@ -285,7 +328,7 @@ while calling `--help` or `-h` with a specific parameter will only print the hel
 ####################################################################################################
 ```
 
-## ArgsException examples
+## ArgsException printout examples
 The ArgsParser will throw an `ArgsException` if the user provides invalid arguments.
 The printouts of these exceptions look like this:
 
@@ -321,47 +364,56 @@ for misspelled flags, the Parser will even do a suggestion:
 
 ```
 
-## List of all available "addParameter" methods
+## Create your own Parameters:
+By creating a class extending Parameter<T> with T of the Type that your Parameter should handle, you can implement
+your own Parameters that are compatible with this ArgsParser!
 
-#### String type:
-- `addMandatoryStringParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalStringParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultStringParameter(String fullFlag, String shortFlag, String description, String defaultValue)`
-- `addStringArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultStringArrayParameter(String fullFlag, String shortFlag, String description, String[] defaultValue)`
+### To create a custom parameter, follow these steps:
+#### 1. Define the Parameter Type:
+Determine the type T that the parameter will handle (e.g., Integer, String, etc.).  
+(We use Integer as T for this example!)
+#### 2. Create the Subclass:
+Extend the Parameter<T> class, specifying the appropriate type.
+```java
+public class IntegerParameter extends Parameter<Integer> {
+    // Implementation details
+}
+```
+#### 3. Implement Constructors:
+Provide constructors that call the superclass constructors, passing necessary parameters such as flags, description,
+mandatory status, and default values if applicable.
+```java
+public IntegerParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+    super(fullFlag, shortFlag, description, isMandatory, Integer.class);
+}
 
-#### Integer type:
-- `addMandatoryIntegerParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalIntegerParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultIntegerParameter(String fullFlag, String shortFlag, String description, Integer defaultValue)`
-- `addIntegerArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultIntegerArrayParameter(String fullFlag, String shortFlag, String description, Integer[] defaultValue)`
+public IntegerParameter(Integer defaultValue, String fullFlag, String shortFlag, String description) {
+    super(defaultValue, fullFlag, shortFlag, description, Integer.class);
+}
+```
+#### 4. Override castArgument:
+Implement the castArgument method to convert the input string to the desired type T. Handle any
+necessary validation and exception throwing within this method.
+```java
+@Override
+protected Integer castArgument(String argument) throws InvalidArgTypeArgsException {
+    try {
+        return Integer.parseInt(argument);
+    } catch (NumberFormatException e) {
+        throw new InvalidArgTypeArgsException(getFullFlag(), "Integer", "Invalid integer value: " + argument);
+    }
+}
+```
 
-#### Double type:
-- `addMandatoryDoubleParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalDoubleParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultDoubleParameter(String fullFlag, String shortFlag, String description, Double defaultValue)`
-- `addDoubleArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultDoubleArrayParameter(String fullFlag, String shortFlag, String description, Double[] defaultValue)`
+## List of methods:
 
-#### Boolean type:
-- `addMandatoryBooleanParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalBooleanParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultBooleanParameter(String fullFlag, String shortFlag, String description, Boolean defaultValue)`
-- `addBooleanArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultBooleanArrayParameter(String fullFlag, String shortFlag, String description, Boolean[] defaultValue)`
-
-#### Character type:
-- `addMandatoryCharacterParameter(String fullFlag, String shortFlag, String description)`
-- `addOptionalCharacterParameter(String fullFlag, String shortFlag, String description)`
-- `addDefaultCharacterParameter(String fullFlag, String shortFlag, String description, Character defaultValue)`
-- `addCharacterArrayParameter(String fullFlag, String shortFlag, String description, boolean isMandatory)`
-- `addDefaultCharacterArrayParameter(String fullFlag, String shortFlag, String description, Character[] defaultValue)`
+#### add a parameter to a parser instance:
+- `parser.addParameter()`
 
 #### access an Argument of ANY of these Parameters:
 - `parameter.getArgument()`
 
-#### Command type:
+#### add a Command to a parser instance:
 - `addCommand(String fullCommandName, String shortCommandName, String description)`
 
 #### check provision of a specific command:
@@ -377,3 +429,54 @@ for misspelled flags, the Parser will even do a suggestion:
 #### indirect access of parameters / commands:
 - `getArgumentOf(String fullFlag)`
 - `checkIfCommandIsProvided(String fullCommandName)`
+
+## Full Code Example:
+```java
+public static void main(String[] args) {
+    // initialize ArgsParser instance
+    ArgsParser parser = new ArgsParser(args);
+    
+    // declare Parameters on the parser instance
+    StrParameter example = parser.addParameter(
+          new StrParameter("parameterFlag", "pf", "short Description", true));
+    IntParameter example2 = parser.addParameter(
+          new IntParameter("parameterFlag2", "pf2", null, false));
+    DblParameter argWithDefault = parser.addParameter(
+          new DblParameter(5.6, "parameterFlag3", "pf3", "description"));
+    BolArrParameter booleanArrayParam = parser.addParameter(
+          new BolArrParameter(new Boolean[]{true, false, false}, "boolArray", "bArr", "Array of several boolean values"));
+    IntArrParameter integerArrayParam = parser.addParameter(
+            new IntArrParameter(new Integer[]{1, 2, 3}, "intArray", "iArr", "Array of several integer values"));
+    Command command = parser.addCommand(
+          new Command("commandName", "cN", "this is a description for the command"));
+
+    // declare Commands on the parser instance
+    Command cmd1 = parser.addCommand(
+          new Command("commName1", "cmdN1", "Description of command1"));
+    Command cmd2 = parser.addCommand(
+          new Command("commName2", "cmdN2", "Description of command2"));
+    Command cmd3 = parser.addCommand(
+          new Command("commName3", "cmdN3", "Description of command3"));
+    parser.toggle(cmd1, cmd2);
+
+    // parser the command-line arguments
+    parser.parse();
+
+    // example for direct access of command-line arguments via their parameters
+    String providedArgument = example.getArgument();
+    Double result = example2.getArgument() + argWithDefault.getArgument();
+
+    // example for checking a command
+    if (command.isProvided()) System.out.println("command provided");
+    
+    // example for indirect command-line argument access
+    String providedArgument = parser.getArgumentOf("parameterFlag");
+    Integer getInteger = parser.getArgumentOf("parameterFlag2");
+    Double getDouble = parser.getArgumentOf("parameterFlag3");
+    Double result = getInteger + getDouble;
+
+    // example for indirect command check
+    if (parser.checkIfCommandIsProvided("commandName")) System.out.println("command still provided");
+}
+
+```

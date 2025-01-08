@@ -1,10 +1,10 @@
 package ArgsParser;
 
 public class Command {
-    private final ArgsParser argsParser;
     private final String fullCommandName;
     private final String shortCommandName;
     private final String description;
+    private ArgsParser argsParser;
     private boolean status = false;
 
     /**
@@ -13,12 +13,14 @@ public class Command {
      * @param fullCommandName the detailed or long form flag for this command
      * @param shortCommandName the abbreviated or short form flag for this command
      * @param description a brief description of what this command does
-     * @param argsParser the parser responsible for handling command-line arguments
      */
-    public Command(String fullCommandName, String shortCommandName, String description, ArgsParser argsParser) {
+    public Command(String fullCommandName, String shortCommandName, String description) {
         this.fullCommandName = fullCommandName;
         this.shortCommandName = shortCommandName;
         this.description = description;
+    }
+
+    protected void setArgsParser(ArgsParser argsParser) {
         this.argsParser = argsParser;
     }
 
@@ -61,8 +63,10 @@ public class Command {
      *
      * @return true if the command is provided, false otherwise.
      * @throws IllegalArgumentException if the {@link ArgsParser#parse(String[] args)} method was not called before checking the command.
+     * or if this Command was not added to any {@link ArgsParser}!
      */
-    public boolean isProvided() throws IllegalArgumentException {
+    public boolean isProvided() throws IllegalStateException {
+        if (argsParser == null) throw new IllegalStateException("Command: " + this + " is not assigned to any parser instance!");
         if (!argsParser.parseArgsWasCalled()) throw new IllegalStateException("parse() was not called before trying to check the command!");
         return status;
     }

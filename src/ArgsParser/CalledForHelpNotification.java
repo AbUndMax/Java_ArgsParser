@@ -14,12 +14,16 @@ public class CalledForHelpNotification extends Exception {
     private static final int consoleWidth = 100;
     private static final Map<String, String> shortFlagTypes = new HashMap<>(){{
         put("String", "s");
+        put("Path", "p");
         put("Integer", "i");
+        put("Float", "f");
         put("Double", "d");
         put("Boolean", "b");
         put("Character", "c");
         put("String[]", "s+");
+        put("Path[]", "p+");
         put("Integer[]", "i+");
+        put("Float[]", "f+");
         put("Double[]", "d+");
         put("Boolean[]", "b+");
         put("Character[]", "c+");
@@ -90,12 +94,12 @@ public class CalledForHelpNotification extends Exception {
         int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
         return "#" + " ".repeat(freeSpace) + stringToCenter;
     }
-    
+
+    //TODO abstract commandHelpString and ParameterHelpString
     private static String commandHelpString(Command command, int longestFlagSize, int longestShortFlag) {
         String fullCommandName = command.getFullCommandName();
         String shortCommandName = command.getShortCommandName();
         String description = command.getDescription();
-        String isMandatory = "   ";
         StringBuilder helpString = new StringBuilder("###  ");
 
         // check if a description is available:
