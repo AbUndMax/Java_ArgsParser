@@ -69,8 +69,8 @@ public class ArgsParser {
     private final LinkedList<String> commandsInDefinitionOrder = new LinkedList<>();
     private final LinkedList<String> flagsInDefinitionOrder = new LinkedList<>();
     protected boolean parseArgsWasCalled = false;
-    private int longestFlagSize = 0;
-    private int longestShortFlag = 0;
+    private int longestFullFlagSize = 0;
+    private int longestShortFlagSize = 0;
 
     /**
      * Constructor
@@ -182,10 +182,10 @@ public class ArgsParser {
      */
     protected void setNameSizes(String fullVersion, String shortVersion) {
         int nameSize = fullVersion.length();
-        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
+        if (longestFullFlagSize < nameSize) longestFullFlagSize = nameSize;
 
         int shortSize = shortVersion.length();
-        if (longestShortFlag < shortSize) longestShortFlag = shortSize;
+        if (longestShortFlagSize < shortSize) longestShortFlagSize = shortSize;
     }
 
 
@@ -278,6 +278,9 @@ public class ArgsParser {
      */
     public void toggle(Command... commands) {
         toggleList.add(commands);
+        for (Command command : commands) {
+            command.setToggle(commands);
+        }
     }
 
 
@@ -378,18 +381,18 @@ public class ArgsParser {
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
             throw new CalledForHelpNotification(parameterMap, flagsInDefinitionOrder,
                                                 commandMap, commandsInDefinitionOrder,
-                                                longestFlagSize, longestShortFlag);
+                                                longestFullFlagSize, longestShortFlagSize);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
                 throw new CalledForHelpNotification(parameterMap, Collections.singletonList(args[0]),
                                                     commandMap, new LinkedList<>(),
-                                                    longestFlagSize, longestShortFlag);
+                                                    longestFullFlagSize, longestShortFlagSize);
 
             } else if (firstArgumentIsCommand) { // if the first argument is a command and --help follows
                 throw new CalledForHelpNotification(parameterMap, new LinkedList<>(),
                                                     commandMap, Collections.singletonList(args[0]),
-                                                    longestFlagSize, longestShortFlag);
+                                                    longestFullFlagSize, longestShortFlagSize);
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input

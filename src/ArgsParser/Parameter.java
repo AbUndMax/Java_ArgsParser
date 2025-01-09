@@ -261,7 +261,15 @@ public abstract class Parameter<T> {
      * getter method for the type attribute
      * @return type
      */
-    protected String getType() {
+    protected Class<T> getType() {
+        return type;
+    }
+
+    /**
+     * getter method for the simple name of this Parameters types
+     * @return simpleName of this parameters type
+     */
+    protected String getTypeSimpleName() {
         return type.getSimpleName();
     }
 
@@ -279,6 +287,15 @@ public abstract class Parameter<T> {
      */
     protected T getDefaultValue() {
         return this.defaultValue;
+    }
+
+    /**
+     * Returns the defaultValues as String or "" if default is null
+     * @return defaultValue as String
+     */
+    protected String getDefaultAsString() {
+        if (defaultValue == null) return "";
+        return defaultValue.toString();
     }
 
     /**

@@ -1,5 +1,6 @@
 package ArgsParser;
 
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -12,37 +13,204 @@ import java.util.*;
 public class CalledForHelpNotification extends Exception {
 
     private static final int consoleWidth = 100;
-    private static final Map<String, String> shortFlagTypes = new HashMap<>(){{
-        put("String", "s");
-        put("Path", "p");
-        put("Integer", "i");
-        put("Float", "f");
-        put("Double", "d");
-        put("Boolean", "b");
-        put("Character", "c");
-        put("String[]", "s+");
-        put("Path[]", "p+");
-        put("Integer[]", "i+");
-        put("Float[]", "f+");
-        put("Double[]", "d+");
-        put("Boolean[]", "b+");
-        put("Character[]", "c+");
+    private static int longestUsedTypeSize = 1;
+    private static final Map<Class<?>, String> shortTypes = new HashMap<>(){{
+        put(String.class, "s");
+        put(Path.class, "p");
+        put(Integer.class, "i");
+        put(Float.class, "f");
+        put(Double.class, "d");
+        put(Boolean.class, "b");
+        put(Character.class, "c");
+        put(String[].class, "s+");
+        put(Path[].class, "p+");
+        put(Integer[].class, "i+");
+        put(Float[].class, "f+");
+        put(Double[].class, "d+");
+        put(Boolean[].class, "b+");
+        put(Character[].class, "c+");
     }};
 
     public CalledForHelpNotification(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
                                      Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
-                                     int longestFlagSize, int longestShortFlag) {
-        super(generateHelpMessage(parameterMap, flagsInDefinitionOrder, 
+                                     int longestFullFlagSize, int longestShortFlagSizeSize) {
+        super(helpMessage(parameterMap, flagsInDefinitionOrder,
                                   commandMap, commandsInDefinitionOrder,
-                                  longestFlagSize, longestShortFlag));
+                                  longestFullFlagSize, longestShortFlagSizeSize));
     }
+
+    private static String helpMessage(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
+                                              Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
+                                              int longestFullFlagSize, int longestShortFlagSize) {
+        StringBuilder helpMessage = new StringBuilder();
+
+        // Header
+        helpMessage.append(generateHead(parameterMap));
+
+        // Parameters
+        for (String flag : flagsInDefinitionOrder ) {
+            Parameter<?> parameter = parameterMap.get(flag);
+            helpMessage.append(generateSingleHelpString(parameter.getFullFlag(), longestFullFlagSize,
+                                     parameter.getShortFlag(), longestShortFlagSize,
+                                     shortTypes.get(parameter.getType()), formatMandatory(parameter.isMandatory()),
+                                     parameter.getDescription(), parameter.hasDefault(), "default:  ",
+                                     parameter.getDefaultAsString()));
+        }
+
+
+        // Commands
+        for (String cmd : commandsInDefinitionOrder ) {
+            Command command = commandMap.get(cmd);
+            helpMessage.append(generateSingleHelpString(command.getFullCommandName(), longestFullFlagSize,
+                                                        command.getShortCommandName(), longestShortFlagSize,
+                                                        " ".repeat(longestUsedTypeSize + 2), "   ",
+                                                        command.getDescription(), command.isPartOfToggle(),
+                                                        "cannot be combined with:  ",
+                                                        command.cannotBeCombinedWith()));
+        }
+
+
+        return helpMessage.toString();
+    }
+
+    private static String generateHead(Map<String, Parameter<?>> parameterMap) {
+        StringBuilder header = new StringBuilder();
+        String headTitle = " HELP ";
+        int numberOfHashes = consoleWidth / 2 - headTitle.length() / 2;
+        String head = "#".repeat(numberOfHashes) + headTitle + "#".repeat(numberOfHashes);
+        header.append(head).append("\n");
+
+        // generate a list of the used types:
+        HashSet<Class<?>> usedTypes = new HashSet<>();
+        for (Parameter<?> parameter : parameterMap.values()) {
+            usedTypes.add(parameter.getType());
+        }
+
+        // information about the abbreviation of types used:
+        StringBuilder currentLine = new StringBuilder();
+        boolean arrayParamUsed = false;
+        for (Class<?> type : usedTypes) {
+            if (type.isArray()) arrayParamUsed = true;
+            String typeInformation = "[" + getShortType(type) + "]=" +
+                    type.getSimpleName().replaceFirst("\\[\\]", "");
+            longestUsedTypeSize = Math.max(longestUsedTypeSize, typeInformation.length());
+            if (currentLine.length() + typeInformation.length() > consoleWidth - 11) {
+                header.append(centerString(currentLine.toString())).append("\n");
+                currentLine.setLength(0);
+                currentLine.append(typeInformation);
+
+            } else if (currentLine.isEmpty()){
+                currentLine.append(typeInformation);
+
+            } else {
+                currentLine.append(" | ").append(typeInformation);
+            }
+        }
+        header.append(centerString(currentLine.toString())).append("\n");
+
+        if (arrayParamUsed) {
+            header.append(centerString(
+                    "('+' marks a flag that takes several arguments " +
+                            "of the same type whitespace separated)")).append("\n");
+        }
+
+        header.append(centerString("(!)=mandatory | ( )=optional | (/)=command")).append("\n");
+        header.append("#\n");
+        return header.toString();
+    }
+
+    /**
+     * centers a given string in the help Box
+     * @param stringToCenter String to be centered
+     * @return centered String with a leading #
+     */
+    private static String centerString(String stringToCenter) {
+        int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
+        return "#" + " ".repeat(freeSpace) + stringToCenter;
+    }
+
+    /**
+     * calculates the short version of the given type:
+     * tries to use single character abbreviation. If this already exists, it takes two chars and so on...
+     * reserved: see "shortTypes" Map
+     * @param type
+     * @return abbreviation of the type
+     */
+    private static String getShortType(Class<?> type) {
+        String simpleName = type.getSimpleName();
+        String shortType = shortTypes.get(type);
+        if (shortType != null) return shortType;
+
+        for (int i = 1; i < simpleName.length(); i++) {
+            shortType = type.isArray() ? simpleName.substring(0, i) + "+" : simpleName.substring(0, i);
+            if (!shortTypes.containsValue(shortType)) {
+                shortTypes.put(type, shortType);
+                return shortType;
+            }
+        }
+
+        return simpleName.replaceFirst("\\[\\]", "");
+    }
+
+    private static String formatMandatory(boolean isMandatory) {
+        if (isMandatory) return "(!)";
+        else return "( )";
+    }
+
+    private static String generateSingleHelpString(String fullName, int longestFullFlagSize, String shortName,
+                                                   int longestShortFlagSize, String type, String mandatory,
+                                                   String description, boolean hasDefaultOrToggle, String defaultOrToggle, String value) {
+        StringBuilder helpMessage = new StringBuilder();
+        String informationLine = (generateInformationLine(fullName, longestFullFlagSize,
+                                                          shortName, longestShortFlagSize,
+                                                          type, mandatory));
+        helpMessage.append(formatLastPartInLine(informationLine, description));
+        if (hasDefaultOrToggle) helpMessage.append(formatLastPartInLine(defaultOrToggle, value));
+
+        return helpMessage.toString();
+    }
+
+    private static String generateInformationLine(String fullName, int longestFullFlagSize,
+                                                  String shortName, int LongestShortFlagSize,
+                                                  String type, String mandatory) {
+        StringBuilder informationLine = new StringBuilder();
+
+        return informationLine.toString();
+    }
+
+    private static String formatLastPartInLine(String informationLine, String lastPart) {
+        StringBuilder fullPart = new StringBuilder(informationLine);
+
+        return fullPart.toString();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * prints all available Parameters found in argumentsList to the console
      */
     private static String generateHelpMessage(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
                                               Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
-                                              int longestFlagSize, int longestShortFlag) {
+                                              int longestFullFlagSize, int longestShortFlagSize) {
         StringBuilder helpMessage = new StringBuilder();
         helpMessage.append("\n");
 
@@ -66,7 +234,7 @@ public class CalledForHelpNotification extends Exception {
         }
 
         for (String flag : flagsInDefinitionOrder) {
-            String helpString = parameterHelpString(parameterMap.get(flag), longestFlagSize, longestShortFlag);
+            String helpString = parameterHelpString(parameterMap.get(flag), longestFullFlagSize, longestShortFlagSize);
             helpMessage.append(helpString).append("\n");
             helpMessage.append("#").append("\n");
         }
@@ -77,7 +245,7 @@ public class CalledForHelpNotification extends Exception {
         }
         
         for (String command : commandsInDefinitionOrder) {
-            String helpString = commandHelpString(commandMap.get(command), longestFlagSize, longestShortFlag);
+            String helpString = commandHelpString(commandMap.get(command), longestFullFlagSize, longestShortFlagSize);
             helpMessage.append(helpString).append("\n");
             helpMessage.append("#").append("\n");
         }
@@ -85,18 +253,10 @@ public class CalledForHelpNotification extends Exception {
         return helpMessage.append("#".repeat(consoleWidth)).toString();
     }
 
-    /**
-     * centers a given string in the help Box
-     * @param stringToCenter String to be centered
-     * @return centered String with a leading #
-     */
-    private static String centerString(String stringToCenter) {
-        int freeSpace = (consoleWidth - stringToCenter.length()) / 2 - 1;
-        return "#" + " ".repeat(freeSpace) + stringToCenter;
-    }
+
 
     //TODO abstract commandHelpString and ParameterHelpString
-    private static String commandHelpString(Command command, int longestFlagSize, int longestShortFlag) {
+    private static String commandHelpString(Command command, int longestFullFlagSize, int longestShortFlagSize) {
         String fullCommandName = command.getFullCommandName();
         String shortCommandName = command.getShortCommandName();
         String description = command.getDescription();
@@ -110,9 +270,9 @@ public class CalledForHelpNotification extends Exception {
         }
 
         // align the parameter names nicely
-        int nameWhiteSpaceSize = longestFlagSize - fullCommandName.length();
+        int nameWhiteSpaceSize = longestFullFlagSize - fullCommandName.length();
         fullCommandName = fullCommandName + " ".repeat(nameWhiteSpaceSize);
-        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortCommandName.length();
+        int shortWhiteSpaceSize = longestShortFlagSize == 0 ? 0 : longestShortFlagSize - shortCommandName.length();
         shortCommandName = shortCommandName + " ".repeat(shortWhiteSpaceSize);
 
         helpString.append(fullCommandName).append("  ").append(shortCommandName).append("       (/)  ");
@@ -141,7 +301,7 @@ public class CalledForHelpNotification extends Exception {
      * @param parameter parameter Instance of which the help String should be generated
      * @return String with all information for the given Parameter
      */
-    private static String parameterHelpString(Parameter<?> parameter, int longestFlagSize, int longestShortFlag) {
+    private static String parameterHelpString(Parameter<?> parameter, int longestFullFlagSize, int longestShortFlagSize) {
         String name = parameter.getFullFlag();
         String shortFlag = parameter.getShortFlag();
         String description = parameter.getDescription();
@@ -156,13 +316,13 @@ public class CalledForHelpNotification extends Exception {
         }
 
         // align the parameter names nicely
-        int nameWhiteSpaceSize = longestFlagSize - name.length();
+        int nameWhiteSpaceSize = longestFullFlagSize - name.length();
         name = name + " ".repeat(nameWhiteSpaceSize);
-        int shortWhiteSpaceSize = longestShortFlag == 0 ? 0 : longestShortFlag - shortFlag.length();
+        int shortWhiteSpaceSize = longestShortFlagSize == 0 ? 0 : longestShortFlagSize - shortFlag.length();
         shortFlag = shortFlag + " ".repeat(shortWhiteSpaceSize);
 
         // get type
-        String type = shortFlagTypes.get(parameter.getType());
+        String type = shortTypes.get(parameter.getType());
 
         helpString.append(name).append("  ").append(shortFlag).append("  [").append(type);
         if (type.contains("+")) helpString.append("] ");

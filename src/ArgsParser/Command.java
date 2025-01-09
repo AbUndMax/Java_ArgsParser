@@ -4,6 +4,7 @@ public class Command {
     private final String fullCommandName;
     private final String shortCommandName;
     private final String description;
+    private Command[] toggle;
     private ArgsParser argsParser;
     private boolean status = false;
 
@@ -22,6 +23,37 @@ public class Command {
 
     protected void setArgsParser(ArgsParser argsParser) {
         this.argsParser = argsParser;
+    }
+
+    /**
+     * Sets the toggle of which this Command is part of!
+     *
+     * @param toggle the toggle which this Command is part of!
+     */
+    protected void setToggle(Command[] toggle) {
+        this.toggle = toggle;
+    }
+
+    /**
+     * Returns whether this Command is part of a toggle or not
+     *
+     * @return true if this Command is part of a toggle, false elsewise.
+     */
+    protected boolean isPartOfToggle() {
+        return toggle != null;
+    }
+
+    /**
+     * Returns the Commands that cannot be combined with this Command instance!
+     *
+     * @return Command array of commands that cannot be combined with this instance.
+     */
+    protected String cannotBeCombinedWith() {
+        StringBuilder builder = new StringBuilder();
+        for (Command command : toggle) {
+            if (command != this) builder.append(command.fullCommandName);
+        }
+        return builder.toString();
     }
 
     /**
