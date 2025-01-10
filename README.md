@@ -12,7 +12,7 @@ It removes complex exception handling by providing automatic checks on common co
 The tool supports a wide range of parameter types including Strings, Integers, Doubles, Booleans, and Characters,
 catering to diverse application needs.
 
-## Key features:
+## Key features
 
 - **Definition Of Parameters:** Define parameters with flag names and shorthands, 
   mandatory/optional status, as well as optional default values and descriptions.
@@ -33,7 +33,7 @@ catering to diverse application needs.
 - **Extensible:** Extend the library with custom parameter classes tailored to your application’s needs.
 
 
-## Example Code:
+## Example Code
 
 ```java
 import ArgsParser.*;
@@ -125,7 +125,7 @@ You can specify several fields for each parameter:
 - **defaultValue**: A default value that the parameter returns if no argument was provided but accessed in the program.
 - **isMandatory**: Determines whether the flag must be provided in the arguments. If set to true and the flag is missing, an ArgsException will be thrown.
 
-#### The PthParameter
+#### The PthParameter:
 The Parameter handling Paths provides has one additional field in each of the two constructors:  
 `pathCheck`.
 If this is set true, the parser will check if the provided path does exist, if not it will raise an ArgsException!
@@ -228,7 +228,7 @@ or like the following example for manually handling the ArgsExceptions:
 
 ### 4. Access the Arguments
 
-#### direct access to arguments via its parameter
+#### direct access to arguments via its parameter:
 Access the console arguments given by the user by calling the `getArgument()` method on the parameter variable.  
 The return type matches the type defined when adding the parameter.
 The **arguments can be used directly in your code**!
@@ -240,7 +240,7 @@ The **arguments can be used directly in your code**!
     //...
 ```
 
-#### check provision of a command or Parameter
+#### check provision of a command or Parameter:
 For the commands, a simple call of `isProvided` on the Command instance will return if the command was provided in args:
 ```java
     //...
@@ -248,7 +248,7 @@ For the commands, a simple call of `isProvided` on the Command instance will ret
     //...
 ```
 
-#### access arguments indirectly via the ArgsParser instance they were defined on
+#### access arguments indirectly via the ArgsParser instance they were defined on:
 With version 3.0.0 the `getArgumentOf(String fullFlag)` method ia available, thus arguments provided to a specific
 parameter flag can be accessed by the parameter flugFlag name.
 But this comes with some restrictions:
@@ -273,13 +273,13 @@ The same is possible with commands:
 }
 ```
 
-## Integrated --help function:
+## Integrated --help function
 The ArgsParser tool has an integrated help function. If the user provides the flag `--help` or `-h` the tool will print
 a help message with all the defined parameters. The help message will contain the full flag, the short flag, the 
 description, and if the parameter is mandatory or not. The help message will be printed either for all parameters or only for the
 parameter that was placed before the `--help` flag.
 
-### Help example:
+### Help example
 Calling `--help` or `-h` without anything else on the programm will print all available parameters **in the order
 they were added** on the ArgsParser Instance: 
 
@@ -287,29 +287,31 @@ they were added** on the ArgsParser Instance:
 ```
 
 ############################################### HELP ###############################################
-#   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-#       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-#                            (!)=mandatory | (?)=optional | (/)=command
+#               [s]=String | [i]=Integer | [d]=Double | [b+]=Boolean | [i+]=Integer
+#      ('+' marks a flag that takes several arguments of the same type whitespace separated)
+#                            (!)=mandatory | ( )=optional | (/)=command
 #
-#                                      Available Parameters:
+#                                     Available Parameters:
 #
-###  --parameterFlag   -pf    [s]  (!)  short Description
+###  --parameterFlag   -pf    [s]   (!)  short Description
 #
-###  --parameterFlag2  -pf2   [i]  (?)  No description available!
+###  --parameterFlag2  -pf2   [i]   ( )  No description available!
 #
-###  --parameterFlag3  -pf3   [d]  (?)  description
-#                             default:  5.6
+###  --parameterFlag3  -pf3   [d]   ( )  description
+#                              default:  5.6
 #
-###  --boolArray       -bArr  [b+] (?)  Array of several boolean values
+###  --boolArray       -bArr  [b+]  ( )  Array of several boolean values
+#                              default:  [true, false, false]
 #
-###  --intArray        -iArr  [i+] (?)  Array of several integer values
-#                             default:  [1, 2, 3]
+###  --intArray        -iArr  [i+]  ( )  Array of several integer values
+#                              default:  [1, 2, 3]
 #
-#                                       Available Commands:
+#                                      Available Commands:
 #
-###  commandName       cN          (/)  this is a description for the command
+###  commandName       cN           (/)  this is a description for the command
 #
 ####################################################################################################
+
 ```
 
 while calling `--help` or `-h` with a specific parameter will only print the help message for that parameter:
@@ -318,14 +320,14 @@ while calling `--help` or `-h` with a specific parameter will only print the hel
 ```
 
 ############################################### HELP ###############################################
-#   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-#       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-#                            (!)=mandatory | (?)=optional | (/)=command
+#                                            [d]=Double
+#                            (!)=mandatory | ( )=optional | (/)=command
 #
-###  --parameterFlag3  -pf3   [d]  (?)  description
+###  --parameterFlag3  -pf3   [d]  ( )  description
 #                             default:  5.6
 #
 ####################################################################################################
+
 ```
 
 ## ArgsException printout examples
@@ -364,22 +366,22 @@ for misspelled flags, the Parser will even do a suggestion:
 
 ```
 
-## Create your own Parameters:
+## Create your own Parameters
 By creating a class extending Parameter<T> with T of the Type that your Parameter should handle, you can implement
 your own Parameters that are compatible with this ArgsParser!
 
 ### To create a custom parameter, follow these steps:
-#### 1. Define the Parameter Type:
+#### 1. Define the Parameter Type
 Determine the type T that the parameter will handle (e.g., Integer, String, etc.).  
 (We use Integer as T for this example!)
-#### 2. Create the Subclass:
+#### 2. Create the Subclass
 Extend the Parameter<T> class, specifying the appropriate type.
 ```java
 public class IntegerParameter extends Parameter<Integer> {
     // Implementation details
 }
 ```
-#### 3. Implement Constructors:
+#### 3. Implement Constructors
 Provide constructors that call the superclass constructors, passing necessary parameters such as flags, description,
 mandatory status, and default values if applicable.
 ```java
@@ -391,21 +393,27 @@ public IntegerParameter(Integer defaultValue, String fullFlag, String shortFlag,
     super(defaultValue, fullFlag, shortFlag, description, Integer.class);
 }
 ```
-#### 4. Override castArgument:
-Implement the castArgument method to convert the input string to the desired type T. Handle any
-necessary validation and exception throwing within this method.
+#### 4. Override castArgument & castDefaultToString
+Implement the castArgument method to convert the input string to the desired type T. 
+A try-catch phrase is not needed as the castArgument is internally only used in such a statement ands makes sure to raise
+InvalidArgTypeArgsException if the type is not correct.
 ```java
 @Override
-protected Integer castArgument(String argument) throws InvalidArgTypeArgsException {
-    try {
-        return Integer.parseInt(argument);
-    } catch (NumberFormatException e) {
-        throw new InvalidArgTypeArgsException(getFullFlag(), "Integer", "Invalid integer value: " + argument);
-    }
+protected Integer castArgument(String argument) {
+    return Integer.parseInt(argument);
+}
+
+@Override
+protected String castDefaultToString(Integer defaultValue) {
+  return defaultValue.toString();
 }
 ```
 
-## List of methods:
+### Custom Parameters in Help
+Custom parameters are automatically detected and included in the help message. 
+The correct parameter type is annotated and displayed accurately in the help output!
+
+## List of methods
 
 #### add a parameter to a parser instance:
 - `parser.addParameter()`
@@ -419,7 +427,7 @@ protected Integer castArgument(String argument) throws InvalidArgTypeArgsExcepti
 #### check provision of a specific command:
 - `command.isProvided()`
 
-#### check provision of a specific Parameter or if it has a value
+#### check provision of a specific Parameter or if it has a value:
 - `parameter.isProvided()`
 - `parameter.hasArgument()`
 
@@ -430,7 +438,7 @@ protected Integer castArgument(String argument) throws InvalidArgTypeArgsExcepti
 - `getArgumentOf(String fullFlag)`
 - `checkIfCommandIsProvided(String fullCommandName)`
 
-## Full Code Example:
+## Full Code Example
 ```java
 public static void main(String[] args) {
     // initialize ArgsParser instance

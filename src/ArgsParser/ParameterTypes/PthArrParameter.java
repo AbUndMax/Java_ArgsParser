@@ -95,7 +95,7 @@ public class PthArrParameter extends Parameter<Path[]> {
      */
     @Override
     protected String castDefaultToString(Path[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

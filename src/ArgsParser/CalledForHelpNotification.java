@@ -13,7 +13,7 @@ import java.util.*;
 public class CalledForHelpNotification extends Exception {
 
     private static final int consoleWidth = 100;
-    private static int longestUsedTypeSize = 1;
+    private static int longestUsedTypeSize;
     private static int longestFullSize;
     private static int longestShortSize;
     private static final Map<Class<?>, String> shortTypes = new HashMap<>(){{
@@ -56,12 +56,13 @@ public class CalledForHelpNotification extends Exception {
                                       int longestFullFlagSize, int longestShortFlagSize) {
         longestFullSize = longestFullFlagSize;
         longestShortSize = longestShortFlagSize;
-        StringBuilder helpMessage = new StringBuilder();
-        boolean printSingleParameter = parameterMap.size() + commandMap.size() == 2; // 2 because one param or cmd is represented by long AND short flag in their maps
+        longestUsedTypeSize = 1;
+        StringBuilder helpMessage = new StringBuilder("\n");
+        boolean printSingleParameter = flagsInDefinitionOrder.size() + commandsInDefinitionOrder.size() == 1;
 
 
         // Header
-        helpMessage.append(generateHead(parameterMap));
+        helpMessage.append(generateHead(parameterMap, flagsInDefinitionOrder));
 
         // Parameters
         if (!printSingleParameter && !parameterMap.isEmpty()) {
@@ -93,7 +94,7 @@ public class CalledForHelpNotification extends Exception {
         helpMessage.append("#".repeat(consoleWidth));
 
 
-        return helpMessage.toString();
+        return helpMessage.append("\n").toString();
     }
 
     /**
@@ -103,7 +104,7 @@ public class CalledForHelpNotification extends Exception {
      * @param parameterMap the map containing all parameters and their metadata
      * @return the generated header as a string
      */
-    private static String generateHead(Map<String, Parameter<?>> parameterMap) {
+    private static String generateHead(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder) {
         StringBuilder header = new StringBuilder();
         String headTitle = " HELP ";
         int numberOfHashes = consoleWidth / 2 - headTitle.length() / 2;
@@ -111,9 +112,9 @@ public class CalledForHelpNotification extends Exception {
         header.append(head).append("\n");
 
         // generate a list of the used types:
-        HashSet<Class<?>> usedTypes = new HashSet<>();
-        for (Parameter<?> parameter : parameterMap.values()) {
-            usedTypes.add(parameter.getType());
+        LinkedHashSet<Class<?>> usedTypes = new LinkedHashSet<>();
+        for (String flag : flagsInDefinitionOrder ) {
+            usedTypes.add(parameterMap.get(flag).getType());
         }
 
         // information about the abbreviation of types used:
@@ -170,7 +171,7 @@ public class CalledForHelpNotification extends Exception {
      * @return the short abbreviation of the type
      */
     private static String getShortType(Class<?> type) {
-        String simpleName = type.getSimpleName();
+        String simpleName = type.getSimpleName().toLowerCase();
         String shortType = shortTypes.get(type);
         if (shortType != null) return shortType;
 

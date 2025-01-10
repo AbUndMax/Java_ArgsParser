@@ -87,7 +87,7 @@ public class ChrArrParameter extends Parameter<Character[]> {
      */
     @Override
     protected String castDefaultToString(Character[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

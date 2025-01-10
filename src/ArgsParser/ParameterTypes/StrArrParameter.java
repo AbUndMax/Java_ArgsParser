@@ -82,7 +82,7 @@ public class StrArrParameter extends Parameter<String[]> {
      */
     @Override
     protected String castDefaultToString(String[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

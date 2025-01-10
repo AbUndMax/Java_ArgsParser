@@ -87,7 +87,7 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      */
     @Override
     protected String castDefaultToString(Boolean[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

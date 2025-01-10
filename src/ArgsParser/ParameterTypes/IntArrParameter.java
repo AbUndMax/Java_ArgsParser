@@ -87,7 +87,7 @@ public class IntArrParameter extends Parameter<Integer[]> {
      */
     @Override
     protected String castDefaultToString(Integer[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

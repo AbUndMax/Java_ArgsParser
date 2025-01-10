@@ -277,10 +277,26 @@ public class ArgsParser {
      * @param commands commands that cannot be combined
      */
     public void toggle(Command... commands) {
+        if (commands.length <= 1) throw new IllegalArgumentException("Must specify at least two commands in one toggle!");
+        if (!hasUniqueElements(commands)) throw new IllegalArgumentException("Commands have to be unique, no duplications allowed!");
         toggleList.add(commands);
         for (Command command : commands) {
             command.setToggle(commands);
         }
+    }
+
+    /**
+     * Checks whether an array has only unique elements or not.
+     *
+     * @param array the array to be checked
+     * @return true if all elements are unique, false else wise.
+     */
+    private static boolean hasUniqueElements(Command[] array) {
+        Set<Command> uniqueElements = new HashSet<>();
+        for (Command command : array) {
+            if (!uniqueElements.add(command)) return false;
+        }
+        return true;
     }
 
 

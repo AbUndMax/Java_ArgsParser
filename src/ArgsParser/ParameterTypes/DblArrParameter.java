@@ -87,7 +87,7 @@ public class DblArrParameter extends Parameter<Double[]> {
      */
     @Override
     protected String castDefaultToString(Double[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**

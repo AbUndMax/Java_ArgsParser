@@ -87,7 +87,7 @@ public class FltArrParameter extends Parameter<Float[]> {
      */
     @Override
     protected String castDefaultToString(Float[] defaultValue) {
-        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+        return Arrays.toString(defaultValue);
     }
 
     /**
