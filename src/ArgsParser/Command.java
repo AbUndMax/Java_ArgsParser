@@ -49,6 +49,7 @@ public class Command {
      * @return Command array of commands that cannot be combined with this instance.
      */
     protected String cannotBeCombinedWith() {
+        if (toggle == null) return "";
         StringBuilder builder = new StringBuilder();
         for (Command command : toggle) {
             if (command != this) builder.append(command.fullCommandName);

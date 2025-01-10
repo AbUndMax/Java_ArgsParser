@@ -77,6 +77,17 @@ public class BolParameter extends Parameter<Boolean> {
     }
 
     /**
+     * Casts the default Argument of type T to String
+     *
+     * @param defaultValue the default to be cast to String
+     * @return the defaultValue as String
+     */
+    @Override
+    protected String castDefaultToString(Boolean defaultValue) {
+        return defaultValue.toString();
+    }
+
+    /**
      * Casts the argument to type T
      *
      * @param argument to be cast
@@ -86,4 +97,6 @@ public class BolParameter extends Parameter<Boolean> {
     protected Boolean castArgument(String argument) {
         return Boolean.parseBoolean(argument);
     }
+
+
 }

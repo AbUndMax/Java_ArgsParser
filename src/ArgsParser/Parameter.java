@@ -295,8 +295,15 @@ public abstract class Parameter<T> {
      */
     protected String getDefaultAsString() {
         if (defaultValue == null) return "";
-        return defaultValue.toString();
+        return castDefaultToString(defaultValue);
     }
+
+    /**
+     * Casts the default Argument of type T to String
+     * @param defaultValue the default to be cast to String
+     * @return the defaultValue as String
+     */
+    protected abstract String castDefaultToString(T defaultValue);
 
     /**
      * Checks if the parameter has an Argument or default value that is not null!.

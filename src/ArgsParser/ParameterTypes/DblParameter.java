@@ -77,6 +77,17 @@ public class DblParameter extends Parameter<Double> {
     }
 
     /**
+     * Casts the default Argument of type T to String
+     *
+     * @param defaultValue the default to be cast to String
+     * @return the defaultValue as String
+     */
+    @Override
+    protected String castDefaultToString(Double defaultValue) {
+        return String.valueOf(defaultValue);
+    }
+
+    /**
      * Casts the argument to type T
      *
      * @param argument to be cast

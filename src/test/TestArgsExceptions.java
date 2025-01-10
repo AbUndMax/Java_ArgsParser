@@ -340,7 +340,17 @@ public class TestArgsExceptions {
                 new ChrArrParameter(new Character[]{'a', 'b', 'c'},
                                     "characterArray", "ca", "description")
         );
+
+        //TODO: remove:
+        parser.parse(args);
+
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
+
+
+
+
+
+
         String expected = """
                 
                 ############################################### HELP ###############################################

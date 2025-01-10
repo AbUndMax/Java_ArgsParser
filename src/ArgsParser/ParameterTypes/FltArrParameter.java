@@ -80,6 +80,17 @@ public class FltArrParameter extends Parameter<Float[]> {
     }
 
     /**
+     * Casts the default Argument of type T to String
+     *
+     * @param defaultValue the default to be cast to String
+     * @return the defaultValue as String
+     */
+    @Override
+    protected String castDefaultToString(Float[] defaultValue) {
+        return Arrays.toString(defaultValue).replaceAll("\\[|\\]", "");
+    }
+
+    /**
      * Casts the argument to type T
      *
      * @param argument to be cast
