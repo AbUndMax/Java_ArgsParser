@@ -420,6 +420,7 @@ public class TestArgsExceptions {
         IntParameter newParam2 = parser.addParameter(new IntParameter("newParam2", "np2", "this is the second new parameter", false));
         Command newCommand = parser.addCommand(new Command("newCommand", "nc", "this is another command"));
 
+        parser.parse(args);
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 

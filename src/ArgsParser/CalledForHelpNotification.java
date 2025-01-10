@@ -84,7 +84,7 @@ public class CalledForHelpNotification extends Exception {
         for (String cmd : commandsInDefinitionOrder ) {
             Command command = commandMap.get(cmd);
             helpMessage.append(generateSingleHelpString(command.getFullCommandName(), command.getShortCommandName(),
-                                                        " ".repeat(longestUsedTypeSize + 2), "(/)",
+                                                        " ".repeat(longestUsedTypeSize), "(/)",
                                                         command.getDescription(), command.isPartOfToggle(),
                                                         "cannot be combined with:  ",
                                                         command.cannotBeCombinedWith()));
@@ -256,7 +256,7 @@ public class CalledForHelpNotification extends Exception {
      */
     private static String formatLastPartInLine(String informationLine, String lastPart) {
         lastPart = lastPart.trim();
-        int fillSpace = 17 + longestFullSize + longestShortSize + longestUsedTypeSize;
+        int fillSpace = 15 + longestFullSize + longestShortSize + longestUsedTypeSize;
         String filler = String.format(String.format("#%%%ds", fillSpace), informationLine);
         if (informationLine.length() + lastPart.length() <= consoleWidth) return filler + lastPart + "\n";
 
