@@ -23,14 +23,14 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      * The constructor validates and formats the provided flag names.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
      *     <li>Stores the description and mandatory status of the parameter.</li>
      *     <li>Initializes internal fields for argument management and default values.</li>
      * </ul>
      *
-     * <h2>Flag Validation Rules:</h2>
+     * <p>Flag Validation Rules:</p>
      * <ul>
      *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
      *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
@@ -54,14 +54,14 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      * The constructor validates and formats the provided flag names.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
      *     <li>Stores the description and mandatory status of the parameter.</li>
      *     <li>Initializes internal fields for argument management and default values.</li>
      * </ul>
      *
-     * <h2>Flag Validation Rules:</h2>
+     * <p>Flag Validation Rules:</p>
      * <ul>
      *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
      *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
@@ -69,7 +69,7 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
+     * @param defaultValue Sets a default value for this Parameter and makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
@@ -77,6 +77,17 @@ public class BolArrParameter extends Parameter<Boolean[]> {
      */
     public BolArrParameter(Boolean[] defaultValue, String fullFlag, String shortFlag, String description) {
         super(defaultValue, fullFlag, shortFlag, description, Boolean[].class);
+    }
+
+    /**
+     * Casts the default Argument of type T to String
+     *
+     * @param defaultValue the default to be cast to String
+     * @return the defaultValue as String
+     */
+    @Override
+    protected String castDefaultToString(Boolean[] defaultValue) {
+        return Arrays.toString(defaultValue);
     }
 
     /**

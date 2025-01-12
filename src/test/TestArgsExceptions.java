@@ -4,7 +4,6 @@ import ArgsParser.ParameterTypes.*;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,14 +22,14 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #                                            [d]=Double
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                ###  --parameterFlag4  -pf4  [d]  (?)  description
+                ###  --parameterFlag4  -pf4  [d]  ( )  description
                 #                            default:  5.6
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
         System.out.println(exception.getMessage());
     }
@@ -214,78 +213,80 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #    [s]=String | [d]=Double | [i]=Integer | [c]=Character | [b]=Boolean | [f]=Float | [p]=Path
+                #                               [s+]=String | [f+]=Float | [p+]=Path
+                #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                      Available Parameters:
+                #                                     Available Parameters:
                 #
-                ###  --mandatory_string       -ms    [s]  (!)  mandatory string description
+                ###  --mandatory_string       -ms    [s]   (!)  mandatory string description
                 #
-                ###  --optional_string        -os    [s]  (?)  optional string description
+                ###  --optional_string        -os    [s]   ( )  optional string description
                 #
-                ###  --default_string         -ds    [s]  (?)  default string description
-                #                                    default:  default
+                ###  --default_string         -ds    [s]   ( )  default string description
+                #                                     default:  default
                 #
-                ###  --mandatory_double       -md    [d]  (!)  mandatory double description
+                ###  --mandatory_double       -md    [d]   (!)  mandatory double description
                 #
-                ###  --optional_double        -d     [d]  (?)  this one is optional
+                ###  --optional_double        -d     [d]   ( )  this one is optional
                 #
-                ###  --default_double         -dd    [d]  (?)  default double description
-                #                                    default:  7.89
+                ###  --default_double         -dd    [d]   ( )  default double description
+                #                                     default:  7.89
                 #
-                ###  --mandatory_integer      -mi    [i]  (!)  mandatory integer description
+                ###  --mandatory_integer      -mi    [i]   (!)  mandatory integer description
                 #
-                ###  --optional_integer       -oi    [i]  (?)  optional integer description
+                ###  --optional_integer       -oi    [i]   ( )  optional integer description
                 #
-                ###  --default_integer        -i     [i]  (?)  No description available!
-                #                                    default:  5
+                ###  --default_integer        -i     [i]   ( )  No description available!
+                #                                     default:  5
                 #
-                ###  --mandatory_character    -mc    [c]  (!)  mandatory character description
+                ###  --mandatory_character    -mc    [c]   (!)  mandatory character description
                 #
-                ###  --optional_character     -oc    [c]  (?)  optional character description
+                ###  --optional_character     -oc    [c]   ( )  optional character description
                 #
-                ###  --default_character      -dc    [c]  (?)  default character description
-                #                                    default:  a
+                ###  --default_character      -dc    [c]   ( )  default character description
+                #                                     default:  a
                 #
-                ###  --mandatory_boolean      -mb    [b]  (!)  mandatory boolean description
+                ###  --mandatory_boolean      -mb    [b]   (!)  mandatory boolean description
                 #
-                ###  --optional_boolean       -ob    [b]  (?)  optional boolean description
+                ###  --optional_boolean       -ob    [b]   ( )  optional boolean description
                 #
-                ###  --default_boolean        -db    [b]  (?)  default boolean description
-                #                                    default:  true
+                ###  --default_boolean        -db    [b]   ( )  default boolean description
+                #                                     default:  true
                 #
-                ###  --mandatory_float        -mf    [f]  (!)  mandatory float description
+                ###  --mandatory_float        -mf    [f]   (!)  mandatory float description
                 #
-                ###  --optional_float         -of    [f]  (?)  optional float description
+                ###  --optional_float         -of    [f]   ( )  optional float description
                 #
-                ###  --default_float          -df    [f]  (?)  default float description
-                #                                    default:  3.14
+                ###  --default_float          -df    [f]   ( )  default float description
+                #                                     default:  3.14
                 #
-                ###  --mandatory_path         -mp    [p]  (!)  mandatory path description
+                ###  --mandatory_path         -mp    [p]   (!)  mandatory path description
                 #
-                ###  --optional_path          -op    [p]  (?)  optional path description
+                ###  --optional_path          -op    [p]   ( )  optional path description
                 #
-                ###  --default_path           -dp    [p]  (?)  default path description
-                #                                    default:  /some/default/path
+                ###  --default_path           -dp    [p]   ( )  default path description
+                #                                     default:  /some/default/path
                 #
-                ###  --stringArray            -sArr  [s+] (?)  description for string array
+                ###  --stringArray            -sArr  [s+]  ( )  description for string array
                 #
-                ###  --mandatory_float_array  -mfa   [f+] (!)  mandatory float array description
+                ###  --mandatory_float_array  -mfa   [f+]  (!)  mandatory float array description
                 #
-                ###  --optional_float_array   -ofa   [f+] (?)  optional float array description
+                ###  --optional_float_array   -ofa   [f+]  ( )  optional float array description
                 #
-                ###  --default_float_array    -dfa   [f+] (?)  default float array description
-                #                                    default:  [1.1, 2.2]
+                ###  --default_float_array    -dfa   [f+]  ( )  default float array description
+                #                                     default:  [1.1, 2.2]
                 #
-                ###  --mandatory_path_array   -mpa   [p+] (!)  mandatory path array description
+                ###  --mandatory_path_array   -mpa   [p+]  (!)  mandatory path array description
                 #
-                ###  --optional_path_array    -opa   [p+] (?)  optional path array description
+                ###  --optional_path_array    -opa   [p+]  ( )  optional path array description
                 #
-                ###  --default_path_array     -dpa   [p+] (?)  default path array description
-                #                                    default:  [/path/one, /path/two]
+                ###  --default_path_array     -dpa   [p+]  ( )  default path array description
+                #                                     default:  [/path/one, /path/two]
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
         System.out.println(exception.getMessage());
     }
@@ -340,42 +341,44 @@ public class TestArgsExceptions {
                 new ChrArrParameter(new Character[]{'a', 'b', 'c'},
                                     "characterArray", "ca", "description")
         );
+
         Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #             [s+]=String | [d+]=Double | [i+]=Integer | [b+]=Boolean | [c+]=Character
+                #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                      Available Parameters:
+                #                                     Available Parameters:
                 #
-                ###  --stringArrayParam     -hap  [s+] (!)  descr
+                ###  --stringArrayParam     -hap  [s+]  (!)  descr
                 #
-                ###  --stringArray          -sAr  [s+] (?)  descr
-                #                                 default:  [string1, string2, string3]
+                ###  --stringArray          -sAr  [s+]  ( )  descr
+                #                                  default:  [string1, string2, string3]
                 #
-                ###  --doubleArrayParam     -dap  [d+] (?)  description
+                ###  --doubleArrayParam     -dap  [d+]  ( )  description
                 #
-                ###  --doubleArray          -da   [d+] (?)  description
-                #                                 default:  [1.1, 2.2, 3.3]
+                ###  --doubleArray          -da   [d+]  ( )  description
+                #                                  default:  [1.1, 2.2, 3.3]
                 #
-                ###  --integerArrayParam    -iap  [i+] (!)  description
+                ###  --integerArrayParam    -iap  [i+]  (!)  description
                 #
-                ###  --integerArray         -ia   [i+] (?)  description
-                #                                 default:  [1, 2, 3]
+                ###  --integerArray         -ia   [i+]  ( )  description
+                #                                  default:  [1, 2, 3]
                 #
-                ###  --booleanArrayParam    -bap  [b+] (?)  description
+                ###  --booleanArrayParam    -bap  [b+]  ( )  description
                 #
-                ###  --booleanArray         -ba   [b+] (?)  description
-                #                                 default:  [true, false, true]
+                ###  --booleanArray         -ba   [b+]  ( )  description
+                #                                  default:  [true, false, true]
                 #
-                ###  --characterArrayParam  -cap  [c+] (!)  description
+                ###  --characterArrayParam  -cap  [c+]  (!)  description
                 #
-                ###  --characterArray       -ca   [c+] (?)  description
-                #                                 default:  [a, b, c]
+                ###  --characterArray       -ca   [c+]  ( )  description
+                #                                  default:  [a, b, c]
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
         System.out.println(exception.getMessage());
     }
@@ -391,13 +394,12 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                ###  command  c       (/)  this is a command
+                ###  command  c     (/)  this is a command
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -414,23 +416,23 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #                                     [s]=String | [i]=Integer
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                      Available Parameters:
+                #                                     Available Parameters:
                 #
                 ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
                 #
-                ###  --newParam2  -np2  [i]  (?)  this is the second new parameter
+                ###  --newParam2  -np2  [i]  ( )  this is the second new parameter
                 #
-                #                                       Available Commands:
+                #                                      Available Commands:
                 #
                 ###  command      c          (/)  this is a command
                 #
                 ###  newCommand   nc         (/)  this is another command
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -445,19 +447,19 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #                                            [s]=String
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                      Available Parameters:
+                #                                     Available Parameters:
                 #
                 ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
                 #
-                #                                       Available Commands:
+                #                                      Available Commands:
                 #
                 ###  command      c          (/)  this is a command
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
     }
 
@@ -477,17 +479,17 @@ public class TestArgsExceptions {
         String expected = """
                 
                 ############################################### HELP ###############################################
-                #   [s]/[s+]=String | [i]/[i+]=Integer | [c]/[c+]=Character | [b]/[b+]=Boolean | [d]/[d+]=Double
-                #       ('+' marks a flag that takes several arguments of the same type whitespace separated)
-                #                            (!)=mandatory | (?)=optional | (/)=command
+                #                                            [s]=String
+                #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                ###  --longString  -ls  [s]  (?)  This description is so long, it will force the automatic help
-                #                                 printout to introduce a new line and still have a nice look :)
-                #                       default:  this/path/is/so/long/it/is/actually/longer/than/any/existing/path/
-                #                                 that/I/have/on/my/PC/Do/You/Know/The/WordOberwesedampfschifffahrt
-                #                                 sgesellschaftskapitän
+                ##  --longString  -ls  [s]  ( )  This description is so long, it will force the automatic help
+                ###  --longString  -ls  [s]  ( )  printout to introduce a new line and still have a nice look :)
+                default:  this/path/is/so/long/it/is/actually/longer/than/any/existing/path/
+                #                       default:  that/I/have/on/my/PC/Do/You/Know/The/WordOberwesedampfschifffahrts
+                #                       default:  gesellschaftskapitän
                 #
-                ####################################################################################################""";
+                ####################################################################################################
+                """;
         assertEquals(expected, exception.getMessage());
         System.out.println(exception.getMessage());
     }
@@ -547,6 +549,83 @@ public class TestArgsExceptions {
                 #
                 ####################################################################################################""";
         System.out.println(exception.getMessage());
+    }
+
+    @Test
+    public void testCustomParameter() {
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser();
+
+        class LngParameter extends Parameter<Long> {
+
+            protected LngParameter(String fullFlag, String shortFlag, String description, boolean isMandatory) {
+                super(fullFlag, shortFlag, description, isMandatory, Long.class);
+            }
+
+            protected LngParameter(Long defaultValue, String fullFlag, String shortFlag, String description) {
+                super(defaultValue, fullFlag, shortFlag, description, Long.class);
+            }
+
+            @Override
+            protected String castDefaultToString(Long defaultValue) {
+                return defaultValue.toString();
+            }
+
+            @Override
+            protected Long castArgument(String argument) throws NotExistingPathArgsException {
+                return Long.parseLong(argument);
+            }
+        }
+
+        LngParameter longParam = parser.addParameter(
+                new LngParameter(101010100011L, "long", "l",
+                                 "parameter for a loooooong value"));
+
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
+        String expected = """
+                
+                ############################################### HELP ###############################################
+                #                                             [l]=Long
+                #                            (!)=mandatory | ( )=optional | (/)=command
+                #
+                ###  --long  -l  [l]  ( )  parameter for a loooooong value
+                #                default:  101010100011
+                #
+                ####################################################################################################
+                """;
+
+        assertEquals(expected, exception.getMessage());
+
+    }
+
+    @Test
+    public void testToggleInformationInHelpString() {
+        String[] args = {"--help"};
+        ArgsParser parser = new ArgsParser();
+        Command cmd1 = parser.addCommand(
+                new Command("Command1", "cmd1", "command1 description")
+        );
+        Command cmd2 = parser.addCommand(
+                new Command("Command2", "cmd2", "command2 description")
+        );
+        parser.toggle(cmd1, cmd2);
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
+        String expectation = """
+                
+                ############################################### HELP ###############################################
+                #                            (!)=mandatory | ( )=optional | (/)=command
+                #
+                #                                      Available Commands:
+                #
+                ###  Command1  cmd1     (/)  command1 description
+                #  cannot be combined with:  Command2
+                #
+                ###  Command2  cmd2     (/)  command2 description
+                #  cannot be combined with:  Command1
+                #
+                ####################################################################################################
+                """;
+        assertEquals(expectation, exception.getMessage());
     }
 
 // HelpAtWrongPositionInArgsException
@@ -888,6 +967,30 @@ public class TestArgsExceptions {
                 [command / comm]
                 [command2 / comm2]""";
         assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    public void testToggleErrors() {
+        String[] args = {"comm", "comm2"};
+        ArgsParser parser = new ArgsParser();
+        Command comd = parser.addCommand(new Command("command", "comm", "command1"));
+        Command comd2 = parser.addCommand(new Command("command2", "comm2", "command2"));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> parser.toggle(comd, comd));
+        assertEquals(new IllegalArgumentException("Commands have to be unique, no duplications allowed!").getMessage(),
+                     exception.getMessage());
+    }
+
+    @Test
+    public void testToggleErrors2() {
+        String[] args = {"comm", "comm2"};
+        ArgsParser parser = new ArgsParser();
+        Command comd = parser.addCommand(new Command("command", "comm", "command1"));
+        Command comd2 = parser.addCommand(new Command("command2", "comm2", "command2"));
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> parser.toggle(comd));
+        assertEquals(new IllegalArgumentException("Must specify at least two commands in one toggle!").getMessage(),
+                     exception.getMessage());
     }
 
     @Test

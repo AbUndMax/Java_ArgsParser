@@ -25,7 +25,7 @@ import java.util.*;
  *
  * <ol>
  *     <li>Define as many Parameters on a ArgsParser instance as needed by using {@link ArgsParser#addParameter(Parameter)}.
- *     This method takes a instance of any Parameter<?> type. There are several usage-ready child classes for the most
+ *     This method takes a instance of any Parameter type. There are several usage-ready child classes for the most
  *     common types used. There are also Array type Parameters for each equivalent:
  *
  *     <ul>
@@ -69,8 +69,8 @@ public class ArgsParser {
     private final LinkedList<String> commandsInDefinitionOrder = new LinkedList<>();
     private final LinkedList<String> flagsInDefinitionOrder = new LinkedList<>();
     protected boolean parseArgsWasCalled = false;
-    private int longestFlagSize = 0;
-    private int longestShortFlag = 0;
+    private int longestFullFlagSize = 0;
+    private int longestShortFlagSize = 0;
 
     /**
      * Constructor
@@ -99,7 +99,7 @@ public class ArgsParser {
      * If the input flag is already correctly formatted, it will be returned unchanged.
      * </p>
      *
-     * <h3>Examples:</h3>
+     * <p>Examples:</p>
      * <pre>
      * makeFlag("example", false)  → "--example"
      * makeFlag("--example", false) → "--example"
@@ -130,7 +130,7 @@ public class ArgsParser {
      * If any of these conditions are violated, an {@link IllegalArgumentException} will be thrown.
      * </p>
      *
-     * <h3>Examples:</h3>
+     * <p>Examples:</p>
      * <pre>
      * checkReservedFlags("--example", "-e"); // Valid
      * checkReservedFlags("--help", "-h");    // Throws IllegalArgumentException
@@ -169,7 +169,7 @@ public class ArgsParser {
      * are longer. This ensures proper alignment when displaying flags in help messages or documentation.
      * </p>
      *
-     * <h3>Behavior:</h3>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Compares the length of the provided full flag name with the current maximum length (`longestFlagSize`).</li>
      *     <li>Updates `longestFlagSize` if the new full flag is longer.</li>
@@ -182,10 +182,10 @@ public class ArgsParser {
      */
     protected void setNameSizes(String fullVersion, String shortVersion) {
         int nameSize = fullVersion.length();
-        if (longestFlagSize < nameSize) longestFlagSize = nameSize;
+        if (longestFullFlagSize < nameSize) longestFullFlagSize = nameSize;
 
         int shortSize = shortVersion.length();
-        if (longestShortFlag < shortSize) longestShortFlag = shortSize;
+        if (longestShortFlagSize < shortSize) longestShortFlagSize = shortSize;
     }
 
 
@@ -196,7 +196,7 @@ public class ArgsParser {
      * and doesn't conflict with reserved flags such as `--help` or `-h`.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the parameter's full and short flags are non-empty and unique.</li>
      *     <li>Ensures reserved flags (`--help`, `-h`) are not being reused.</li>
@@ -277,7 +277,26 @@ public class ArgsParser {
      * @param commands commands that cannot be combined
      */
     public void toggle(Command... commands) {
+        if (commands.length <= 1) throw new IllegalArgumentException("Must specify at least two commands in one toggle!");
+        if (!hasUniqueElements(commands)) throw new IllegalArgumentException("Commands have to be unique, no duplications allowed!");
         toggleList.add(commands);
+        for (Command command : commands) {
+            command.setToggle(commands);
+        }
+    }
+
+    /**
+     * Checks whether an array has only unique elements or not.
+     *
+     * @param array the array to be checked
+     * @return true if all elements are unique, false else wise.
+     */
+    private static boolean hasUniqueElements(Command[] array) {
+        Set<Command> uniqueElements = new HashSet<>();
+        for (Command command : array) {
+            if (!uniqueElements.add(command)) return false;
+        }
+        return true;
     }
 
 
@@ -318,6 +337,7 @@ public class ArgsParser {
      * detected during the parsing process, specific exceptions are thrown
      * to indicate what went wrong.
      *
+     * @param args The main-methods String[] args array that holds the Strings coming from the command-line.
      * @throws NoArgumentsProvidedArgsException if no command-line arguments are provided.
      * @throws UnknownFlagArgsException if an unknown flag is encountered in the arguments.
      * @throws TooManyArgumentsArgsException if too many arguments are provided.
@@ -378,18 +398,18 @@ public class ArgsParser {
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
             throw new CalledForHelpNotification(parameterMap, flagsInDefinitionOrder,
                                                 commandMap, commandsInDefinitionOrder,
-                                                longestFlagSize, longestShortFlag);
+                                                longestFullFlagSize, longestShortFlagSize);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
                 throw new CalledForHelpNotification(parameterMap, Collections.singletonList(args[0]),
                                                     commandMap, new LinkedList<>(),
-                                                    longestFlagSize, longestShortFlag);
+                                                    longestFullFlagSize, longestShortFlagSize);
 
             } else if (firstArgumentIsCommand) { // if the first argument is a command and --help follows
                 throw new CalledForHelpNotification(parameterMap, new LinkedList<>(),
                                                     commandMap, Collections.singletonList(args[0]),
-                                                    longestFlagSize, longestShortFlag);
+                                                    longestFullFlagSize, longestShortFlagSize);
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
