@@ -25,7 +25,7 @@ import java.util.*;
  *
  * <ol>
  *     <li>Define as many Parameters on a ArgsParser instance as needed by using {@link ArgsParser#addParameter(Parameter)}.
- *     This method takes a instance of any Parameter<?> type. There are several usage-ready child classes for the most
+ *     This method takes a instance of any Parameter type. There are several usage-ready child classes for the most
  *     common types used. There are also Array type Parameters for each equivalent:
  *
  *     <ul>
@@ -99,7 +99,7 @@ public class ArgsParser {
      * If the input flag is already correctly formatted, it will be returned unchanged.
      * </p>
      *
-     * <h3>Examples:</h3>
+     * <p>Examples:</p>
      * <pre>
      * makeFlag("example", false)  → "--example"
      * makeFlag("--example", false) → "--example"
@@ -130,7 +130,7 @@ public class ArgsParser {
      * If any of these conditions are violated, an {@link IllegalArgumentException} will be thrown.
      * </p>
      *
-     * <h3>Examples:</h3>
+     * <p>Examples:</p>
      * <pre>
      * checkReservedFlags("--example", "-e"); // Valid
      * checkReservedFlags("--help", "-h");    // Throws IllegalArgumentException
@@ -169,7 +169,7 @@ public class ArgsParser {
      * are longer. This ensures proper alignment when displaying flags in help messages or documentation.
      * </p>
      *
-     * <h3>Behavior:</h3>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Compares the length of the provided full flag name with the current maximum length (`longestFlagSize`).</li>
      *     <li>Updates `longestFlagSize` if the new full flag is longer.</li>
@@ -196,7 +196,7 @@ public class ArgsParser {
      * and doesn't conflict with reserved flags such as `--help` or `-h`.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the parameter's full and short flags are non-empty and unique.</li>
      *     <li>Ensures reserved flags (`--help`, `-h`) are not being reused.</li>
@@ -337,6 +337,7 @@ public class ArgsParser {
      * detected during the parsing process, specific exceptions are thrown
      * to indicate what went wrong.
      *
+     * @param args The main-methods String[] args array that holds the Strings coming from the command-line.
      * @throws NoArgumentsProvidedArgsException if no command-line arguments are provided.
      * @throws UnknownFlagArgsException if an unknown flag is encountered in the arguments.
      * @throws TooManyArgumentsArgsException if too many arguments are provided.

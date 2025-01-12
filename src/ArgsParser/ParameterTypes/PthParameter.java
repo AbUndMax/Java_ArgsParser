@@ -28,14 +28,14 @@ public class PthParameter extends Parameter<Path> {
      * The constructor validates and formats the provided flag names.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
      *     <li>Stores the description and mandatory status of the parameter.</li>
      *     <li>Initializes internal fields for argument management and default values.</li>
      * </ul>
      *
-     * <h2>Flag Validation Rules:</h2>
+     * <p>Flag Validation Rules:</p>
      * <ul>
      *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
      *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
@@ -61,14 +61,14 @@ public class PthParameter extends Parameter<Path> {
      * The constructor validates and formats the provided flag names.
      * </p>
      *
-     * <h2>Behavior:</h2>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Validates that the full and short flags are correctly formatted and non-empty.</li>
      *     <li>Stores the description and mandatory status of the parameter.</li>
      *     <li>Initializes internal fields for argument management and default values.</li>
      * </ul>
      *
-     * <h2>Flag Validation Rules:</h2>
+     * <p>Flag Validation Rules:</p>
      * <ul>
      *     <li><b>Full Flag:</b> Full words recommended (e.g., example), two dashes `--` will automatically be added.</li>
      *     <li><b>Short Flag:</b> Abbreviations of the fullFlag are recommended (e.g., e), one dash `-`will automatically be added.</li>
@@ -76,11 +76,12 @@ public class PthParameter extends Parameter<Path> {
      *     <li><b>Uniqueness:</b> Full and short flags must be unique and must not already be defined.</li>
      * </ul>
      *
-     * @param defaultValue Sets a default value for this Parameter & makes it not mandatory.
+     * @param defaultValue Sets a default value for this Parameter and makes it not mandatory.
      * @param fullFlag     The full version of the flag (e.g., `--example`).
      * @param shortFlag    The short version of the flag (e.g., `-e`).
      * @param description  A brief description of what the parameter represents.
      * @throws IllegalArgumentException If the flag names are invalid, empty, or reserved.
+     * @param pathCheck   Specify whether to automatically check if the path exists or to not check while parsing.
      */
     public PthParameter(Path defaultValue, String fullFlag, String shortFlag, String description, boolean pathCheck) {
         super(defaultValue, fullFlag, shortFlag, description, Path.class);
@@ -94,7 +95,7 @@ public class PthParameter extends Parameter<Path> {
      * interprets it as a file system path, and verifies whether it exists.
      * </p>
      *
-     * <h3>Behavior:</h3>
+     * <p>Behavior:</p>
      * <ul>
      *     <li>Returns {@code true} if the path exists, otherwise {@code false}.</li>
      *     <li>If the argument is invalid or null, this method may throw a {@link NullPointerException}.</li>
