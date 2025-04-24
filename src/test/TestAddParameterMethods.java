@@ -1,7 +1,6 @@
 import ArgsParser.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import ArgsParser.ArgsExceptions.ToggleArgsException;
 import ArgsParser.ParameterTypes.*;
 import org.junit.jupiter.api.Test;
 
