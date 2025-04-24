@@ -2,8 +2,8 @@ name: Deploy Latest Release JARs to GitHub Packages
 
 on:
   release:
-    types: [published]
-  workflow_dispatch:
+    types: [published]    # Automatisch bei neuem Release
+  workflow_dispatch:      # Manuell auslösbar
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
         with:
           repository: AbUndMax/Java_ArgsParser
           latest: true
-          fileName: "ArgsParser_v*.jar"
+          fileName: "ArgsParser_*.jar"  # Holt alle JARs (ohne doppeltes v!)
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -26,14 +26,22 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Get Release Tag Name
+      - name: Get Release Tag Name (cleaned)
         id: get_tag
         run: |
           tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest | jq -r .tag_name)
           echo "release_tag=$tag_name" >> $GITHUB_OUTPUT
 
-      - name: Create minimal POM
-        run: echo '<project xmlns="http://maven.apache.org/POM/4.0.0" />' > pom.xml
+      - name: Create minimal valid POM
+        run: |
+          echo '<project xmlns="http://maven.apache.org/POM/4.0.0" \
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> \
+          <modelVersion>4.0.0</modelVersion> \
+          <groupId>com.github.AbUndMax</groupId> \
+          <artifactId>dummy</artifactId> \
+          <version>1.0.0</version> \
+          </project>' > pom.xml
 
       - name: Deploy JARs to GitHub Packages
         run: mvn deploy:deploy-file \
