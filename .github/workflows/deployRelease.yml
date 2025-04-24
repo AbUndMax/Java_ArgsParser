@@ -1,0 +1,37 @@
+name: Deploy Release JARs to GitHub Packages
+
+on:
+  release:
+    types: [published]  # Trigger nur, wenn ein neuer Release veröffentlicht wird
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download release assets
+        uses: robinraju/release-downloader@v1.9
+        with:
+          repository: AbUndMax/Java_ArgsParser
+          tag: ${{ github.event.release.tag_name }}  # Hole das Tag des aktuellen Releases
+          fileName: "ArgsParser_v*.jar"              # Hole alle JARs des Releases
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Deploy JARs to GitHub Packages
+        run: mvn deploy:deploy-file \
+          -Dfile=ArgsParser_v${{ github.event.release.tag_name }}.jar \
+          -DgroupId=com.github.AbUndMax \
+          -DartifactId=Java_ArgsParser \
+          -Dversion=${{ github.event.release.tag_name }} \
+          -Dpackaging=jar \
+          -Dsources=ArgsParser_v${{ github.event.release.tag_name }}-src.jar \
+          -Djavadoc=ArgsParser_v${{ github.event.release.tag_name }}-doc.jar \
+          -DrepositoryId=github \
+          -Durl=https://maven.pkg.github.com/AbUndMax/Java_ArgsParser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
