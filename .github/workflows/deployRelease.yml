@@ -3,7 +3,7 @@ name: Deploy Release JARs to GitHub Packages
 on:
   release:
     types: [published]
-    workflow_dispatch: 
+  workflow_dispatch: 
 
 jobs:
   deploy:
