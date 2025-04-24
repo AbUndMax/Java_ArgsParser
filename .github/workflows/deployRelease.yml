@@ -3,7 +3,12 @@ name: Deploy Release JARs to GitHub Packages
 on:
   release:
     types: [published]
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag'
+        required: false
+        default: 'latest' # Default auf 'latest'
 
 jobs:
   deploy:
