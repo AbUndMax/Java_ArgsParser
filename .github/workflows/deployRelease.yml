@@ -1,8 +1,8 @@
 name: Deploy Latest Release JARs to GitHub Packages
 
 permissions:
-  contents: read    # erlaubt checkout des Codes
-  packages: write   # erlaubt Upload in GitHub Packages
+  contents: read
+  packages: write
 
 on:
   release:
@@ -24,17 +24,17 @@ jobs:
           latest: true
           fileName: "ArgsParser_v*.jar"
 
-      - name: Set up JDK 21 and configure Maven auth
+      - name: Set up JDK 21 and Maven auth
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          server-id: github                      # entspricht -DrepositoryId=github
-          server-username: ${{ github.actor }}   # GITHUB_TOKEN-Aktor
+          server-id: github
+          server-username: ${{ github.actor }}
           server-password: ${{ secrets.GITHUB_TOKEN }}
-          settings-path: ${{ github.workspace }} # hier erzeugt setup-java eine settings.xml
+          # NO settings-path: we want the default ($HOME/.m2/settings.xml)
 
-      - name: Get Release Tag Name (keep original)
+      - name: Get Release Tag Name
         id: get_tag
         run: |
           tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest \
