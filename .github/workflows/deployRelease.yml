@@ -34,14 +34,15 @@ jobs:
 
       - name: Create minimal valid POM
         run: |
-          echo '<project xmlns="http://maven.apache.org/POM/4.0.0" \
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
-          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> \
-          <modelVersion>4.0.0</modelVersion> \
-          <groupId>com.github.AbUndMax</groupId> \
-          <artifactId>dummy</artifactId> \
-          <version>1.0.0</version> \
-          </project>' > pom.xml
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > pom.xml
+          echo '<project xmlns="http://maven.apache.org/POM/4.0.0"' >> pom.xml
+          echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> pom.xml
+          echo '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">' >> pom.xml
+          echo '    <modelVersion>4.0.0</modelVersion>' >> pom.xml
+          echo '    <groupId>com.github.AbUndMax</groupId>' >> pom.xml
+          echo '    <artifactId>dummy</artifactId>' >> pom.xml
+          echo '    <version>1.0.0</version>' >> pom.xml
+          echo '</project>' >> pom.xml
 
       - name: Deploy JARs to GitHub Packages
         run: mvn deploy:deploy-file \
