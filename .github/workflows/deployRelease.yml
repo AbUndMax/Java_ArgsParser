@@ -1,9 +1,13 @@
 name: Deploy Latest Release JARs to GitHub Packages
 
+permissions:
+  contents: read   # Repo-Inhalte lesen
+  packages: write  # Packages beschreiben
+
 on:
   release:
-    types: [published]    # Automatisch bei neuem Release
-  workflow_dispatch:      # Manuell auslösbar
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   deploy:
