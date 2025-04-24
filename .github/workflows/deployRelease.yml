@@ -6,20 +6,23 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release Tag'
+        description: 'Release Tag (e.g. v6.0.0 or latest)'
         required: false
-        default: 'latest' # Default auf 'latest'
+        default: 'latest'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - name: Download release assets
         uses: robinraju/release-downloader@v1.9
         with:
           repository: AbUndMax/Java_ArgsParser
-          tag: ${{ github.event.release.tag_name }}
+          tag: ${{ github.event.release.tag_name || github.event.inputs.tag }}
           fileName: "ArgsParser_v*.jar"
 
       - name: Set up JDK 21
@@ -30,13 +33,13 @@ jobs:
 
       - name: Deploy JARs to GitHub Packages
         run: mvn deploy:deploy-file \
-          -Dfile=ArgsParser_v${{ github.event.release.tag_name }}.jar \
+          -Dfile=ArgsParser_v${{ github.event.release.tag_name || github.event.inputs.tag }}.jar \
           -DgroupId=com.github.AbUndMax \
           -DartifactId=Java_ArgsParser \
-          -Dversion=${{ github.event.release.tag_name }} \
+          -Dversion=${{ github.event.release.tag_name || github.event.inputs.tag }} \
           -Dpackaging=jar \
-          -Dsources=ArgsParser_v${{ github.event.release.tag_name }}-src.jar \
-          -Djavadoc=ArgsParser_v${{ github.event.release.tag_name }}-doc.jar \
+          -Dsources=ArgsParser_v${{ github.event.release.tag_name || github.event.inputs.tag }}-src.jar \
+          -Djavadoc=ArgsParser_v${{ github.event.release.tag_name || github.event.inputs.tag }}-doc.jar \
           -DrepositoryId=github \
           -Durl=https://maven.pkg.github.com/AbUndMax/Java_ArgsParser
         env:
