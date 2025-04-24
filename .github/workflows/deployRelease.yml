@@ -2,7 +2,8 @@ name: Deploy Release JARs to GitHub Packages
 
 on:
   release:
-    types: [published]  # Trigger nur, wenn ein neuer Release veröffentlicht wird
+    types: [published]
+    workflow_dispatch: 
 
 jobs:
   deploy:
@@ -13,8 +14,8 @@ jobs:
         uses: robinraju/release-downloader@v1.9
         with:
           repository: AbUndMax/Java_ArgsParser
-          tag: ${{ github.event.release.tag_name }}  # Hole das Tag des aktuellen Releases
-          fileName: "ArgsParser_v*.jar"              # Hole alle JARs des Releases
+          tag: ${{ github.event.release.tag_name }}
+          fileName: "ArgsParser_v*.jar"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
