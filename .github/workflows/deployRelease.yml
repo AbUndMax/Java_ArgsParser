@@ -32,8 +32,11 @@ jobs:
           tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest | jq -r .tag_name)
           echo "release_tag=$tag_name" >> $GITHUB_OUTPUT
 
+      - name: Create minimal POM
+        run: echo '<project xmlns="http://maven.apache.org/POM/4.0.0" />' > pom.xml
+
       - name: Deploy JARs to GitHub Packages
-        run: mvn -N deploy:deploy-file \
+        run: mvn deploy:deploy-file \
           -Dfile=ArgsParser_${{ steps.get_tag.outputs.release_tag }}.jar \
           -DgroupId=com.github.AbUndMax \
           -DartifactId=Java_ArgsParser \
