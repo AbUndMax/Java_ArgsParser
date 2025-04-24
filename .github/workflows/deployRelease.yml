@@ -18,15 +18,17 @@ jobs:
         with:
           repository: AbUndMax/Java_ArgsParser
           latest: true
-          fileName: "ArgsParser_*.jar"  # Holt alle JARs (ohne doppeltes v!)
+          fileName: "ArgsParser_v*.jar"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
 
-      - name: Get Release Tag Name (cleaned)
+      - name: Get Release Tag Name (keep original)
         id: get_tag
         run: |
           tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest | jq -r .tag_name)
@@ -34,26 +36,29 @@ jobs:
 
       - name: Create minimal valid POM
         run: |
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > pom.xml
-          echo '<project xmlns="http://maven.apache.org/POM/4.0.0"' >> pom.xml
-          echo '         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' >> pom.xml
-          echo '         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">' >> pom.xml
-          echo '    <modelVersion>4.0.0</modelVersion>' >> pom.xml
-          echo '    <groupId>com.github.AbUndMax</groupId>' >> pom.xml
-          echo '    <artifactId>dummy</artifactId>' >> pom.xml
-          echo '    <version>1.0.0</version>' >> pom.xml
-          echo '</project>' >> pom.xml
+          cat <<EOF > pom.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project xmlns="http://maven.apache.org/POM/4.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+              <modelVersion>4.0.0</modelVersion>
+              <groupId>com.github.AbUndMax</groupId>
+              <artifactId>dummy</artifactId>
+              <version>1.0.0</version>
+          </project>
+          EOF
 
       - name: Deploy JARs to GitHub Packages
-        run: mvn deploy:deploy-file \
-          -Dfile=ArgsParser_${{ steps.get_tag.outputs.release_tag }}.jar \
-          -DgroupId=com.github.AbUndMax \
-          -DartifactId=Java_ArgsParser \
-          -Dversion=${{ steps.get_tag.outputs.release_tag }} \
-          -Dpackaging=jar \
-          -Dsources=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-src.jar \
-          -Djavadoc=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-doc.jar \
-          -DrepositoryId=github \
-          -Durl=https://maven.pkg.github.com/AbUndMax/Java_ArgsParser
+        run: |
+          mvn deploy:deploy-file \
+            -Dfile=ArgsParser_${{ steps.get_tag.outputs.release_tag }}.jar \
+            -DgroupId=com.github.AbUndMax \
+            -DartifactId=Java_ArgsParser \
+            -Dversion=${{ steps.get_tag.outputs.release_tag }} \
+            -Dpackaging=jar \
+            -Dsources=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-src.jar \
+            -Djavadoc=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-doc.jar \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/AbUndMax/Java_ArgsParser
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
