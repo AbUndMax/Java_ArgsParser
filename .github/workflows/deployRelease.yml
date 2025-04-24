@@ -33,14 +33,14 @@ jobs:
           echo "release_tag=$tag_name" >> $GITHUB_OUTPUT
 
       - name: Deploy JARs to GitHub Packages
-        run: mvn deploy:deploy-file \
-          -Dfile=ArgsParser_v${{ steps.get_tag.outputs.release_tag }}.jar \
+        run: mvn -N deploy:deploy-file \
+          -Dfile=ArgsParser_${{ steps.get_tag.outputs.release_tag }}.jar \
           -DgroupId=com.github.AbUndMax \
           -DartifactId=Java_ArgsParser \
           -Dversion=${{ steps.get_tag.outputs.release_tag }} \
           -Dpackaging=jar \
-          -Dsources=ArgsParser_v${{ steps.get_tag.outputs.release_tag }}-src.jar \
-          -Djavadoc=ArgsParser_v${{ steps.get_tag.outputs.release_tag }}-doc.jar \
+          -Dsources=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-src.jar \
+          -Djavadoc=ArgsParser_${{ steps.get_tag.outputs.release_tag }}-doc.jar \
           -DrepositoryId=github \
           -Durl=https://maven.pkg.github.com/AbUndMax/Java_ArgsParser
         env:
