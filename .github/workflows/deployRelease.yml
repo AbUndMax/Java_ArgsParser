@@ -1,8 +1,8 @@
 name: Deploy Latest Release JARs to GitHub Packages
 
 permissions:
-  contents: read   # Repo-Inhalte lesen
-  packages: write  # Packages beschreiben
+  contents: read    # erlaubt checkout des Codes
+  packages: write   # erlaubt Upload in GitHub Packages
 
 on:
   release:
@@ -24,18 +24,21 @@ jobs:
           latest: true
           fileName: "ArgsParser_v*.jar"
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 and configure Maven auth
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          server-id: github
-          settings-path: ${{ github.workspace }}
+          server-id: github                      # entspricht -DrepositoryId=github
+          server-username: ${{ github.actor }}   # GITHUB_TOKEN-Aktor
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          settings-path: ${{ github.workspace }} # hier erzeugt setup-java eine settings.xml
 
       - name: Get Release Tag Name (keep original)
         id: get_tag
         run: |
-          tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest | jq -r .tag_name)
+          tag_name=$(curl -s https://api.github.com/repos/AbUndMax/Java_ArgsParser/releases/latest \
+            | jq -r .tag_name)
           echo "release_tag=$tag_name" >> $GITHUB_OUTPUT
 
       - name: Create minimal valid POM
@@ -44,11 +47,12 @@ jobs:
           <?xml version="1.0" encoding="UTF-8"?>
           <project xmlns="http://maven.apache.org/POM/4.0.0"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-              <modelVersion>4.0.0</modelVersion>
-              <groupId>com.github.AbUndMax</groupId>
-              <artifactId>dummy</artifactId>
-              <version>1.0.0</version>
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 \
+                   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>com.github.AbUndMax</groupId>
+            <artifactId>dummy</artifactId>
+            <version>1.0.0</version>
           </project>
           EOF
 
