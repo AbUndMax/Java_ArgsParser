@@ -482,11 +482,11 @@ public class TestArgsExceptions {
                 #                                            [s]=String
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                ##  --longString  -ls  [s]  ( )  This description is so long, it will force the automatic help
-                ###  --longString  -ls  [s]  ( )  printout to introduce a new line and still have a nice look :)
-                default:  this/path/is/so/long/it/is/actually/longer/than/any/existing/path/
-                #                       default:  that/I/have/on/my/PC/Do/You/Know/The/WordOberwesedampfschifffahrts
-                #                       default:  gesellschaftskapitän
+                ###  --longString  -ls  [s]  ( )  This description is so long, it will force the automatic help
+                #                                 printout to introduce a new line and still have a nice look :)
+                #                       default:  this/path/is/so/long/it/is/actually/longer/than/any/existing/path/
+                #                                 that/I/have/on/my/PC/Do/You/Know/The/WordOberwesedampfschifffahrts
+                #                                 gesellschaftskapitän
                 #
                 ####################################################################################################
                 """;
