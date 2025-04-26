@@ -68,15 +68,34 @@ public class ArgsParser {
     private final LinkedList<Command[]> toggleList = new LinkedList<>();
     private final LinkedList<String> commandsInDefinitionOrder = new LinkedList<>();
     private final LinkedList<String> flagsInDefinitionOrder = new LinkedList<>();
+    private String programDescription = "";
     protected boolean parseArgsWasCalled = false;
     private int longestFullFlagSize = 0;
     private int longestShortFlagSize = 0;
 
     /**
-     * Constructor
-     * @throws IllegalArgumentException if args is null
+     * Creates a new ArgsParser instance
      */
-    public ArgsParser() throws IllegalArgumentException {
+    public ArgsParser() {
+    }
+
+    /**
+     * Sets a custom description for the program that will be shown at the top of the help output.
+     *
+     * @param description the text to display as the program description when help is invoked
+     */
+    public void addProgramDescription(String description) {
+        programDescription = description;
+    }
+
+    /**
+     * Creates a new ArgsParser instance with a custom program description.
+     * This description is shown at the top of the help output when --help is invoked.
+     *
+     * @param programDescription the description text for the program to display in help output
+     */
+    public ArgsParser(String programDescription) {
+        this.programDescription = programDescription;
     }
 
     /**
@@ -286,6 +305,7 @@ public class ArgsParser {
     }
 
     /**
+     * Helper function:
      * Checks whether an array has only unique elements or not.
      *
      * @param array the array to be checked
@@ -398,18 +418,18 @@ public class ArgsParser {
         if (oneArgProvided && (args[0].equals("--help") || args[0].equals("-h"))) { // if --help or -h was called, the help is printed
             throw new CalledForHelpNotification(parameterMap, flagsInDefinitionOrder,
                                                 commandMap, commandsInDefinitionOrder,
-                                                longestFullFlagSize, longestShortFlagSize);
+                                                longestFullFlagSize, longestShortFlagSize, programDescription);
 
         } else if (twoArgsProvided && (args[1].equals("--help") || args[1].equals("-h"))) {
             if (firstArgumentIsParameter) { // if the first argument is a parameter and --help follows,
                 throw new CalledForHelpNotification(parameterMap, Collections.singletonList(args[0]),
                                                     commandMap, new LinkedList<>(),
-                                                    longestFullFlagSize, longestShortFlagSize);
+                                                    longestFullFlagSize, longestShortFlagSize, programDescription);
 
             } else if (firstArgumentIsCommand) { // if the first argument is a command and --help follows
                 throw new CalledForHelpNotification(parameterMap, new LinkedList<>(),
                                                     commandMap, Collections.singletonList(args[0]),
-                                                    longestFullFlagSize, longestShortFlagSize);
+                                                    longestFullFlagSize, longestShortFlagSize, programDescription);
 
             } else { // if the first argument is not a parameter but --help was called,
                 // the program notifies the user of an unknown parameter input
