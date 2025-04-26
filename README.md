@@ -68,12 +68,24 @@ Import the ArgsParser package.
 ```java
 import ArgsParser.*;
 ```
-Instantiate an ArgsParser object, and hand over the String array `args` from the main method.
+Instantiate an ArgsParser object, all parameters you want to define will later be added on this instance!
 
 ```java
 public static void main(String[] args) {
-    ArgsParser parser = new ArgsParser(args);
+    ArgsParser parser = new ArgsParser();
     // ...
+```
+
+#### Program Description
+
+You can provide a description for your application that will be shown at the top of the help output:
+
+```java
+    // via constructor
+    ArgsParser parser = new ArgsParser("This is an example for a programDescription");
+    
+    // or set/override later
+    parser.addProgramDescription("This is an example for a programDescription");
 ```
 
 ### 2. Define the Parameters or Commands
@@ -285,13 +297,16 @@ they were added** on the ArgsParser Instance:
 
 `> exampleProgramm --help`
 ```
-
 ############################################### HELP ###############################################
 #               [s]=String | [i]=Integer | [d]=Double | [b+]=Boolean | [i+]=Integer
 #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
 #                            (!)=mandatory | ( )=optional | (/)=command
 #
-#                                     Available Parameters:
+# ------------------------------------------------------------------------------------------------
+# This is an example for a programDescription
+# ------------------------------------------------------------------------------------------------
+#
+#                           ######### Available Parameters: #########
 #
 ###  --parameterFlag   -pf    [s]   (!)  short Description
 #
@@ -306,28 +321,30 @@ they were added** on the ArgsParser Instance:
 ###  --intArray        -iArr  [i+]  ( )  Array of several integer values
 #                              default:  [1, 2, 3]
 #
-#                                      Available Commands:
+#
+#                           ########## Available Commands: ##########
 #
 ###  commandName       cN           (/)  this is a description for the command
 #
 ####################################################################################################
-
 ```
 
 while calling `--help` or `-h` with a specific parameter will only print the help message for that parameter:
 
 `> exampleProgramm -pf3 -h`
 ```
-
 ############################################### HELP ###############################################
 #                                            [d]=Double
 #                            (!)=mandatory | ( )=optional | (/)=command
+#
+# ------------------------------------------------------------------------------------------------
+# This is an example for a programDescription
+# ------------------------------------------------------------------------------------------------
 #
 ###  --parameterFlag3  -pf3   [d]  ( )  description
 #                             default:  5.6
 #
 ####################################################################################################
-
 ```
 
 ## ArgsException printout examples

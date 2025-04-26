@@ -44,7 +44,7 @@ public class TestArgsExceptions {
         };
 
         ArgsParser parser = new ArgsParser();
-        parser.addProgramDescription("This is the full Program description. It is so precise, even Granny would now" +
+        parser.addProgramDescription("This is the full Program description. It is so precise, even Granny would now " +
                                              "what exactly is happening in this program! - Do you know CO:E33?");
 
         // Integer (mandatory)
@@ -69,7 +69,7 @@ public class TestArgsExceptions {
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
                 # ------------------------------------------------------------------------------------------------
-                # This is the full Program description. It is so precise, even Granny would nowwhat exactly is
+                # This is the full Program description. It is so precise, even Granny would now what exactly is
                 # happening in this program! - Do you know CO:E33?
                 # ------------------------------------------------------------------------------------------------
                 #
