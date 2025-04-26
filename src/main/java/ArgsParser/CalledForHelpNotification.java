@@ -35,9 +35,9 @@ public class CalledForHelpNotification extends Exception {
 
     public CalledForHelpNotification(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
                                      Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
-                                     int longestFullFlagSize, int longestShortFlagSize) {
+                                     int longestFullFlagSize, int longestShortFlagSize, String programDescription) {
         super(helpMessage(parameterMap, flagsInDefinitionOrder, commandMap, commandsInDefinitionOrder,
-                          longestFullFlagSize, longestShortFlagSize));
+                          longestFullFlagSize, longestShortFlagSize, programDescription));
     }
 
     /**
@@ -53,7 +53,7 @@ public class CalledForHelpNotification extends Exception {
      */
     private static String helpMessage(Map<String, Parameter<?>> parameterMap, List<String> flagsInDefinitionOrder,
                                       Map<String, Command> commandMap, List<String> commandsInDefinitionOrder,
-                                      int longestFullFlagSize, int longestShortFlagSize) {
+                                      int longestFullFlagSize, int longestShortFlagSize, String programDescription) {
         longestFullSize = longestFullFlagSize;
         longestShortSize = longestShortFlagSize;
         longestUsedTypeSize = 1;
@@ -64,9 +64,23 @@ public class CalledForHelpNotification extends Exception {
         // Header
         helpMessage.append(generateHead(parameterMap, flagsInDefinitionOrder));
 
+        String dashLine = "# " + "-".repeat(consoleWidth - 4) + "\n";
+        helpMessage.append(dashLine);
+
+        // Program description
+        if (!programDescription.isEmpty()) {
+            helpMessage.append("# ").append(lineWrap(programDescription, "# "));
+            helpMessage.append(dashLine).append("#\n");
+
+        } else {
+            helpMessage.append("#\n");
+        }
+
         // Parameters
+        boolean parameterHeadPrinted = false;
         if (!printSingleParameter && !parameterMap.isEmpty()) {
-            helpMessage.append(centerString("Available Parameters:\n#\n"));
+            helpMessage.append(centerString("######### Available Parameters: #########\n#\n"));
+            parameterHeadPrinted = true;
         }
 
         for (String flag : flagsInDefinitionOrder ) {
@@ -79,7 +93,8 @@ public class CalledForHelpNotification extends Exception {
 
         // Commands
         if (!printSingleParameter && !commandMap.isEmpty()) {
-            helpMessage.append(centerString("Available Commands:\n#\n"));
+            if (parameterHeadPrinted) helpMessage.append("#\n");
+            helpMessage.append(centerString("########## Available Commands: ##########\n#\n"));
         }
 
         for (String cmd : commandsInDefinitionOrder ) {
@@ -262,32 +277,38 @@ public class CalledForHelpNotification extends Exception {
         String filler = "#" + " ".repeat(fillSpace);
         if (informationLine.length() + lastPart.length() <= consoleWidth) return firstPart + lastPart + "\n";
 
-        StringBuilder fullPart = new StringBuilder(firstPart);
+        String wrappedLines = lineWrap(lastPart, filler);
+        return firstPart + wrappedLines;
+    }
+
+
+    private static String lineWrap(String text, String filler) {
+        StringBuilder wrap = new StringBuilder();
 
         int freeSpace = consoleWidth - filler.length();
-        while (lastPart.length() > freeSpace) {
-            String lead = lastPart.substring(0, freeSpace);
+        while (text.length() > freeSpace) {
+            String lead = text.substring(0, freeSpace);
 
             if (lead.contains(" ")) {
                 // Look for the last index which has a space symbol " "
                 int breakPoint = lead.lastIndexOf(" ");
                 if (breakPoint > 0) {
                     // Cut up to this position and append it
-                    fullPart.append(lead, 0, breakPoint).append("\n").append(filler);
-                    lastPart = lastPart.substring(breakPoint + 1).trim();
+                    wrap.append(lead, 0, breakPoint).append("\n").append(filler);
+                    text = text.substring(breakPoint + 1).trim();
                 } else {
                     // No space found, break after freeSpace
-                    fullPart.append(lead).append("\n").append(filler);
-                    lastPart = lastPart.substring(freeSpace).trim();
+                    wrap.append(lead).append("\n").append(filler);
+                    text = text.substring(freeSpace).trim();
                 }
             } else {
                 // No space found, break after freeSpace
-                fullPart.append(lead).append("\n").append(filler);
-                lastPart = lastPart.substring(freeSpace).trim();
+                wrap.append(lead).append("\n").append(filler);
+                text = text.substring(freeSpace).trim();
             }
         }
-        fullPart.append(lastPart).append("\n");
+        wrap.append(text).append("\n");
 
-        return fullPart.toString();
+        return wrap.toString();
     }
 }

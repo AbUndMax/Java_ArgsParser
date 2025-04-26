@@ -25,6 +25,8 @@ public class TestArgsExceptions {
                 #                                            [d]=Double
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
+                # ------------------------------------------------------------------------------------------------
+                #
                 ###  --parameterFlag4  -pf4  [d]  ( )  description
                 #                            default:  5.6
                 #
@@ -32,6 +34,59 @@ public class TestArgsExceptions {
                 """;
         assertEquals(expected, exception.getMessage());
         System.out.println(exception.getMessage());
+    }
+
+
+    @Test
+    public void testProgramDescription() {
+        String[] args = new String[]{
+                "--help",
+        };
+
+        ArgsParser parser = new ArgsParser();
+        parser.addProgramDescription("This is the full Program description. It is so precise, even Granny would now" +
+                                             "what exactly is happening in this program! - Do you know CO:E33?");
+
+        // Integer (mandatory)
+        IntParameter intPar = parser.addParameter(
+                new IntParameter("Int", "i", "desc", true)
+        );
+
+        // Integer array (optional)
+        IntArrParameter intArrPar = parser.addParameter(
+                new IntArrParameter("IntArray", "iArr", "", false)
+        );
+
+        // Commands
+        Command command1 = parser.addCommand(new Command("command1", "c1", null));
+
+        Exception exception = assertThrows(CalledForHelpNotification.class, () -> parser.parseUnchecked(args));
+        String expected = """
+                
+                ############################################### HELP ###############################################
+                #                                    [i]=Integer | [i+]=Integer
+                #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
+                #                            (!)=mandatory | ( )=optional | (/)=command
+                #
+                # ------------------------------------------------------------------------------------------------
+                # This is the full Program description. It is so precise, even Granny would nowwhat exactly is
+                # happening in this program! - Do you know CO:E33?
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ######### Available Parameters: #########
+                #
+                ###  --Int       -i     [i]   (!)  desc
+                #
+                ###  --IntArray  -iArr  [i+]  ( )  No description available!
+                #
+                #
+                #                           ########## Available Commands: ##########
+                #
+                ###  command1    c1           (/)  No description available!
+                #
+                ####################################################################################################
+                """;
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -218,7 +273,9 @@ public class TestArgsExceptions {
                 #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                     Available Parameters:
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ######### Available Parameters: #########
                 #
                 ###  --mandatory_string       -ms    [s]   (!)  mandatory string description
                 #
@@ -350,7 +407,9 @@ public class TestArgsExceptions {
                 #      ('+' marks a flag that takes several arguments of the same type whitespace separated)
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                     Available Parameters:
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ######### Available Parameters: #########
                 #
                 ###  --stringArrayParam     -hap  [s+]  (!)  descr
                 #
@@ -396,6 +455,8 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
+                # ------------------------------------------------------------------------------------------------
+                #
                 ###  command  c     (/)  this is a command
                 #
                 ####################################################################################################
@@ -419,13 +480,16 @@ public class TestArgsExceptions {
                 #                                     [s]=String | [i]=Integer
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                     Available Parameters:
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ######### Available Parameters: #########
                 #
                 ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
                 #
                 ###  --newParam2  -np2  [i]  ( )  this is the second new parameter
                 #
-                #                                      Available Commands:
+                #
+                #                           ########## Available Commands: ##########
                 #
                 ###  command      c          (/)  this is a command
                 #
@@ -450,11 +514,14 @@ public class TestArgsExceptions {
                 #                                            [s]=String
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                     Available Parameters:
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ######### Available Parameters: #########
                 #
                 ###  --newParam1  -np1  [s]  (!)  this is the first new parameter
                 #
-                #                                      Available Commands:
+                #
+                #                           ########## Available Commands: ##########
                 #
                 ###  command      c          (/)  this is a command
                 #
@@ -481,6 +548,8 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #                                            [s]=String
                 #                            (!)=mandatory | ( )=optional | (/)=command
+                #
+                # ------------------------------------------------------------------------------------------------
                 #
                 ###  --longString  -ls  [s]  ( )  This description is so long, it will force the automatic help
                 #                                 printout to introduce a new line and still have a nice look :)
@@ -588,6 +657,8 @@ public class TestArgsExceptions {
                 #                                             [l]=Long
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
+                # ------------------------------------------------------------------------------------------------
+                #
                 ###  --long  -l  [l]  ( )  parameter for a loooooong value
                 #                default:  101010100011
                 #
@@ -615,7 +686,9 @@ public class TestArgsExceptions {
                 ############################################### HELP ###############################################
                 #                            (!)=mandatory | ( )=optional | (/)=command
                 #
-                #                                      Available Commands:
+                # ------------------------------------------------------------------------------------------------
+                #
+                #                           ########## Available Commands: ##########
                 #
                 ###  Command1  cmd1     (/)  command1 description
                 #  cannot be combined with:  Command2
