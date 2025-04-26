@@ -258,10 +258,11 @@ public class CalledForHelpNotification extends Exception {
     private static String formatLastPartInLine(String informationLine, String lastPart) {
         lastPart = lastPart.trim();
         int fillSpace = 15 + longestFullSize + longestShortSize + longestUsedTypeSize;
-        String filler = String.format(String.format("#%%%ds", fillSpace), informationLine);
-        if (informationLine.length() + lastPart.length() <= consoleWidth) return filler + lastPart + "\n";
+        String firstPart = String.format(String.format("#%%%ds", fillSpace), informationLine);
+        String filler = "#" + " ".repeat(fillSpace);
+        if (informationLine.length() + lastPart.length() <= consoleWidth) return firstPart + lastPart + "\n";
 
-        StringBuilder fullPart = new StringBuilder(informationLine);
+        StringBuilder fullPart = new StringBuilder(firstPart);
 
         int freeSpace = consoleWidth - filler.length();
         while (lastPart.length() > freeSpace) {
