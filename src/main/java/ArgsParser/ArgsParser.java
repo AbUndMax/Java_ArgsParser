@@ -439,11 +439,7 @@ public class ArgsParser {
 
         Set<Parameter<?>> givenParameters = new HashSet<>();
 
-        //check if the first argument provided is actually a flag or command
-        if (args.length > 0 && parameterMap.get(args[0]) == null && commandMap.get(args[0]) == null &&
-                !(args[0].equals("--help") || args[0].equals("-h"))) {
-            throw new UnknownFlagArgsException(args[0], parameterMap.keySet(), commandMap.keySet(), true);
-        }
+        validateInitialArg(args[0]);
 
         Parameter<?> currentParameter = null;
         boolean longFlagUsed = false;
@@ -463,52 +459,73 @@ public class ArgsParser {
             boolean lastPositionWasFlag = i >= 1 && args[i - 1].startsWith("-");
             boolean flagAlreadyProvided = false;
             if (flagExists) flagAlreadyProvided = givenParameters.contains(currentParameter);
-            boolean isHelpCall = ("--help".equals(arg) || "-h".equals(arg));
-            boolean helpCallInWrongPosition = isHelpCall && (i > 1 || (i == 0 && args.length == 2));
+            boolean helpCallInWrongPosition = isHelpFlag(arg) && (i > 1 || (i == 0 && args.length == 2));
 
             if (helpCallInWrongPosition) {
+                // --> if a -h or --help is in a not allowed position
                 throw new HelpAtWrongPositionArgsException();
 
-            } else if (currentPositionIsFlag && !flagExists) { // if flag is unknown
+            } else if (currentPositionIsFlag && !flagExists) {
+                // --> if flag is unknown
                 throw new UnknownFlagArgsException(arg, parameterMap.keySet(), commandMap.keySet(), false);
 
-            } else if (currentPositionIsFlag && flagAlreadyProvided) { // if the flag already was set
+            } else if (currentPositionIsFlag && flagAlreadyProvided) {
+                // --> if the flag already was set
                 throw new FlagAlreadyProvidedArgsException(currentParameter.getFullFlag(),
                                                            currentParameter.getShortFlag());
 
-            } else if (argumentSet && !currentPositionIsFlag && !currentPositionIsCommand) { // if two arguments are provided to a single flag
+            } else if (argumentSet && !currentPositionIsFlag && !currentPositionIsCommand) {
+                // --> if two arguments are provided to a single flag
                 throw new TooManyArgumentsArgsException(longFlagUsed ?
                                                                 currentParameter.getFullFlag() :
                                                                 currentParameter.getShortFlag());
 
-            } else if (currentPositionIsFlag && lastPositionWasFlag) { // if a flag follows another flag
+            } else if (currentPositionIsFlag && lastPositionWasFlag) {
+                // --> if a flag follows another flag
                 throw new MissingArgArgsException(args[i - 1]);
 
-            } else if (isLastEntry && currentPositionIsFlag) { //if last Flag has no argument
+            } else if (isLastEntry && currentPositionIsFlag) {
+                // --> if last Flag has no argument
                 throw new MissingArgArgsException(arg);
 
-            } else if (currentPositionIsCommand) { // if current position is a command
+            } else if (currentPositionIsCommand) {
+                // --> if current position is a command
                 commandMap.get(arg).setCommand(); // set the command to true
 
-            } else if (lastPositionWasFlag && currentParameterNotNull) { // if the current position is an argument
-
-                boolean isArrayParam = arrayParameters.contains(args[i - 1]);
-                if (isArrayParam) { // "collect" all following arguments after an array parameter in a StringBuilder
-                    currentParameter.setArgument(args[i]);
-                    while(i + 1 < args.length && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) { // loop through all arguments
-                        currentParameter.setArgument(args[++i]);
-                    }
-
-                } else {
-                    currentParameter.setArgument(arg);
-
-                }
-                currentParameter.setProvided();
+            } else if (lastPositionWasFlag && currentParameterNotNull) {
+                // --> if the current position is an argument
+                i = handleArgument(currentParameter, args, i);
                 givenParameters.add(currentParameter); // add parameter to the given Parameter Set
             }
         }
 
         return givenParameters;
+    }
+
+    /**
+     * Validates the very first argument: it must be either a flag, a command, or help.
+     *
+     * @param arg the first raw command-line arguments
+     * @throws UnknownFlagArgsException if the first token is neither flag nor command nor help
+     */
+    private void validateInitialArg(String arg) throws UnknownFlagArgsException {
+        if (parameterMap.get(arg) == null
+            && commandMap  .get(arg) == null
+            && !isHelpFlag(arg)) {
+                throw new UnknownFlagArgsException(
+                        arg, parameterMap.keySet(), commandMap.keySet(), true
+                );
+        }
+    }
+
+    /**
+     * Checks whether the provided token is the help flag.
+     *
+     * @param arg the argument token to check
+     * @return true if {@code arg} equals "--help" or "-h"
+     */
+    private boolean isHelpFlag(String arg) {
+        return "--help".equals(arg) || "-h".equals(arg);
     }
 
     /**
@@ -528,6 +545,47 @@ public class ArgsParser {
         }
     }
 
+
+    /**
+     * Consumes one or more argument values for the current parameter.
+     *
+     * @param currentParameter the flag's Parameter instance
+     * @param args             the full args array
+     * @param i                the index of the first value in args
+     * @return the new index after consuming all relevant values
+     * @throws NotExistingPathArgsException   if a path parameter points to a non-existent path
+     * @throws InvalidArgTypeArgsException    if a invalid argument type is set to the parameter
+     */
+    private int handleArgument(Parameter<?> currentParameter, String[] args, int i)
+            throws NotExistingPathArgsException, InvalidArgTypeArgsException {
+
+        String arg = args[i];
+        boolean isArrayParam = arrayParameters.contains(args[i - 1]);
+        if (isArrayParam) { // if currentParameter is an array parameter
+            currentParameter.setArgument(arg);
+            // loop through all arguments and "collect" all following arguments until next flag or end
+            while(i + 1 < args.length && !args[i + 1].startsWith("-") && !commandMap.containsKey(args[i + 1])) {
+                currentParameter.setArgument(args[++i]);
+            }
+
+        } else {
+            currentParameter.setArgument(arg);
+
+        }
+        currentParameter.setProvided();
+        return i;
+    }
+
+
+    /**
+     * Validates that no more than one command in each toggle group has been provided.
+     * The parser maintains a list of mutually exclusive command groups (toggleList),
+     * where only one command per group may be active. This method iterates through each
+     * group and counts how many commands are marked as provided. If more than one command
+     * in the same group is provided, a ToggleArgsException is thrown.
+     *
+     * @throws ToggleArgsException if multiple commands from the same toggle group are provided
+     */
     private void checkToggles() throws ToggleArgsException{
         for (Command[] toggle : toggleList) {
 
