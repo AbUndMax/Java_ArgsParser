@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.AbUndMax</groupId>
-    <artifactId>Java_ArgsParser</artifactId>
+    <artifactId>java_argsparser</artifactId>
     <version>6.0.0</version>
     <packaging>jar</packaging>
 
