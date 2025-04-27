@@ -2,6 +2,7 @@
 [![Java](https://img.shields.io/badge/Java-11+-a7752f)](https://openjdk.org/projects/jdk/11/)
 [![License](https://img.shields.io/badge/License-CC_BY--NC_4.0-blue)](https://github.com/AbUndMax/Java_ArgsParser/blob/main/LICENSE.md)
 [![Badge](https://img.shields.io/github/v/release/AbUndMax/Java_ArgsParser?color=brightgreen)](https://github.com/AbUndMax/Java_ArgsParser/releases/latest)
+[![Maven](https://img.shields.io/badge/Maven-Package-8b2674?logo=apachemaven)](https://github.com/AbUndMax/Java_ArgsParser/packages/2484585)
 
 # ArgsParser Library
 The ArgsParser Library is a comprehensive solution 
